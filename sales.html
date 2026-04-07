@@ -165,11 +165,10 @@ table.st tr:hover td{background:var(--bg2)}
         <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Month</div>
         <input type="month" class="filter-select" id="mMonth">
       </div>
-      <div style="display:grid;grid-template-columns:170px 90px 110px 110px;gap:10px;padding:0 2px 8px;border-bottom:1px solid var(--border)">
+      <div style="display:grid;grid-template-columns:170px 90px 110px;gap:10px;padding:0 2px 8px;border-bottom:1px solid var(--border)">
         <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase">Product</div>
         <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;text-align:right">Monthly Target</div>
-        <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;text-align:right">MTD Count</div>
-        <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;text-align:right">Amount (KWD)</div>
+        <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;text-align:right">MTD Value</div>
       </div>
       <div id="eMTDRows"></div>
       <div style="display:flex;gap:10px;margin-top:16px">
@@ -183,7 +182,7 @@ table.st tr:hover td{background:var(--bg2)}
 </div>
 
 <script>
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbyEsiqC_SZ8Hq0HTvMOD3sd-Z1p6Ax4TI87NSetpl7IhgZb4pPAr6XaVOucl1A9xdrpgQ/exec';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbxMAQI_NNlXhBtf4iHDyLqPGnJ6wSWdqVjPsH9uMSitXNInb9fDF5i2b_kmgn0ucyUWGA/exec';
 var SES_KEY = 'kib_ops_session';
 
 var PRODS = [
@@ -274,11 +273,10 @@ async function loadAll() {
     tProds.forEach(function(p) { tMap[p.product] = p; });
     mProds.forEach(function(p) { mMap[p.product] = p; });
 
-    // KPI 1 — Transfer to Dirwaza today (amount in KWD)
-    var tdAmt = ts.transfer_today_amount || 0;
-    var tdCnt = ts.transfer_today_count  || 0;
-    document.getElementById('k1').textContent = 'KWD ' + Number(tdAmt).toLocaleString('en', {minimumFractionDigits:0, maximumFractionDigits:0});
-    document.getElementById('k1s').textContent = tdCnt + ' transactions | Target: KWD 68,000';
+    // KPI 1 — Transfer to Dirwaza today (KWD amount stored as sales_count)
+    var tdVal = ts.transfer_today_value || 0;
+    document.getElementById('k1').textContent = 'KWD ' + Number(tdVal).toLocaleString('en', {minimumFractionDigits:0, maximumFractionDigits:0});
+    document.getElementById('k1s').textContent = 'Daily target: KWD 68,000 | MTD target: KWD 1,500,000';
 
     // KPI 2 — MTD avg achievement across all products
     document.getElementById('k2').textContent = (ms.avg_mtd_ach_pct || 0) + '%';
@@ -292,12 +290,12 @@ async function loadAll() {
     var cOpts = {responsive: true, maintainAspectRatio: false, plugins: {legend: {position: 'top', labels: {font: {size: 10}, boxWidth: 8}}}, scales: {x: {ticks: {font: {size: 9}}}, y: {ticks: {font: {size: 9}}}}};
     if (cDay) cDay.destroy();
     cDay = new Chart(document.getElementById('cDay'), {type: 'bar', data: {labels: labels, datasets: [
-      {label: 'Actual Today', data: PRODS.map(function(p) { return tMap[p.name] ? tMap[p.name].actual_count : 0; }), backgroundColor: 'rgba(24,119,197,0.8)', borderRadius: 4},
+      {label: 'Actual Today', data: PRODS.map(function(p) { return tMap[p.name] ? Number(tMap[p.name].actual_count || 0) : 0; }), backgroundColor: 'rgba(24,119,197,0.8)', borderRadius: 4},
       {label: 'Daily Target', data: PRODS.map(function(p) { return p.daily; }), backgroundColor: 'rgba(228,234,243,0.9)', borderRadius: 4}
     ]}, options: cOpts});
     if (cMTD) cMTD.destroy();
     cMTD = new Chart(document.getElementById('cMTD'), {type: 'bar', data: {labels: labels, datasets: [
-      {label: 'MTD Actual', data: PRODS.map(function(p) { return mMap[p.name] ? mMap[p.name].actual_count : 0; }), backgroundColor: 'rgba(14,164,114,0.8)', borderRadius: 4},
+      {label: 'MTD Actual', data: PRODS.map(function(p) { return mMap[p.name] ? Number(mMap[p.name].actual_count || 0) : 0; }), backgroundColor: 'rgba(14,164,114,0.8)', borderRadius: 4},
       {label: 'Monthly Target', data: PRODS.map(function(p) { return p.monthly; }), backgroundColor: 'rgba(228,234,243,0.9)', borderRadius: 4}
     ]}, options: cOpts});
 
@@ -307,8 +305,8 @@ async function loadAll() {
       var isAmt = p.name === 'Transfer to Dirwaza';
       var pp = Math.min(100, md.mtd_ach_pct || 0);
       // Display value: KWD amount for Transfer, count for others
-      var tVal = isAmt ? ('KWD ' + Number(td.actual_amount||0).toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0})) : (td.actual_count||0).toLocaleString();
-      var mVal = isAmt ? ('KWD ' + Number(md.actual_amount||0).toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0})) : (md.actual_count||0).toLocaleString();
+      var tVal = isAmt ? ('KWD ' + Number(td.actual_count||0).toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0})) : (td.actual_count||0).toLocaleString();
+      var mVal = isAmt ? ('KWD ' + Number(md.actual_count||0).toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0})) : (md.actual_count||0).toLocaleString();
       var dTgtFmt = isAmt ? ('KWD ' + p.daily.toLocaleString()) : p.daily.toLocaleString();
       var mTgtFmt = isAmt ? ('KWD ' + p.monthly.toLocaleString()) : p.monthly.toLocaleString();
       var metricBadge = isAmt ? '<span style="font-size:9px;background:#EDE9FE;color:#6D28D9;padding:1px 5px;border-radius:3px;margin-left:4px">KWD</span>' : '<span style="font-size:9px;background:#DBEAFE;color:#1E40AF;padding:1px 5px;border-radius:3px;margin-left:4px">Count</span>';
@@ -338,22 +336,27 @@ function setTab(tab) {
 
 function buildRows() {
   document.getElementById('eRows').innerHTML = PRODS.map(function(p) {
+    var isAmt = p.name === 'Transfer to Dirwaza';
+    var phld = isAmt ? 'KWD amount e.g. 56000' : '0';
     return '<div class="prow">'
-      + '<div><div style="font-size:12px;font-weight:600;color:var(--t2)">' + p.name + '</div><div style="font-size:10px;color:var(--t3)">Monthly target: ' + p.monthly.toLocaleString() + '</div></div>'
-      + '<div style="text-align:right;font-size:12px;font-weight:600;color:var(--t3)">' + p.daily.toLocaleString() + '</div>'
-      + '<input type="number" class="pinput" id="ec_' + p.id + '" placeholder="0" min="0">'
-      + '<input type="number" class="pinput" id="ea_' + p.id + '" placeholder="0.000" min="0" step="0.001">'
+      + '<div><div style="font-size:12px;font-weight:600;color:var(--t2)">' + p.name + (isAmt ? ' <span style="font-size:9px;background:#EDE9FE;color:#6D28D9;padding:1px 4px;border-radius:3px">KWD</span>' : '') + '</div>'
+      + '<div style="font-size:10px;color:var(--t3)">Target: ' + (isAmt ? 'KWD ' : '') + p.daily.toLocaleString() + '</div></div>'
+      + '<div style="text-align:right;font-size:12px;font-weight:600;color:var(--t3)">' + (isAmt ? 'KWD ' : '') + p.daily.toLocaleString() + '</div>'
+      + '<input type="number" class="pinput" id="ec_' + p.id + '" placeholder="' + phld + '" min="0">'
+      + '<input type="number" class="pinput" id="ea_' + p.id + '" placeholder="notes amt" min="0" step="0.001" style="display:none">'
       + '</div>';
   }).join('');
 }
 
 function buildMTDRows() {
   document.getElementById('eMTDRows').innerHTML = PRODS.map(function(p) {
+    var isAmt = p.name === 'Transfer to Dirwaza';
+    var phld = isAmt ? 'KWD total e.g. 344556' : '0';
     return '<div class="prow">'
-      + '<div><div style="font-size:12px;font-weight:600;color:var(--t2)">' + p.name + '</div><div style="font-size:10px;color:var(--t3)">Daily target: ' + p.daily.toLocaleString() + '</div></div>'
-      + '<div style="text-align:right;font-size:12px;font-weight:600;color:var(--t3)">' + p.monthly.toLocaleString() + '</div>'
-      + '<input type="number" class="pinput" id="em_' + p.id + '" placeholder="0" min="0">'
-      + '<input type="number" class="pinput" id="ema_' + p.id + '" placeholder="0.000" min="0" step="0.001">'
+      + '<div><div style="font-size:12px;font-weight:600;color:var(--t2)">' + p.name + (isAmt ? ' <span style="font-size:9px;background:#EDE9FE;color:#6D28D9;padding:1px 4px;border-radius:3px">KWD</span>' : '') + '</div>'
+      + '<div style="font-size:10px;color:var(--t3)">Monthly target: ' + (isAmt ? 'KWD ' : '') + p.monthly.toLocaleString() + '</div></div>'
+      + '<div style="text-align:right;font-size:12px;font-weight:600;color:var(--t3)">' + (isAmt ? 'KWD ' : '') + p.monthly.toLocaleString() + '</div>'
+      + '<input type="number" class="pinput" id="em_' + p.id + '" placeholder="' + phld + '" min="0">'
       + '</div>';
   }).join('');
 }
@@ -397,7 +400,7 @@ async function saveMTD() {
   PRODS.forEach(function(p) {
     var count = document.getElementById('em_' + p.id).value;
     var amt   = document.getElementById('ema_' + p.id).value;
-    entries.push({product: p.name, count: count || '0', amount: amt || '0'});
+    entries.push({product: p.name, count: count || '0', amount: '0'});
   });
   var hasData = entries.some(function(e) { return Number(e.count) > 0 || Number(e.amount) > 0; });
   if (!hasData) { mMsg('Enter at least one product count', 'error'); return; }
