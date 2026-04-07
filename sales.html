@@ -112,9 +112,33 @@ table.st tr:hover td{background:var(--bg2)}
       <div class="kpi-card kpi-amber"><div class="kpi-value" id="k3">0%</div><div class="kpi-label">Daily Achievement</div><div class="kpi-sub" id="k3s">loading...</div></div>
     </div>
 
+    <!-- Count-based products charts -->
     <div class="charts-grid">
-      <div class="chart-card"><div class="chart-title">Daily: Actual vs Target</div><div class="chart-wrap"><canvas id="cDay"></canvas></div></div>
-      <div class="chart-card"><div class="chart-title">MTD: Progress vs Monthly Target</div><div class="chart-wrap"><canvas id="cMTD"></canvas></div></div>
+      <div class="chart-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="chart-title" style="margin-bottom:0">Daily: Count Products</div>
+          <span style="font-size:10px;color:var(--t3);background:var(--bg2);padding:2px 8px;border-radius:4px">Transactions</span>
+        </div>
+        <div class="chart-wrap"><canvas id="cDayCount"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="chart-title" style="margin-bottom:0">MTD: Count Products</div>
+          <span style="font-size:10px;color:var(--t3);background:var(--bg2);padding:2px 8px;border-radius:4px">Transactions</span>
+        </div>
+        <div class="chart-wrap"><canvas id="cMTDCount"></canvas></div>
+      </div>
+    </div>
+    <!-- Transfer to Dirwaza (KWD) chart -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">Transfer to Dirwaza — Daily &amp; MTD vs Target</div>
+        <span style="font-size:10px;color:#6D28D9;background:#EDE9FE;padding:2px 8px;border-radius:4px;font-weight:600">KWD Amount</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div style="position:relative;height:180px"><canvas id="cTDDay"></canvas></div>
+        <div style="position:relative;height:180px"><canvas id="cTDMTD"></canvas></div>
+      </div>
     </div>
 
     <div class="panel">
@@ -286,18 +310,64 @@ async function loadAll() {
     document.getElementById('k3').textContent = (ts.avg_daily_ach_pct || 0) + '%';
     document.getElementById('k3s').textContent = 'Average of all 6 products today';
 
-    var labels = PRODS.map(function(p) { return sName(p.name); });
-    var cOpts = {responsive: true, maintainAspectRatio: false, plugins: {legend: {position: 'top', labels: {font: {size: 10}, boxWidth: 8}}}, scales: {x: {ticks: {font: {size: 9}}}, y: {ticks: {font: {size: 9}}}}};
+    // Separate count products from KWD product
+    var countProds = PRODS.filter(function(p) { return p.name !== 'Transfer to Dirwaza'; });
+    var tdProd     = PRODS.find(function(p) { return p.name === 'Transfer to Dirwaza'; });
+
+    var cntLabels  = countProds.map(function(p) { return sName(p.name); });
+
+    var baseOpts = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {legend: {position: 'top', labels: {font: {size: 10}, boxWidth: 8}}},
+      scales: {x: {ticks: {font: {size: 9}}}, y: {ticks: {font: {size: 9}}}}
+    };
+
+    // Count products — Daily
     if (cDay) cDay.destroy();
-    cDay = new Chart(document.getElementById('cDay'), {type: 'bar', data: {labels: labels, datasets: [
-      {label: 'Actual Today', data: PRODS.map(function(p) { return tMap[p.name] ? Number(tMap[p.name].actual_count || 0) : 0; }), backgroundColor: 'rgba(24,119,197,0.8)', borderRadius: 4},
-      {label: 'Daily Target', data: PRODS.map(function(p) { return p.daily; }), backgroundColor: 'rgba(228,234,243,0.9)', borderRadius: 4}
-    ]}, options: cOpts});
+    cDay = new Chart(document.getElementById('cDayCount'), {type: 'bar', data: {labels: cntLabels, datasets: [
+      {label: 'Actual', data: countProds.map(function(p) { return tMap[p.name] ? Number(tMap[p.name].actual_count || 0) : 0; }), backgroundColor: 'rgba(24,119,197,0.85)', borderRadius: 5},
+      {label: 'Target', data: countProds.map(function(p) { return p.daily; }), backgroundColor: 'rgba(228,234,243,0.9)', borderRadius: 5}
+    ]}, options: baseOpts});
+
+    // Count products — MTD
     if (cMTD) cMTD.destroy();
-    cMTD = new Chart(document.getElementById('cMTD'), {type: 'bar', data: {labels: labels, datasets: [
-      {label: 'MTD Actual', data: PRODS.map(function(p) { return mMap[p.name] ? Number(mMap[p.name].actual_count || 0) : 0; }), backgroundColor: 'rgba(14,164,114,0.8)', borderRadius: 4},
-      {label: 'Monthly Target', data: PRODS.map(function(p) { return p.monthly; }), backgroundColor: 'rgba(228,234,243,0.9)', borderRadius: 4}
-    ]}, options: cOpts});
+    cMTD = new Chart(document.getElementById('cMTDCount'), {type: 'bar', data: {labels: cntLabels, datasets: [
+      {label: 'MTD Actual', data: countProds.map(function(p) { return mMap[p.name] ? Number(mMap[p.name].actual_count || 0) : 0; }), backgroundColor: 'rgba(14,164,114,0.85)', borderRadius: 5},
+      {label: 'Target', data: countProds.map(function(p) { return p.monthly; }), backgroundColor: 'rgba(228,234,243,0.9)', borderRadius: 5}
+    ]}, options: baseOpts});
+
+    // Transfer to Dirwaza — KWD charts
+    var tdDayAct  = tMap['Transfer to Dirwaza'] ? Number(tMap['Transfer to Dirwaza'].actual_count || 0) : 0;
+    var tdMTDAct  = mMap['Transfer to Dirwaza'] ? Number(mMap['Transfer to Dirwaza'].actual_count || 0) : 0;
+
+    var kwdOpts = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {legend: {position: 'top', labels: {font: {size: 10}, boxWidth: 8}}},
+      scales: {
+        x: {ticks: {font: {size: 9}}},
+        y: {ticks: {font: {size: 9}, callback: function(v) { return v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? Math.round(v/1000)+'K' : v; }}}
+      }
+    };
+
+    if (window.cTDDay) window.cTDDay.destroy();
+    window.cTDDay = new Chart(document.getElementById('cTDDay'), {type: 'bar', data: {
+      labels: ['Daily'],
+      datasets: [
+        {label: 'Actual (KWD)', data: [tdDayAct], backgroundColor: 'rgba(109,40,217,0.8)', borderRadius: 6},
+        {label: 'Target (KWD)', data: [tdProd ? tdProd.daily : 0], backgroundColor: 'rgba(237,233,254,0.9)', borderRadius: 6}
+      ]
+    }, options: kwdOpts});
+
+    if (window.cTDMTD) window.cTDMTD.destroy();
+    window.cTDMTD = new Chart(document.getElementById('cTDMTD'), {type: 'bar', data: {
+      labels: ['MTD'],
+      datasets: [
+        {label: 'Actual (KWD)', data: [tdMTDAct], backgroundColor: 'rgba(109,40,217,0.8)', borderRadius: 6},
+        {label: 'Target (KWD)', data: [tdProd ? tdProd.monthly : 0], backgroundColor: 'rgba(237,233,254,0.9)', borderRadius: 6}
+      ]
+    }, options: kwdOpts});
 
     document.getElementById('pTbl').innerHTML = PRODS.map(function(p) {
       var td = tMap[p.name] || {actual_count:0, actual_amount:0, actual_value:0, daily_ach_pct:0};
