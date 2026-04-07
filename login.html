@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — KIB Ops Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'IBM Plex Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{background:#060F24;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:20px;padding:44px 40px;width:420px;max-width:100%;box-shadow:0 24px 64px rgba(0,0,0,.4)}
+.logo{width:52px;height:52px;background:linear-gradient(135deg,#1877C5,#0EA472);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;margin-bottom:20px}
+h1{font-size:22px;font-weight:800;color:#0A1628;margin-bottom:4px}
+.sub{font-size:12px;color:#8A9BB0;margin-bottom:32px}
+label{display:block;font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.fg{margin-bottom:16px}
+select,input{width:100%;padding:11px 14px;border:1.5px solid #E4EAF3;border-radius:10px;font-size:14px;color:#0A1628;background:#FAFBFD;outline:none;font-family:inherit;transition:border-color .15s}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A9BB0' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
+select:focus,input:focus{border-color:#1877C5;box-shadow:0 0 0 3px rgba(24,119,197,.12)}
+input[type=password]{letter-spacing:4px;font-size:20px;text-align:center}
+input[type=password]::placeholder{letter-spacing:0;font-size:14px;text-align:left}
+.dots{display:flex;gap:10px;justify-content:center;margin-bottom:10px}
+.dot{width:12px;height:12px;border-radius:50%;background:#E4EAF3;transition:background .2s}
+.dot.on{background:#1877C5}
+.btn{width:100%;padding:13px;background:linear-gradient(135deg,#1877C5,#1565A8);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;transition:opacity .15s}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.err{background:#FEE8E8;border:1px solid #FCCACA;border-radius:8px;padding:10px 14px;font-size:12px;color:#8A1818;margin-top:12px;display:none}
+.foot{text-align:center;margin-top:20px;font-size:11px;color:#B8C5D4}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">KIB</div>
+  <h1>Operations Portal</h1>
+  <div class="sub">Kuwait International Bank · Internal Use Only</div>
+  <form id="frm">
+    <div class="fg"><label>Your Name</label><select id="sel" required><option value="">— Loading staff... —</option></select></div>
+    <div class="fg">
+      <label>4-Digit PIN</label>
+      <div class="dots"><div class="dot" id="d0"></div><div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div></div>
+      <input type="password" id="pin" maxlength="4" inputmode="numeric" placeholder="Enter PIN" required>
+    </div>
+    <button class="btn" id="btn" type="submit">Sign In</button>
+    <div class="err" id="err"></div>
+  </form>
+  <div class="foot">Forgot your PIN? Contact your manager.</div>
+</div>
+<script>
+var GAS='https://script.google.com/macros/s/AKfycbxNRekRNtf5AfvZEoLIzMACuP6smQiMpPjLHs_s1XClBMU9wv-To2Id9asyJ5VHeD3FCg/exec';
+var KEY='kib_ops_session';
+try{var s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&new Date(s.expires_at)>new Date())location.href='/cc-task/index.html';}catch(e){}
+fetch(GAS+'?action=users_list',{redirect:'follow'}).then(function(r){return r.json();}).then(function(data){
+  var users=(data&&data.data&&data.data.users)?data.data.users:[];
+  users.sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+  var sel=document.getElementById('sel');sel.innerHTML='<option value="">— Select your name —</option>';
+  users.forEach(function(u){var o=document.createElement('option');o.value=u.user_id;o.textContent=u.full_name+' ('+u.role+')';sel.appendChild(o);});
+}).catch(function(){document.getElementById('sel').innerHTML='<option value="">— Could not load users —</option>';});
+document.getElementById('pin').addEventListener('input',function(){
+  this.value=this.value.replace(/\D/g,'').slice(0,4);
+  for(var i=0;i<4;i++)document.getElementById('d'+i).className='dot'+(i<this.value.length?' on':'');
+});
+document.getElementById('frm').addEventListener('submit',function(e){
+  e.preventDefault();
+  var uid=document.getElementById('sel').value,pin=document.getElementById('pin').value;
+  var err=document.getElementById('err'),btn=document.getElementById('btn');
+  if(!uid||pin.length!==4){err.textContent='Select your name and enter your 4-digit PIN.';err.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Signing in...';err.style.display='none';
+  fetch(GAS,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'login',user_id:uid,pin:pin})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.success&&data.data){localStorage.setItem(KEY,JSON.stringify(data.data));location.href='/cc-task/index.html';}
+    else{throw new Error((data.error&&data.error.message)?data.error.message:'Login failed');}
+  }).catch(function(ex){
+    err.textContent=ex.message.indexOf('ncorrect')!==-1||ex.message.indexOf('PIN')!==-1?'Incorrect PIN. Please try again.':'Connection error: '+ex.message;
+    err.style.display='block';btn.disabled=false;btn.textContent='Sign In';
+  });
+});
+</script>
+</body>
+</html>
