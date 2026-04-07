@@ -107,7 +107,7 @@ table.st tr:hover td{background:var(--bg2)}
 
   <div class="page-content">
     <div class="kpi-row">
-      <div class="kpi-card kpi-blue"><div class="kpi-value" id="k1">0</div><div class="kpi-label">Dept Transactions Today</div><div class="kpi-sub" id="k1s">loading...</div></div>
+      <div class="kpi-card kpi-blue"><div class="kpi-value" id="k1">0</div><div class="kpi-label">Transfer to Dirwaza (Today)</div><div class="kpi-sub" id="k1s">loading...</div></div>
       <div class="kpi-card kpi-green"><div class="kpi-value" id="k2">0%</div><div class="kpi-label">MTD Achievement</div><div class="kpi-sub" id="k2s">loading...</div></div>
       <div class="kpi-card kpi-amber"><div class="kpi-value" id="k3">0%</div><div class="kpi-label">Daily Achievement</div><div class="kpi-sub" id="k3s">loading...</div></div>
     </div>
@@ -183,7 +183,7 @@ table.st tr:hover td{background:var(--bg2)}
 </div>
 
 <script>
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbyISaMx60xptgRS8grp9_-okMlglI0nNz-4C1D74Y3AQ-qzygJ_xnL6nnhaNWsd3zj4wQ/exec';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbzIyJQpN8qD90XlNgxAXx5kMYZBVme--JY98WNAbiB0na30ixXTGE6sDQkN01_LnODXLQ/exec';
 var SES_KEY = 'kib_ops_session';
 
 var PRODS = [
@@ -274,12 +274,19 @@ async function loadAll() {
     tProds.forEach(function(p) { tMap[p.product] = p; });
     mProds.forEach(function(p) { mMap[p.product] = p; });
 
-    document.getElementById('k1').textContent = Number(ts.total_count || 0).toLocaleString();
-    document.getElementById('k1s').textContent = 'Daily target: ' + Number(ts.total_daily_target || 0).toLocaleString();
-    document.getElementById('k2').textContent = (ms.mtd_ach_pct || 0) + '%';
-    document.getElementById('k2s').textContent = Number(ms.total_count || 0).toLocaleString() + ' / ' + Number(ms.total_mtd_target || 0).toLocaleString();
-    document.getElementById('k3').textContent = (ts.daily_ach_pct || 0) + '%';
-    document.getElementById('k3s').textContent = Number(ts.total_count || 0) + ' actual vs ' + Number(ts.total_daily_target || 0) + ' target';
+    // KPI 1 — Transfer to Dirwaza today (amount in KWD)
+    var tdAmt = ts.transfer_today_amount || 0;
+    var tdCnt = ts.transfer_today_count  || 0;
+    document.getElementById('k1').textContent = 'KWD ' + Number(tdAmt).toLocaleString('en', {minimumFractionDigits:0, maximumFractionDigits:0});
+    document.getElementById('k1s').textContent = tdCnt + ' transactions | Target: KWD 68,000';
+
+    // KPI 2 — MTD avg achievement across all products
+    document.getElementById('k2').textContent = (ms.avg_mtd_ach_pct || 0) + '%';
+    document.getElementById('k2s').textContent = 'Average of all 6 products MTD';
+
+    // KPI 3 — Daily avg achievement across all products
+    document.getElementById('k3').textContent = (ts.avg_daily_ach_pct || 0) + '%';
+    document.getElementById('k3s').textContent = 'Average of all 6 products today';
 
     var labels = PRODS.map(function(p) { return sName(p.name); });
     var cOpts = {responsive: true, maintainAspectRatio: false, plugins: {legend: {position: 'top', labels: {font: {size: 10}, boxWidth: 8}}}, scales: {x: {ticks: {font: {size: 9}}}, y: {ticks: {font: {size: 9}}}}};
@@ -295,15 +302,22 @@ async function loadAll() {
     ]}, options: cOpts});
 
     document.getElementById('pTbl').innerHTML = PRODS.map(function(p) {
-      var td = tMap[p.name] || {actual_count: 0, daily_ach_pct: 0};
-      var md = mMap[p.name] || {actual_count: 0, mtd_ach_pct: 0};
+      var td = tMap[p.name] || {actual_count:0, actual_amount:0, actual_value:0, daily_ach_pct:0};
+      var md = mMap[p.name] || {actual_count:0, actual_amount:0, actual_value:0, mtd_ach_pct:0};
+      var isAmt = p.name === 'Transfer to Dirwaza';
       var pp = Math.min(100, md.mtd_ach_pct || 0);
-      return '<tr><td style="font-weight:700">' + p.name + '</td>'
-        + '<td>' + p.daily.toLocaleString() + '</td>'
-        + '<td style="font-weight:600">' + (td.actual_count || 0).toLocaleString() + '</td>'
+      // Display value: KWD amount for Transfer, count for others
+      var tVal = isAmt ? ('KWD ' + Number(td.actual_amount||0).toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0})) : (td.actual_count||0).toLocaleString();
+      var mVal = isAmt ? ('KWD ' + Number(md.actual_amount||0).toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0})) : (md.actual_count||0).toLocaleString();
+      var dTgtFmt = isAmt ? ('KWD ' + p.daily.toLocaleString()) : p.daily.toLocaleString();
+      var mTgtFmt = isAmt ? ('KWD ' + p.monthly.toLocaleString()) : p.monthly.toLocaleString();
+      var metricBadge = isAmt ? '<span style="font-size:9px;background:#EDE9FE;color:#6D28D9;padding:1px 5px;border-radius:3px;margin-left:4px">KWD</span>' : '<span style="font-size:9px;background:#DBEAFE;color:#1E40AF;padding:1px 5px;border-radius:3px;margin-left:4px">Count</span>';
+      return '<tr><td style="font-weight:700">' + p.name + metricBadge + '</td>'
+        + '<td>' + dTgtFmt + '</td>'
+        + '<td style="font-weight:600">' + tVal + '</td>'
         + '<td><span class="badge ' + achC(td.daily_ach_pct || 0) + '">' + (td.daily_ach_pct || 0) + '%</span></td>'
-        + '<td>' + p.monthly.toLocaleString() + '</td>'
-        + '<td style="font-weight:600">' + (md.actual_count || 0).toLocaleString() + '</td>'
+        + '<td>' + mTgtFmt + '</td>'
+        + '<td style="font-weight:600">' + mVal + '</td>'
         + '<td><span class="badge ' + achC(md.mtd_ach_pct || 0) + '">' + (md.mtd_ach_pct || 0) + '%</span></td>'
         + '<td style="min-width:100px"><div class="pbar"><div class="pfill" style="width:' + pp + '%;background:' + pCol(md.mtd_ach_pct || 0) + '"></div></div></td></tr>';
     }).join('');
