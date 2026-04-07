@@ -162,11 +162,11 @@ body{background:var(--bg3,#F0F4F9);color:var(--t1,#0A1628)}
       <div class="metric-row"><div class="metric-label">Attendance</div><input type="text" class="metric-input" id="mAttend" placeholder="e.g. 8/10"></div>
       <div class="metric-row"><div class="metric-label">Issue on Shift</div><input type="text" class="metric-input" id="mIssue" placeholder="—"></div>
       <div class="metric-row"><div class="metric-label">Time of Issue & Resolved</div><input type="text" class="metric-input" id="mIssueTime" placeholder="e.g. 10:00 – 10:30"></div>
-      <div class="metric-row"><div class="metric-label">Avg. Talk Time</div><input type="text" class="metric-input" id="mATT" placeholder="e.g. 0:03:30"></div>
-      <div class="metric-row"><div class="metric-label">Avg Hold Time</div><input type="text" class="metric-input" id="mAHT" placeholder="e.g. 0:00:45"></div>
-      <div class="metric-row"><div class="metric-label">Avg Waiting Time</div><input type="text" class="metric-input" id="mAWT" placeholder="e.g. 0:00:23"></div>
-      <div class="metric-row"><div class="metric-label">SLA</div><input type="text" class="metric-input" id="mSLA" placeholder="e.g. 94%"></div>
-      <div class="metric-row"><div class="metric-label">Black SLA</div><input type="text" class="metric-input" id="mBSLA" placeholder="e.g. 100%"></div>
+      <div class="metric-row"><div class="metric-label">Avg. Talk Time</div><input type="text" class="metric-input" id="mATT" placeholder="e.g. 3:30"></div>
+      <div class="metric-row"><div class="metric-label">Avg Hold Time</div><input type="text" class="metric-input" id="mAHT" placeholder="e.g. 0:45"></div>
+      <div class="metric-row"><div class="metric-label">Avg Waiting Time</div><input type="text" class="metric-input" id="mAWT" placeholder="e.g. 0:23"></div>
+      <div class="metric-row"><div class="metric-label">SLA</div><input type="text" class="metric-input" id="mSLA" placeholder="e.g. 94 or 94%"></div>
+      <div class="metric-row"><div class="metric-label">Black SLA</div><input type="text" class="metric-input" id="mBSLA" placeholder="e.g. 100 or 100%"></div>
       <div class="metric-row"><div class="metric-label">Voicemail</div><input type="number" class="metric-input" id="mVM" placeholder="e.g. 53" min="0"></div>
       <div class="metric-row"><div class="metric-label">Beneficiary</div><input type="text" class="metric-input" id="mBene" placeholder="—"></div>
     </div>
@@ -201,7 +201,7 @@ body{background:var(--bg3,#F0F4F9);color:var(--t1,#0A1628)}
   </div>
 </main>
 <script>
-var GAS_URL='https://script.google.com/macros/s/AKfycbzgCYbHCXZ4pZJ-hGcexuE5ei_i9u3cvx0FUZ6oBwzzZKHgqO5YE7HIFc5bu9d2xUhWfw/exec';
+var GAS_URL='https://script.google.com/macros/s/AKfycbzIyJQpN8qD90XlNgxAXx5kMYZBVme--JY98WNAbiB0na30ixXTGE6sDQkN01_LnODXLQ/exec';
 var SES_KEY='kib_ops_session';
 var API={post:async function(action,body){var p=Object.assign({},body||{},{action:action});try{var s=JSON.parse(localStorage.getItem(SES_KEY));if(s)p.session_token=s.session_token;}catch(e){}var r=await fetch(GAS_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(p)});var d=await r.json();if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:'Error');return d.data;}};
 var AUTH={getSession:function(){try{var s=JSON.parse(localStorage.getItem(SES_KEY));return s&&new Date(s.expires_at)>new Date()?s:null;}catch(e){return null;}},requireAuth:function(){if(!this.getSession())location.href='/cc.task.mane/login.html';},logout:function(){localStorage.removeItem(SES_KEY);location.href='/cc.task.mane/login.html;'},canDo:function(a){var s=this.getSession();if(!s)return false;var m={'handover.create':['HoD','Manager','TL','AL']};return m[a]?m[a].indexOf(s.role)!==-1:true;}};
