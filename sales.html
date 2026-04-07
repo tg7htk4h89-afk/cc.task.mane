@@ -157,7 +157,7 @@ table.st tr:hover td{background:var(--bg2)}
 </div>
 
 <script>
-var GAS_URL='https://script.google.com/macros/s/AKfycbzQT9CKRinMr0egxnGJS_yAZuTzoqQe38VciWN6rXLaBM1e2jDC7tgCbFcMnWH46W40Sg/exec';
+var GAS_URL='https://script.google.com/macros/s/AKfycbzIyJQpN8qD90XlNgxAXx5kMYZBVme--JY98WNAbiB0na30ixXTGE6sDQkN01_LnODXLQ/exec';
 var SES_KEY='kib_ops_session';
 
 var PRODS=[
@@ -329,8 +329,55 @@ function buildRows(){
   }).join('');
 }
 
+var currentMode='daily';
+
+function setMode(mode){
+  currentMode=mode;
+  document.getElementById('modeDaily').style.display=mode==='daily'?'':'none';
+  document.getElementById('modeMTD').style.display=mode==='mtd'?'':'none';
+  document.getElementById('tabDaily').style.background=mode==='daily'?'#1877C5':'#fff';
+  document.getElementById('tabDaily').style.color=mode==='daily'?'#fff':'var(--t3)';
+  document.getElementById('tabMTD').style.background=mode==='mtd'?'#F4A523':'#fff';
+  document.getElementById('tabMTD').style.color=mode==='mtd'?'#fff':'var(--t3)';
+  if(mode==='mtd')buildMTDRows();
+}
+
+function buildMTDRows(){
+  document.getElementById('eMTDRows').innerHTML=PRODS.map(function(p){
+    return '<div class="prow">'
+      +'<div><div style="font-size:12px;font-weight:600;color:var(--t2)">'+p.name+'</div><div style="font-size:10px;color:var(--t3)">Daily target: '+p.daily.toLocaleString()+'</div></div>'
+      +'<div style="text-align:right;font-size:12px;font-weight:600;color:var(--t3)">'+p.monthly.toLocaleString()+'</div>'
+      +'<input type="number" class="pinput" id="em_'+p.id+'" placeholder="0" min="0">'
+      +'<input type="number" class="pinput" id="ema_'+p.id+'" placeholder="0.000" min="0" step="0.001">'
+      +'</div>';
+  }).join('');
+}
+
+async function saveMTD(){
+  var month=document.getElementById('mMonth').value;
+  if(!month){mMsg('Please select a month','error');return;}
+  var entries=[];
+  PRODS.forEach(function(p){
+    var count=document.getElementById('em_'+p.id).value;
+    var amt=document.getElementById('ema_'+p.id).value;
+    entries.push({product:p.name,count:count||'0',amount:amt||'0'});
+  });
+  var hasData=entries.some(function(e){return Number(e.count)>0||Number(e.amount)>0;});
+  if(!hasData){mMsg('Enter at least one product count','error');return;}
+  var btn=document.getElementById('saveMTDBtn');
+  btn.disabled=true;btn.textContent='Updating...';
+  try{
+    await API.post('sales_mtd_update',{month:month+'-01',entries:JSON.stringify(entries)});
+    mMsg('MTD totals updated for '+month,'success');
+    setTimeout(function(){closeM();loadAll();},1400);
+  }catch(ex){mMsg('Error: '+ex.message,'error');}
+  btn.disabled=false;btn.textContent='Update MTD Totals';
+}
+
 function openM(){
   document.getElementById('mDate').value=document.getElementById('sDate').value;
+  document.getElementById('mMonth').value=today.slice(0,7);
+  setMode('daily');
   buildRows();
   document.getElementById('modal').style.display='flex';
   document.getElementById('mMsg').style.display='none';
