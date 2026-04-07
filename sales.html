@@ -103,7 +103,7 @@ table.st tr:hover td{background:var(--bg2)}
       <option value="week">This Week</option>
       <option value="month" selected>MTD</option>
     </select>
-    <button class="btn btn-secondary" onclick="loadAll()">↺</button>
+    <button class="btn btn-secondary" onclick="loadAll()">Refresh</button>
     <button class="btn btn-primary" id="btnAdd">+ Log Dept Sales</button>
   </header>
 
@@ -262,7 +262,7 @@ async function loadAll(){
       responsive:true,
       maintainAspectRatio:false,
       plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:8}}},
-      scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9},callback:function(v){return fmtN(v);}}}}
+      scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}}
     };
 
     // Daily chart
