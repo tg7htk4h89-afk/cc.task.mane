@@ -273,7 +273,7 @@ else document.getElementById('btnAdd').addEventListener('click', openM);
 var today = new Date(Date.now() + 3*3600000).toISOString().slice(0, 10);
 document.getElementById('sDate').value = today;
 
-var cDay = null, cMTD = null;
+var cDay = null, cMTD = null, cTDDay = null, cTDMTD = null;
 
 function sName(n) { return n.length > 12 ? n.slice(0, 10) + '..' : n; }
 function fmtN(n) { if (n >= 1000000) return (n/1000000).toFixed(1) + 'M'; if (n >= 1000) return Math.round(n/1000) + 'K'; return String(n); }
@@ -351,8 +351,8 @@ async function loadAll() {
       }
     };
 
-    if (window.cTDDay) window.cTDDay.destroy();
-    window.cTDDay = new Chart(document.getElementById('cTDDay'), {type: 'bar', data: {
+    if (cTDDay) cTDDay.destroy();
+    cTDDay = new Chart(document.getElementById('cTDDay'), {type: 'bar', data: {
       labels: ['Daily'],
       datasets: [
         {label: 'Actual (KWD)', data: [tdDayAct], backgroundColor: 'rgba(109,40,217,0.8)', borderRadius: 6},
@@ -360,8 +360,8 @@ async function loadAll() {
       ]
     }, options: kwdOpts});
 
-    if (window.cTDMTD) window.cTDMTD.destroy();
-    window.cTDMTD = new Chart(document.getElementById('cTDMTD'), {type: 'bar', data: {
+    if (cTDMTD) cTDMTD.destroy();
+    cTDMTD = new Chart(document.getElementById('cTDMTD'), {type: 'bar', data: {
       labels: ['MTD'],
       datasets: [
         {label: 'Actual (KWD)', data: [tdMTDAct], backgroundColor: 'rgba(109,40,217,0.8)', borderRadius: 6},
