@@ -47,7 +47,7 @@ input[type=password]::placeholder{letter-spacing:0;font-size:14px;text-align:lef
   <div class="foot">Forgot your PIN? Contact your manager.</div>
 </div>
 <script>
-var GAS='https://script.google.com/macros/s/AKfycbxNRekRNtf5AfvZEoLIzMACuP6smQiMpPjLHs_s1XClBMU9wv-To2Id9asyJ5VHeD3FCg/exec';
+var GAS='https://script.google.com/macros/s/AKfycbzIyJQpN8qD90XlNgxAXx5kMYZBVme--JY98WNAbiB0na30ixXTGE6sDQkN01_LnODXLQ/exec';
 var KEY='kib_ops_session';
 try{var s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&new Date(s.expires_at)>new Date())location.href='/cc.task.mane/index.html';}catch(e){}
 fetch(GAS+'?action=users_list',{redirect:'follow'}).then(function(r){return r.json();}).then(function(data){
