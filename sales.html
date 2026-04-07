@@ -173,29 +173,46 @@ var API={
   _s:function(){try{return JSON.parse(localStorage.getItem(SES_KEY));}catch(e){return null;}},
   _t:function(){var s=this._s();return s?s.session_token:null;},
   get:async function(a,p){
-    var url=new URL(GAS_URL);url.searchParams.set('action',a);
+    var url=new URL(GAS_URL);
+    url.searchParams.set('action',a);
     var t=this._t();if(t)url.searchParams.set('session_token',t);
     Object.keys(p||{}).forEach(function(k){if(p[k]!=null&&p[k]!=='')url.searchParams.set(k,p[k]);});
-    var r=await fetch(url.toString(),{redirect:'follow'});var d=await r.json();
-    if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:'Error');return d.data;
+    var r=await fetch(url.toString(),{redirect:'follow'});
+    var d=await r.json();
+    if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:'Error');
+    return d.data;
   },
   post:async function(a,body){
-    var p=Object.assign({},body||{},{action:a});var t=this._t();if(t)p.session_token=t;
+    var p=Object.assign({},body||{},{action:a});
+    var t=this._t();if(t)p.session_token=t;
     var r=await fetch(GAS_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(p)});
-    var d=await r.json();if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:'Error');return d.data;
+    var d=await r.json();
+    if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:'Error');
+    return d.data;
   }
 };
+
 var AUTH={
   getSession:function(){try{var s=JSON.parse(localStorage.getItem(SES_KEY));return s&&new Date(s.expires_at)>new Date()?s:null;}catch(e){return null;}},
   requireAuth:function(){if(!this.getSession())location.href='/cc.task.mane/login.html';},
   logout:function(){localStorage.removeItem(SES_KEY);location.href='/cc.task.mane/login.html';},
-  canDo:function(a){var s=this.getSession();if(!s)return false;return['HoD','Manager','TL','AL'].indexOf(s.role)!==-1;}
+  canDo:function(){var s=this.getSession();if(!s)return false;return['HoD','Manager','TL','AL'].indexOf(s.role)!==-1;}
 };
 
 AUTH.requireAuth();
 var S=AUTH.getSession();
+
 function ini(n){return String(n||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();}
-if(S){var av=document.getElementById('avatarInitials'),nm=document.getElementById('sidebarName'),rl=document.getElementById('sidebarRole');if(av)av.textContent=ini(S.full_name);if(nm)nm.textContent=S.display_name||S.full_name.split(' ')[0];if(rl)rl.textContent=S.role;}
+
+if(S){
+  var av=document.getElementById('avatarInitials');
+  var nm=document.getElementById('sidebarName');
+  var rl=document.getElementById('sidebarRole');
+  if(av)av.textContent=ini(S.full_name);
+  if(nm)nm.textContent=S.display_name||S.full_name.split(' ')[0];
+  if(rl)rl.textContent=S.role;
+}
+
 if(!AUTH.canDo())document.getElementById('btnAdd').style.display='none';
 else document.getElementById('btnAdd').addEventListener('click',openM);
 
@@ -203,12 +220,12 @@ var today=new Date(Date.now()+3*3600000).toISOString().slice(0,10);
 document.getElementById('sDate').value=today;
 document.getElementById('mDate').value=today;
 
-var cDay=null,cMTD=null;
-function shortLabel(n){return n.length>12?n.slice(0,10)+'…':n;}
+var cDay=null, cMTD=null;
+
+function shortName(n){return n.length>12?n.slice(0,11)+'..':n;}
+function fmtN(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return Math.round(n/1000)+'K';return String(n);}
 function achC(p){return p>=100?'bg':p>=80?'ba':'br';}
 function pColor(p){return p>=100?'#0EA472':p>=80?'#F4A523':'#E5383B';}
-function fmtN(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(0)+'K';return String(n);}
-function medals(i){return['🥇','🥈','🥉'][i]||String(i+1);}
 
 async function loadAll(){
   var date=document.getElementById('sDate').value;
@@ -216,67 +233,95 @@ async function loadAll(){
   document.getElementById('mLabel').textContent='Department sales entry for '+date;
 
   try{
-    var [dToday,dMTD]=await Promise.all([
+    var results=await Promise.all([
       API.get('sales_dashboard',{date:date,period:'today'}),
       API.get('sales_dashboard',{date:date,period:'month'})
     ]);
+    var dToday=results[0];
+    var dMTD=results[1];
 
-    var tByP={},mByP={};
-    (dToday.records||[]).forEach(function(r){var p=r.product_or_category;if(!tByP[p])tByP[p]=0;tByP[p]+=Number(r.sales_count||0);});
-    (dMTD.records||[]).forEach(function(r){var p=r.product_or_category;if(!mByP[p])mByP[p]=0;mByP[p]+=Number(r.sales_count||0);});
+    // Build lookup maps from products array
+    var todayMap={};
+    var mtdMap={};
+    (dToday.products||[]).forEach(function(p){todayMap[p.product]=p;});
+    (dMTD.products||[]).forEach(function(p){mtdMap[p.product]=p;});
 
-    // KPIs
-    var tAct=0,tTgt=0,mAct=0,mTgt=0;
-    PRODS.forEach(function(p){tAct+=tByP[p.name]||0;tTgt+=p.daily;mAct+=mByP[p.name]||0;mTgt+=p.monthly;});
-    var dAch=tTgt>0?Math.round(tAct/tTgt*100):0;
-    var mAch=mTgt>0?Math.round(mAct/mTgt*100):0;
-    document.getElementById('k1').textContent=tAct.toLocaleString();
-    document.getElementById('k1s').textContent='Target today: '+tTgt.toLocaleString();
-    document.getElementById('k2').textContent=mAch+'%';
-    document.getElementById('k2s').textContent=mAct.toLocaleString()+' / '+mTgt.toLocaleString();
-    document.getElementById('k3').textContent=dAch+'%';
-    document.getElementById('k3s').textContent=tAct+' actual vs '+tTgt+' target';
-    var ranks=[];
-    
+    var ts=dToday.summary||{};
+    var ms=dMTD.summary||{};
 
-    // Charts
-    var labels=PRODS.map(function(p){return shortLabel(p.name);});
-    var cOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:8}}},scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9},callback:function(v){return fmtN(v);}}}}};
+    // KPI cards
+    document.getElementById('k1').textContent=Number(ts.total_count||0).toLocaleString();
+    document.getElementById('k1s').textContent='Daily target: '+Number(ts.total_daily_target||0).toLocaleString();
+    document.getElementById('k2').textContent=(ms.mtd_ach_pct||0)+'%';
+    document.getElementById('k2s').textContent=Number(ms.total_count||0).toLocaleString()+' / '+Number(ms.total_mtd_target||0).toLocaleString();
+    document.getElementById('k3').textContent=(ts.daily_ach_pct||0)+'%';
+    document.getElementById('k3s').textContent=Number(ts.total_count||0)+' actual vs '+Number(ts.total_daily_target||0)+' target';
+
+    // Chart options
+    var cOpts={
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:8}}},
+      scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9},callback:function(v){return fmtN(v);}}}}
+    };
+
+    // Daily chart
     if(cDay)cDay.destroy();
-    cDay=new Chart(document.getElementById('cDay'),{type:'bar',data:{labels:labels,datasets:[{label:'Actual',data:PRODS.map(function(p){return tByP[p.name]||0;}),backgroundColor:'rgba(24,119,197,0.8)',borderRadius:4},{label:'Target',data:PRODS.map(function(p){return p.daily;}),backgroundColor:'rgba(228,234,243,0.9)',borderRadius:4}]},options:cOpts});
+    cDay=new Chart(document.getElementById('cDay'),{
+      type:'bar',
+      data:{
+        labels:PRODS.map(function(p){return shortName(p.name);}),
+        datasets:[
+          {label:'Actual Today',data:PRODS.map(function(p){return todayMap[p.name]?todayMap[p.name].actual_count:0;}),backgroundColor:'rgba(24,119,197,0.8)',borderRadius:4},
+          {label:'Daily Target',data:PRODS.map(function(p){return p.daily;}),backgroundColor:'rgba(228,234,243,0.9)',borderRadius:4}
+        ]
+      },
+      options:cOpts
+    });
+
+    // MTD chart
     if(cMTD)cMTD.destroy();
-    cMTD=new Chart(document.getElementById('cMTD'),{type:'bar',data:{labels:labels,datasets:[{label:'MTD Actual',data:PRODS.map(function(p){return mByP[p.name]||0;}),backgroundColor:'rgba(14,164,114,0.8)',borderRadius:4},{label:'Monthly Target',data:PRODS.map(function(p){return p.monthly;}),backgroundColor:'rgba(228,234,243,0.9)',borderRadius:4}]},options:cOpts});
+    cMTD=new Chart(document.getElementById('cMTD'),{
+      type:'bar',
+      data:{
+        labels:PRODS.map(function(p){return shortName(p.name);}),
+        datasets:[
+          {label:'MTD Actual',data:PRODS.map(function(p){return mtdMap[p.name]?mtdMap[p.name].actual_count:0;}),backgroundColor:'rgba(14,164,114,0.8)',borderRadius:4},
+          {label:'Monthly Target',data:PRODS.map(function(p){return p.monthly;}),backgroundColor:'rgba(228,234,243,0.9)',borderRadius:4}
+        ]
+      },
+      options:cOpts
+    });
 
     // Product table
     document.getElementById('pTbl').innerHTML=PRODS.map(function(p){
-      var da=tByP[p.name]||0,ma=mByP[p.name]||0;
-      var dp=p.daily>0?Math.round(da/p.daily*100):0;
-      var mp=p.monthly>0?Math.round(ma/p.monthly*100):0;
-      var pp=Math.min(100,mp);
-      return '<tr><td style="font-weight:700">'+p.name+'</td>'
+      var td=todayMap[p.name]||{actual_count:0,daily_ach_pct:0};
+      var md=mtdMap[p.name]||{actual_count:0,mtd_ach_pct:0};
+      var pp=Math.min(100,md.mtd_ach_pct||0);
+      return '<tr>'
+        +'<td style="font-weight:700">'+p.name+'</td>'
         +'<td>'+p.daily.toLocaleString()+'</td>'
-        +'<td style="font-weight:600">'+da.toLocaleString()+'</td>'
-        +'<td><span class="badge '+achC(dp)+'">'+dp+'%</span></td>'
+        +'<td style="font-weight:600">'+(td.actual_count||0).toLocaleString()+'</td>'
+        +'<td><span class="badge '+achC(td.daily_ach_pct||0)+'">'+(td.daily_ach_pct||0)+'%</span></td>'
         +'<td>'+p.monthly.toLocaleString()+'</td>'
-        +'<td style="font-weight:600">'+ma.toLocaleString()+'</td>'
-        +'<td><span class="badge '+achC(mp)+'">'+mp+'%</span></td>'
-        +'<td style="min-width:100px"><div class="pbar"><div class="pfill" style="width:'+pp+'%;background:'+pColor(mp)+'"></div></div></td></tr>';
+        +'<td style="font-weight:600">'+(md.actual_count||0).toLocaleString()+'</td>'
+        +'<td><span class="badge '+achC(md.mtd_ach_pct||0)+'">'+(md.mtd_ach_pct||0)+'%</span></td>'
+        +'<td style="min-width:100px"><div class="pbar"><div class="pfill" style="width:'+pp+'%;background:'+pColor(md.mtd_ach_pct||0)+'"></div></div></td>'
+        +'</tr>';
     }).join('');
-
-    color:'+(i===0?'#854D0E':i===1?'#334155':i===2?'#C2410C':'var(--t3)')+'">'+medals(i)+'</div>'
-        +'<div style="flex:1"><div style="font-size:13px;font-weight:600">'+r.name+'</div><div style="font-size:11px;color:var(--t3)">'+r.team+'</div></div>'
-        +'<div style="text-align:right"><div style="font-size:13px;font-weight:700">'+r.count+' txns</div><div style="font-size:10px;color:var(--t3)">'+r.achievement_pct+'% ach</div></div></div>';
-    }).join(''):'<div style="padding:24px;text-align:center;color:var(--t3);font-size:13px">No entries yet for today</div>';
 
   }catch(ex){
     document.getElementById('pTbl').innerHTML='<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--t3)">Could not load: '+ex.message+'</td></tr>';
+    console.error(ex);
   }
 }
 
+// Build modal product entry rows
 function buildRows(){
   document.getElementById('eRows').innerHTML=PRODS.map(function(p){
     return '<div class="prow">'
-      +'<div><div style="font-size:12px;font-weight:600;color:var(--t2)">'+p.name+'</div><div style="font-size:10px;color:var(--t3)">Monthly: '+p.monthly.toLocaleString()+'</div></div>'
+      +'<div><div style="font-size:12px;font-weight:600;color:var(--t2)">'+p.name+'</div>'
+      +'<div style="font-size:10px;color:var(--t3)">Monthly target: '+p.monthly.toLocaleString()+'</div></div>'
       +'<div style="text-align:right;font-size:12px;font-weight:600;color:var(--t3)">'+p.daily.toLocaleString()+'</div>'
       +'<input type="number" class="pinput" id="ec_'+p.id+'" placeholder="0" min="0">'
       +'<input type="number" class="pinput" id="ea_'+p.id+'" placeholder="0.000" min="0" step="0.001">'
@@ -284,26 +329,66 @@ function buildRows(){
   }).join('');
 }
 
-async function openM(){
+function openM(){
   document.getElementById('mDate').value=document.getElementById('sDate').value;
   buildRows();
-  
   document.getElementById('modal').style.display='flex';
   document.getElementById('mMsg').style.display='none';
 }
-function closeM(){document.getElementById('modal').style.display='none';}
+
+function closeM(){
+  document.getElementById('modal').style.display='none';
+}
 
 async function saveSales(){
   var date=document.getElementById('mDate').value;
   var entries=[];
-  PRODS.forEach(function(p){var c=document.getElementById('ec_'+p.id).value;var a=document.getElementById('ea_'+p.id).value;if(c&&Number(c)>0)entries.push({product_or_category:p.name,sales_count:c,sales_amount:a||'0',sales_target:String(p.daily),date:date});});
-  if(!entries.length){mMsg('Enter at least one product count','error');return;}
-  var btn=document.getElementById('saveBtn');btn.disabled=true;btn.textContent='Saving...';
-  try{for(var i=0;i<entries.length;i++)await API.post('sales_entry',entries[i]);mMsg('✓ '+entries.length+' product(s) saved!','success');setTimeout(function(){closeM();loadAll();},1200);}
-  catch(ex){mMsg('Error: '+ex.message,'error');}
-  btn.disabled=false;btn.textContent='Save';
+
+  PRODS.forEach(function(p){
+    var c=document.getElementById('ec_'+p.id).value;
+    var a=document.getElementById('ea_'+p.id).value;
+    if(c && Number(c)>0){
+      entries.push({
+        product_or_category: p.name,
+        sales_count:         String(Number(c)),
+        sales_amount:        a ? String(Number(a)) : '0',
+        sales_target:        String(p.daily),
+        monthly_target:      String(p.monthly),
+        date:                date
+      });
+    }
+  });
+
+  if(!entries.length){
+    mMsg('Please enter at least one product count','error');
+    return;
+  }
+
+  var btn=document.getElementById('saveBtn');
+  btn.disabled=true;
+  btn.textContent='Saving...';
+
+  try{
+    for(var i=0;i<entries.length;i++){
+      await API.post('sales_entry', entries[i]);
+    }
+    mMsg('Saved '+entries.length+' product(s) successfully!','success');
+    setTimeout(function(){closeM();loadAll();}, 1200);
+  }catch(ex){
+    mMsg('Error: '+ex.message, 'error');
+  }
+
+  btn.disabled=false;
+  btn.textContent='Save';
 }
-function mMsg(msg,type){var el=document.getElementById('mMsg');el.textContent=msg;el.style.background=type==='success'?'#DCFCE7':'#FEE2E2';el.style.color=type==='success'?'#166534':'#991B1B';el.style.display='block';}
+
+function mMsg(msg,type){
+  var el=document.getElementById('mMsg');
+  el.textContent=msg;
+  el.style.background=type==='success'?'#DCFCE7':'#FEE2E2';
+  el.style.color=type==='success'?'#166534':'#991B1B';
+  el.style.display='block';
+}
 
 document.getElementById('sDate').addEventListener('change',loadAll);
 document.getElementById('sPeriod').addEventListener('change',loadAll);
