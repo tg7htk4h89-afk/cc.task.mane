@@ -38,7 +38,7 @@ body{background:#F0F4F9;color:#0A1628}
 .kpi-value{font-size:22px;font-weight:800;color:var(--t1);line-height:1.2;margin-bottom:4px}
 .kpi-label{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
 .kpi-sub{font-size:11px;color:var(--t3);margin-top:3px}
-.shifts-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.shifts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
 .shift-card{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden}
 .shift-card-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
 .shift-name{font-size:13px;font-weight:700;color:var(--t1)}
@@ -91,15 +91,13 @@ table.ht tr:hover td{background:var(--bg2)}
 
   <div class="page-content">
     <div class="kpi-row">
-      <div class="kpi-card kpi-blue"><div class="kpi-value" id="k1">-</div><div class="kpi-label">Submitted Today</div><div class="kpi-sub" id="k1s">of 4 shifts</div></div>
+      <div class="kpi-card kpi-blue"><div class="kpi-value" id="k1">-</div><div class="kpi-label">Submitted Today</div><div class="kpi-sub" id="k1s">of 2 shifts</div></div>
       <div class="kpi-card kpi-red"><div class="kpi-value" id="k2" style="color:var(--red)">-</div><div class="kpi-label">Missing Today</div><div class="kpi-sub" id="k2s">-</div></div>
       <div class="kpi-card kpi-green"><div class="kpi-value" id="k3">-</div><div class="kpi-label">Total Handled Today</div><div class="kpi-sub">all shifts combined</div></div>
       <div class="kpi-card kpi-amber"><div class="kpi-value" id="k4">-</div><div class="kpi-label">Total Voicemail Today</div><div class="kpi-sub">all shifts combined</div></div>
     </div>
 
     <div class="shifts-grid" id="shiftsGrid">
-      <div class="shift-card"><div class="not-sub">Loading...</div></div>
-      <div class="shift-card"><div class="not-sub">Loading...</div></div>
       <div class="shift-card"><div class="not-sub">Loading...</div></div>
       <div class="shift-card"><div class="not-sub">Loading...</div></div>
     </div>
@@ -154,8 +152,8 @@ if(S){var av=document.getElementById('avatarInitials'),nm=document.getElementByI
 var today=new Date(Date.now()+3*3600000).toISOString().slice(0,10);
 document.getElementById('hDate').value=today;
 
-var SHIFTS=['Morning','Afternoon','Evening','Night'];
-var SC={Morning:'sm',Afternoon:'sa',Evening:'se',Night:'sn'};
+var SHIFTS=['Morning','Evening'];
+var SC={Morning:'sm',Evening:'se'};
 
 function sCol(sla){if(!sla)return'';var n=parseInt(sla);return n>=90?'g':n>=75?'a':'r';}
 
@@ -197,7 +195,7 @@ async function loadDash(){
     document.getElementById('k1').textContent=d.submitted_today;
     document.getElementById('k2').textContent=d.missing_today;
     var missing=SHIFTS.filter(function(s){return!d.today_by_shift[s]||!d.today_by_shift[s].submitted;});
-    document.getElementById('k1s').textContent=d.submitted_today+' of 4 shifts';
+    document.getElementById('k1s').textContent=d.submitted_today+' of 2 shifts';
     document.getElementById('k2s').textContent=d.missing_today>0?missing.join(', '):'All submitted';
 
     var totHandled=SHIFTS.reduce(function(s,sh){return s+(d.today_by_shift[sh]?Number(d.today_by_shift[sh].my_handled||0):0);},0);
