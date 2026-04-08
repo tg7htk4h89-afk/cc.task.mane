@@ -312,6 +312,26 @@ async function viewHO(id){
     html+=noteRow('Most Frequent Inquiry',h.most_inquiry);
     html+=noteRow('Escalated Items',h.escalated_items);
     html+=noteRow('Priority for Next Shift',h.priority_next_shift);
+
+    // Sales reference section
+    if(h.shift_sales_reference && h.shift_sales_reference!==''){
+      try{
+        var sales=JSON.parse(h.shift_sales_reference);
+        var salesKeys=Object.keys(sales);
+        if(salesKeys.length>0){
+          html+='<div style="font-size:10px;font-weight:700;color:#6D28D9;text-transform:uppercase;letter-spacing:.8px;margin:16px 0 4px">Sales During Shift <span style="font-size:9px;font-weight:500;color:#8A9BB0;text-transform:none;letter-spacing:0;background:#EDE9FE;padding:1px 6px;border-radius:3px;margin-left:4px">Reference only</span></div>';
+          html+='<div style="background:#F5F3FF;border-radius:10px;padding:12px 16px">';
+          salesKeys.forEach(function(prod){
+            var s=sales[prod];
+            html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #EDE9FE">'
+              +'<span style="font-size:12px;color:#6D28D9;font-weight:600">'+prod+'</span>'
+              +'<span style="font-size:13px;font-weight:700;color:var(--t1)">'+s.value+(s.note?' <span style=\'font-size:10px;color:var(--t3);font-weight:400\'>('+s.note+')</span>':'')+'</span>'
+              +'</div>';
+          });
+          html+='</div>';
+        }
+      }catch(e){}
+    }
     
     document.getElementById('hoModalBody').innerHTML=html||'<div style="color:var(--t3)">No details available</div>';
   }catch(ex){document.getElementById('hoModalBody').innerHTML='<div style="color:var(--red)">Error: '+ex.message+'</div>';}
