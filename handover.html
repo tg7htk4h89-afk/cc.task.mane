@@ -117,7 +117,7 @@ table.ht tr:hover td{background:var(--bg2)}
       <div class="ph"><span class="pt">Recent Handovers</span><span style="font-size:11px;color:var(--t3)">Last 20</span></div>
       <div style="overflow-x:auto">
         <table class="ht">
-          <thead><tr><th>Date</th><th>Shift</th><th>Submitted By</th><th>Team</th><th>Offered</th><th>Handled</th><th>SLA</th><th>Voicemail</th></tr></thead>
+          <thead><tr><th>Date</th><th>Shift</th><th>Submitted By</th><th>Team</th><th>Offered</th><th>Handled</th><th>SLA</th><th>Voicemail</th><th></th></tr></thead>
           <tbody id="hoTbl"><tr><td colspan="8" style="padding:24px;text-align:center;color:var(--t3)">Loading...</td></tr></tbody>
         </table>
       </div>
@@ -234,7 +234,8 @@ async function loadDash(){
           +'<td>'+(h.my_calls_offered||'0')+'</td>'
           +'<td style="font-weight:600">'+(h.my_calls_handled||'0')+'</td>'
           +'<td style="color:'+(parseInt(h.sla_percentage||0)>=90?'var(--green)':parseInt(h.sla_percentage||0)>=75?'var(--amber)':'var(--red)')+';">'+(h.sla_percentage||'-')+'</td>'
-          +'<td>'+(h.voicemail_count||'0')+'</td></tr>';
+          +'<td>'+(h.voicemail_count||'0')+'</td>'
+          +'<td><button onclick="viewHO(\''+h.handover_id+'\')" style="padding:4px 10px;background:var(--blue);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">View</button></td></tr>';
       }).join('')
       :'<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--t3)">No handovers found</td></tr>';
 
@@ -246,6 +247,75 @@ async function loadDash(){
 
 document.getElementById('hDate').addEventListener('change',loadDash);
 loadDash();
+</script>
+
+<!-- Handover Detail Modal -->
+<div id="hoModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:300;display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:20px;width:680px;max-width:100%;max-height:90vh;overflow-y:auto;padding:28px;position:relative">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div><div style="font-size:16px;font-weight:800;color:var(--t1)" id="hoModalTitle">Handover Detail</div><div style="font-size:12px;color:var(--t3)" id="hoModalSub">-</div></div>
+      <button onclick="closeHO()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Close</button>
+    </div>
+    <div id="hoModalBody"></div>
+  </div>
+</div>
+<script>
+function closeHO(){document.getElementById('hoModal').style.display='none';}
+
+async function viewHO(id){
+  document.getElementById('hoModal').style.display='flex';
+  document.getElementById('hoModalBody').innerHTML='<div style="padding:32px;text-align:center;color:var(--t3)">Loading...</div>';
+  try{
+    var d=await API.get('handover_list',{});
+    var hos=d.handovers||[];
+    var h=hos.find(function(x){return x.handover_id===id;});
+    if(!h){document.getElementById('hoModalBody').innerHTML='<div style="color:var(--red)">Handover not found</div>';return;}
+    document.getElementById('hoModalTitle').textContent=h.shift_type+' Shift Handover';
+    document.getElementById('hoModalSub').textContent=h.date+' · Submitted by '+h.submitted_by_name;
+    
+    function row(label,val,cls){
+      if(!val||val===''||val==='0')return'';
+      return'<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F0F4F9">'
+        +'<span style="font-size:12px;color:var(--t3);font-weight:500;width:160px;flex-shrink:0">'+label+'</span>'
+        +'<span style="font-size:12px;font-weight:600;color:'+(cls||'var(--t1)')+';text-align:right;flex:1">'+val+'</span></div>';
+    }
+    function section(title){
+      return'<div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin:16px 0 4px">'+title+'</div>';
+    }
+    function noteRow(label,val){
+      if(!val||val==='')return'';
+      return'<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">'+label+'</div>'
+        +'<div style="font-size:13px;color:var(--t2);line-height:1.6;background:var(--bg2);border-radius:8px;padding:10px 12px">'+val+'</div></div>';
+    }
+
+    var html='';
+    html+=section('Call Statistics');
+    html+=row('My Calls Offered',h.my_calls_offered);
+    html+=row('My Calls Handled',h.my_calls_handled);
+    html+=row('Prev Calls Offered',h.prev_calls_offered);
+    html+=row('Prev Calls Handled',h.prev_calls_handled);
+    
+    html+=section('Performance Metrics');
+    html+=row('Attendance',h.attendance);
+    html+=row('Issue on Shift',h.issue_on_shift);
+    html+=row('Issue Time / Resolved',h.issue_time_resolved);
+    html+=row('Avg Talk Time',String(h.avg_talk_time||'').replace(/-/g,':'));
+    html+=row('Avg Hold Time',String(h.avg_hold_time||'').replace(/-/g,':'));
+    html+=row('Avg Waiting Time',String(h.avg_waiting_time||'').replace(/-/g,':'));
+    html+=row('SLA',h.sla_percentage,parseInt(h.sla_percentage||0)>=90?'var(--green)':'var(--red)');
+    html+=row('Black SLA',h.black_sla);
+    html+=row('Voicemail',h.voicemail_count);
+    html+=row('Beneficiary',h.beneficiary);
+    
+    html+=section('Notes & Escalations');
+    html+=noteRow('Comments',h.comments);
+    html+=noteRow('Most Frequent Inquiry',h.most_inquiry);
+    html+=noteRow('Escalated Items',h.escalated_items);
+    html+=noteRow('Priority for Next Shift',h.priority_next_shift);
+    
+    document.getElementById('hoModalBody').innerHTML=html||'<div style="color:var(--t3)">No details available</div>';
+  }catch(ex){document.getElementById('hoModalBody').innerHTML='<div style="color:var(--red)">Error: '+ex.message+'</div>';}
+}
 </script>
 </body>
 </html>
