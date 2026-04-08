@@ -157,14 +157,14 @@ body{background:var(--bg3,#F0F4F9);color:var(--t1,#0A1628)}
     <!-- Performance Metrics -->
     <div class="form-card">
       <div class="form-section-title">Performance Metrics</div>
-      <div class="metric-row"><div class="metric-label">Attendance</div><input type="text" class="metric-input" id="mAttend" placeholder="e.g. 8/10"></div>
+      <div class="metric-row"><div class="metric-label">Attendance</div><input type="number" class="metric-input" id="mAttend" placeholder="e.g. 10" min="0" max="100"></div>
       <div class="metric-row"><div class="metric-label">Issue on Shift</div><input type="text" class="metric-input" id="mIssue" placeholder="—"></div>
       <div class="metric-row"><div class="metric-label">Time of Issue & Resolved</div><input type="text" class="metric-input" id="mIssueTime" placeholder="e.g. 10:00 – 10:30"></div>
       <div class="metric-row"><div class="metric-label">Avg. Talk Time</div><input type="text" class="metric-input" id="mATT" placeholder="e.g. 3:30"></div>
       <div class="metric-row"><div class="metric-label">Avg Hold Time</div><input type="text" class="metric-input" id="mAHT" placeholder="e.g. 0:45"></div>
       <div class="metric-row"><div class="metric-label">Avg Waiting Time</div><input type="text" class="metric-input" id="mAWT" placeholder="e.g. 0:23"></div>
-      <div class="metric-row"><div class="metric-label">SLA</div><input type="text" class="metric-input" id="mSLA" placeholder="e.g. 94 or 94%"></div>
-      <div class="metric-row"><div class="metric-label">Black SLA</div><input type="text" class="metric-input" id="mBSLA" placeholder="e.g. 100 or 100%"></div>
+      <div class="metric-row"><div class="metric-label">SLA</div><input type="text" class="metric-input" id="mSLA" placeholder="e.g. 94%"></div>
+      <div class="metric-row"><div class="metric-label">Black SLA</div><input type="text" class="metric-input" id="mBSLA" placeholder="e.g. 100%"></div>
       <div class="metric-row"><div class="metric-label">Voicemail</div><input type="number" class="metric-input" id="mVM" placeholder="e.g. 53" min="0"></div>
       <div class="metric-row"><div class="metric-label">Beneficiary</div><input type="text" class="metric-input" id="mBene" placeholder="—"></div>
     </div>
@@ -190,6 +190,23 @@ body{background:var(--bg3,#F0F4F9);color:var(--t1,#0A1628)}
       </div>
     </div>
 
+    <!-- Sales During Shift (reference only) -->
+    </div>
+
+    <div class="form-card">
+      <div class="form-section-title" style="color:#6D28D9;border-color:#6D28D9">
+        Sales During Shift
+        <span style="font-size:9px;font-weight:500;color:#8A9BB0;text-transform:none;letter-spacing:0;margin-left:8px;background:#EDE9FE;padding:2px 8px;border-radius:4px">Reference only — not counted in Sales KPIs</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px">
+        <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px">Product</div>
+        <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;text-align:right">Count / Amount</div>
+        <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;text-align:right">Notes</div>
+      </div>
+      <div id="salesRows"></div>
+    </div>
+
+    <div class="form-card" style="padding-top:0;border-top:none;margin-top:-16px">
     <div style="display:flex;gap:10px">
       <button class="btn btn-primary" onclick="submitHO()">Submit Handover</button>
       <a href="/cc.task.mane/handover.html" class="btn btn-secondary">Cancel</a>
@@ -212,6 +229,26 @@ if(s){var ini=document.getElementById('avatarInitials'),nm=document.getElementBy
 
 // Set today's date
 document.getElementById('hDate').value = new Date(Date.now()+3*3600000).toISOString().slice(0,10);
+
+var SALE_PRODS=[
+  {id:'pp', name:'PrePaid with fees'},
+  {id:'dw', name:'Dirwaza'},
+  {id:'cc', name:'Credit Card'},
+  {id:'mc', name:'Multicurrency Card'},
+  {id:'td', name:'Transfer to Dirwaza', unit:'KWD'},
+  {id:'inc',name:'Inclusion'}
+];
+
+function buildSalesRows(){
+  document.getElementById('salesRows').innerHTML=SALE_PRODS.map(function(p){
+    return '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:8px 0;border-bottom:1px solid var(--border);align-items:center">'
+      +'<div style="font-size:12px;font-weight:600;color:var(--t2)">'+p.name+(p.unit?' <span style="font-size:9px;background:#EDE9FE;color:#6D28D9;padding:1px 4px;border-radius:3px">'+p.unit+'</span>':'')+'</div>'
+      +'<input type="number" id="sr_'+p.id+'" placeholder="0" min="0" step="'+(p.unit?'0.001':'1')+'" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;text-align:right;outline:none;font-family:inherit;background:var(--bg2)">'
+      +'<input type="text" id="sn_'+p.id+'" placeholder="optional note" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;outline:none;font-family:inherit;background:var(--bg2)">'
+      +'</div>';
+  }).join('');
+}
+buildSalesRows();
 
 async function submitHO(){
   var shift=document.getElementById('hShift').value;
