@@ -823,10 +823,11 @@ function kcard(t){
   var pd={Critical:'kp-c',High:'kp-h',Medium:'kp-m',Low:'kp-l'}[t.priority]||'kp-m';
   var pf=t.status==='Completed'?'pg':t.is_overdue==='TRUE'?'pd':pct>70?'pw':'';
   var tl2=t.status==='Completed'?'<span class="k-time kt-ok">Done ✓</span>':tr.overdue?'<span class="k-time kt-danger">'+tr.label+'</span>':tr.diffMs<7200000?'<span class="k-time kt-warn">'+tr.label+'</span>':'<span class="k-time kt-ok">'+tr.label+'</span>';
+  var delegateBadge = t.delegated_flag==='TRUE' ? '<span class="k-tag" style="background:#FEF3C7;color:#92400E;font-size:9px">🔀 from '+UTILS.esc(t.delegated_from_name||'')+'</span>' : '';
   return '<button class="k-card'+(ov?' is-overdue':'')+(t.status==='Completed'?' is-done':'')+'" onclick="openTaskModal(\''+t.task_id+'\')">'
     +'<div class="k-card-id">'+t.task_id+'</div>'
     +'<div class="k-card-top"><div class="k-card-title">'+UTILS.esc(t.title)+'</div><div class="k-avatar" style="background:'+c[0]+';color:'+c[1]+'">'+UTILS.ini(t.assigned_to_name)+'</div></div>'
-    +'<div class="k-card-tags"><span class="k-tag '+tl+'">'+t.category+'</span>'+(t.recurring_flag==='TRUE'?'<span class="k-tag ktag-r">↺</span>':'')+'</div>'
+    +'<div class="k-card-tags"><span class="k-tag '+tl+'">'+t.category+'</span>'+(t.recurring_flag==='TRUE'?'<span class="k-tag ktag-r">↺</span>':'')+delegateBadge+'</div>'
     +'<div class="k-card-footer"><div class="k-priority '+pd+'"></div><div class="k-progress"><div class="k-prog-fill '+pf+'" style="width:'+pct+'%"></div></div>'+tl2+'</div></button>';
 }
 function renderBoard(tasks){
@@ -956,10 +957,17 @@ function renderTaskModal(d) {
   html += '</div>';
   // Tabs
   html += '<div style="display:flex;background:rgba(0,0,0,.2);margin:0 -24px">';
+  var subtasks   = d.subtasks   || [];
+  var extensions = d.extensions || [];
+  var assignees  = d.assignees  || [];
+  var pendingExt = extensions.find(function(x){ return x.status==='Pending'; });
+  var canExtend  = !pendingExt && (isM || t.assigned_to_user_id === AUTH.getUserId());
   var tmTabs = [
-    {id:'tmtab-detail',  label:'Details'},
-    {id:'tmtab-comments',label:'Comments', badge: comments.length > 0 ? String(comments.length) : ''},
-    {id:'tmtab-activity',label:'Activity',  badge: activity.length > 0 ? String(activity.length) : ''}
+    {id:'tmtab-detail',    label:'Details'},
+    {id:'tmtab-subtasks',  label:'Sub-tasks', badge: subtasks.length > 0 ? (subtasks.filter(function(s){return s.status==='Completed';}).length+'/'+subtasks.length) : ''},
+    {id:'tmtab-comments',  label:'Comments',  badge: comments.length > 0 ? String(comments.length) : ''},
+    {id:'tmtab-extension', label:'Extension', badge: pendingExt ? '!' : ''},
+    {id:'tmtab-activity',  label:'Activity',  badge: activity.length > 0 ? String(activity.length) : ''}
   ];
   tmTabs.forEach(function(tb, i){
     var active = i === 0;
@@ -1068,13 +1076,113 @@ function renderTaskModal(d) {
   }
   html += '</div>';
 
+
+  // SUB-TASKS PANEL
+  html += '<div id="tmpanel-subtasks" style="display:none">';
+  if(subtasks.length === 0){
+    html += '<div style="text-align:center;padding:32px 0"><div style="font-size:36px;margin-bottom:8px">✅</div><div style="font-size:13px;font-weight:600;color:#64748B">No sub-tasks</div><div style="font-size:12px;color:#94A3B8;margin-top:4px">Add sub-tasks when creating the task</div></div>';
+  } else {
+    var stDone = subtasks.filter(function(s){return s.status==='Completed';}).length;
+    var stPct  = Math.round(stDone/subtasks.length*100);
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">';
+    html += '<div style="flex:1;background:#E2E8F0;border-radius:6px;height:8px;overflow:hidden"><div style="height:100%;border-radius:6px;background:'+(stPct>=100?'#10B981':'#3B82F6')+';width:'+stPct+'%;transition:width .5s"></div></div>';
+    html += '<span style="font-size:12px;font-weight:700;color:'+(stPct>=100?'#059669':'#64748B')+'">'+stDone+'/'+subtasks.length+'</span>';
+    html += '</div>';
+    html += '<div style="display:flex;flex-direction:column;gap:6px">';
+    subtasks.forEach(function(st){
+      var done = st.status === 'Completed';
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:'+(done?'#F0FDF4':'#F8FAFC')+';border:1.5px solid '+(done?'#A7F3D0':'#E2E8F0')+';border-radius:10px">';
+      html += '<div style="width:22px;height:22px;border-radius:50%;background:'+(done?'#10B981':'#E2E8F0')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">';
+      if(done) html += '<svg width=11 height=11 fill=none stroke=#fff stroke-width=2.5 viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+      html += '</div>';
+      html += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0F172A">'+UTILS.esc(st.title)+'</div>';
+      if(done && st.marked_by_name) html += '<div style="font-size:10px;color:#059669;font-weight:600;margin-top:1px">✓ by '+UTILS.esc(st.marked_by_name)+(st.marked_datetime?' · '+st.marked_datetime.slice(0,10):'')+'</div>';
+      html += '</div>';
+      if(canAct||isM){
+        if(!done){
+          html += '<button data-sid="'+st.subtask_id+'" onclick="markSubtask(this.dataset.sid,true)" style="background:#10B981;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">✓ Done</button>';
+        } else {
+          html += '<button data-sid="'+st.subtask_id+'" onclick="markSubtask(this.dataset.sid,false)" style="background:#fff;color:#94A3B8;border:1.5px solid #E2E8F0;border-radius:8px;padding:6px 12px;font-size:11px;cursor:pointer;flex-shrink:0">↩</button>';
+        }
+      } else {
+        html += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;'+(done?'background:#D1FAE5;color:#065F46':'background:#FEF3C7;color:#92400E')+'">'+(done?'Done':'Pending')+'</span>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  // Delegate section inside sub-tasks panel
+  if(isM||t.assigned_to_user_id===AUTH.getUserId()){
+    html += '<div style="margin-top:16px;padding-top:16px;border-top:1px solid #F1F5F9">';
+    html += '<div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🔀 Delegate Task</div>';
+    if(t.delegated_flag==='TRUE'){
+      html += '<div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:#92400E">🔀 Delegated from <b>'+UTILS.esc(t.delegated_from_name||'')+'</b></div>';
+    }
+    html += '<div style="display:flex;gap:8px">';
+    html += '<select id="delegateSelect" style="flex:1;padding:9px 12px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;background:#F8FAFC"><option value="">Select staff to delegate to...</option></select>';
+    html += '<button onclick="delegateTask()" style="background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">Delegate</button>';
+    html += '</div>';
+    html += '<input type="text" id="delegateReason" placeholder="Reason (optional)..." style="width:100%;margin-top:8px;padding:9px 12px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;box-sizing:border-box;background:#F8FAFC">';
+    html += '</div>';
+  }
+  html += '</div>'; // end subtasks panel
+
+  // EXTENSION PANEL
+  html += '<div id="tmpanel-extension" style="display:none">';
+  if(pendingExt && isM){
+    html += '<div style="background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1.5px solid #FDE68A;border-radius:14px;padding:18px;margin-bottom:14px">';
+    html += '<div style="font-size:13px;font-weight:700;color:#92400E;margin-bottom:10px">⏳ Pending from '+UTILS.esc(pendingExt.requested_by_name)+'</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">';
+    html += '<div style="background:#fff;border-radius:10px;padding:12px"><div style="font-size:10px;color:#92400E;font-weight:700;text-transform:uppercase;margin-bottom:4px">Current</div><div style="font-size:14px;font-weight:800;color:#0F172A">'+UTILS.fdt(pendingExt.current_due)+'</div></div>';
+    html += '<div style="background:#EFF6FF;border-radius:10px;padding:12px"><div style="font-size:10px;color:#1E40AF;font-weight:700;text-transform:uppercase;margin-bottom:4px">Requested</div><div style="font-size:14px;font-weight:800;color:#1E40AF">'+UTILS.esc(pendingExt.requested_due)+'</div></div>';
+    html += '</div>';
+    html += '<div style="background:#fff;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:#334155"><b>Reason:</b> '+UTILS.esc(pendingExt.reason)+'</div>';
+    html += '<input type="text" id="extReviewNote" placeholder="Review note (optional)..." style="width:100%;padding:9px 12px;border:1.5px solid #FDE68A;border-radius:10px;font-size:12px;font-family:inherit;box-sizing:border-box;margin-bottom:12px;background:#fff">';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+    html += '<button data-extid="'+pendingExt.ext_id+'" data-dec="Approved" onclick="reviewTaskExt(this)" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer">✅ Approve</button>';
+    html += '<button data-extid="'+pendingExt.ext_id+'" data-dec="Rejected" onclick="reviewTaskExt(this)" style="background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer">❌ Reject</button>';
+    html += '</div></div>';
+  }
+  if(pendingExt && !isM){
+    html += '<div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:12px;padding:16px;margin-bottom:14px;font-size:13px;color:#1E40AF">⏳ Extension request to <b>'+UTILS.esc(pendingExt.requested_due)+'</b> is pending approval.</div>';
+  }
+  if(canExtend){
+    html += '<div id="tmExtForm" style="display:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:14px;padding:18px;margin-bottom:12px">';
+    html += '<div style="font-size:13px;font-weight:700;color:#0F172A;margin-bottom:12px">⏰ Request Deadline Extension</div>';
+    html += '<div style="background:#EFF6FF;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#334155">Current due: <b style="color:#0F172A">'+UTILS.fdt(t.due_datetime)+'</b></div>';
+    html += '<label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">New Due Date *</label>';
+    html += '<input type="date" id="tmExtDate" style="width:100%;padding:9px 12px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;box-sizing:border-box;margin-bottom:12px;background:#fff">';
+    html += '<label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Reason *</label>';
+    html += '<textarea id="tmExtReason" rows="3" placeholder="Why is the extension needed?" style="width:100%;padding:9px 12px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;margin-bottom:12px;background:#fff"></textarea>';
+    html += '<div style="display:flex;gap:8px">';
+    html += '<button onclick="submitTaskExt()" style="background:linear-gradient(135deg,#1E3A6E,#1A4A7A);color:#fff;border:none;border-radius:10px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer">Submit Request</button>';
+    html += '<button onclick="document.getElementById(\'tmExtForm\').style.display=\'none\';" style="background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;padding:10px 16px;font-size:13px;cursor:pointer;color:#64748B">Cancel</button>';
+    html += '</div></div>';
+    html += '<button onclick="document.getElementById(\'tmExtForm\').style.display=\'\';this.style.display=\'none\';" style="width:100%;background:#fff;border:2px dashed #CBD5E1;border-radius:12px;padding:13px;font-size:13px;font-weight:600;color:#64748B;cursor:pointer">⏰ Request Deadline Extension</button>';
+  }
+  html += '</div>'; // end extension panel
+
   html += '</div>'; // end panels
 
   document.getElementById('taskModalBody').innerHTML = html;
+
+  // Populate delegate dropdown after render
+  if(document.getElementById('delegateSelect')){
+    API.get('agents_reference',{}).then(function(dr){
+      var sel = document.getElementById('delegateSelect');
+      if(!sel) return;
+      (dr.agents||[]).sort(function(a,b){return a.full_name.localeCompare(b.full_name);}).forEach(function(u){
+        if(u.user_id === t.assigned_to_user_id) return;
+        var o = document.createElement('option');
+        o.value = u.user_id; o.textContent = u.full_name+' ('+u.role+')';
+        sel.appendChild(o);
+      });
+    }).catch(function(){});
+  }
 }
 
 function switchTmTab(activeId) {
-  var map = {'tmtab-detail':'tmpanel-detail','tmtab-comments':'tmpanel-comments','tmtab-activity':'tmpanel-activity'};
+  var map = {'tmtab-detail':'tmpanel-detail','tmtab-subtasks':'tmpanel-subtasks','tmtab-comments':'tmpanel-comments','tmtab-extension':'tmpanel-extension','tmtab-activity':'tmpanel-activity'};
   Object.keys(map).forEach(function(tabId){
     var tab = document.getElementById(tabId);
     var panel = document.getElementById(map[tabId]);
@@ -1110,6 +1218,63 @@ async function addTaskComment() {
     renderTaskModal(fresh);
     switchTmTab('tmtab-comments');
   } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
+}
+
+async function markSubtask(sid, done) {
+  if(!currentTask) return;
+  try {
+    await API.post('subtask_mark', {subtask_id: sid, status: done ? 'Completed' : 'Pending'});
+    var fresh = await API.get('tasks_detail', {task_id: currentTask.task.task_id});
+    currentTask = fresh;
+    renderTaskModal(fresh);
+    switchTmTab('tmtab-subtasks');
+  } catch(ex) { UTILS.toast('Error: '+ex.message, 'error'); }
+}
+
+async function delegateTask() {
+  if(!currentTask) return;
+  var sel = document.getElementById('delegateSelect');
+  var uid = sel ? sel.value : '';
+  if(!uid) { UTILS.toast('Please select a staff member', 'error'); return; }
+  var reason = (document.getElementById('delegateReason')||{}).value || '';
+  try {
+    var d = await API.post('task_delegate', {task_id: currentTask.task.task_id, delegate_to_user_id: uid, reason: reason});
+    UTILS.toast('Task delegated to '+d.delegated_to, 'success');
+    var fresh = await API.get('tasks_detail', {task_id: currentTask.task.task_id});
+    currentTask = fresh;
+    renderTaskModal(fresh);
+  } catch(ex) { UTILS.toast('Error: '+ex.message, 'error'); }
+}
+
+async function submitTaskExt() {
+  if(!currentTask) return;
+  var date   = (document.getElementById('tmExtDate')||{}).value || '';
+  var reason = ((document.getElementById('tmExtReason')||{}).value||'').trim();
+  if(!date)   { UTILS.toast('Please select a new due date', 'error'); return; }
+  if(!reason) { UTILS.toast('Please enter a reason', 'error'); return; }
+  try {
+    await API.post('task_ext_request', {task_id: currentTask.task.task_id, requested_due: date, reason: reason});
+    UTILS.toast('Extension request submitted', 'success');
+    var fresh = await API.get('tasks_detail', {task_id: currentTask.task.task_id});
+    currentTask = fresh;
+    renderTaskModal(fresh);
+    switchTmTab('tmtab-extension');
+  } catch(ex) { UTILS.toast('Error: '+ex.message, 'error'); }
+}
+
+async function reviewTaskExt(btn) {
+  if(!currentTask) return;
+  var extId = btn.dataset.extid;
+  var dec   = btn.dataset.dec;
+  var note  = (document.getElementById('extReviewNote')||{}).value || '';
+  if(!confirm((dec==='Approved'?'Approve':'Reject')+' this extension request?')) return;
+  try {
+    await API.post('task_ext_review', {ext_id: extId, decision: dec, review_notes: note});
+    UTILS.toast('Extension '+dec.toLowerCase(), 'success');
+    var fresh = await API.get('tasks_detail', {task_id: currentTask.task.task_id});
+    currentTask = fresh;
+    renderTaskModal(fresh);
+  } catch(ex) { UTILS.toast('Error: '+ex.message, 'error'); }
 }
 
 // Close modal on backdrop click — deferred so element exists
