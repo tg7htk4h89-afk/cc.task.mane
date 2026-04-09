@@ -792,6 +792,7 @@ var UTILS={
 
 AUTH.requireAuth();
 UTILS.setUser(AUTH.getSession());
+var S = AUTH.getSession() || {};
 UTILS.sidebar();
 async function loadBell(){
   try{var d=await API.get('notif_list',{limit:'5',unread_only:'true'});var nb=document.getElementById('notifBadge');if(nb){if(d.unread_count>0){nb.textContent=d.unread_count;nb.classList.remove('hidden');}else{nb.classList.add('hidden');}}}catch(e){}
