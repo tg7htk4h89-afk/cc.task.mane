@@ -183,7 +183,7 @@ function shiftCard(shift,d){
     ['Handling Rate',hr+'%',hr>=90?'g':hr>=75?'a':'r'],
     ['Prev Shift',d.prev_offered+' / '+d.prev_handled,''],
     ['SLA',fmtSLAclient(d.sla)||'-',sCol(d.sla)],
-    ['Black SLA',d.black_sla||'-',''],
+    ['Black SLA',fmtSLA(d.black_sla)||'-',sCol(d.black_sla)],
     ['Avg Talk',d.avg_talk||'-',''],
     ['Avg Hold',d.avg_hold||'-',''],
     ['Avg Wait',d.avg_wait||'-',''],
@@ -315,7 +315,7 @@ async function viewHO(id){
     html+=row('Avg Hold Time',h.avg_hold_time||'');
     html+=row('Avg Waiting Time',h.avg_waiting_time||'');
     html+=row('SLA',h.sla_percentage,(parseInt(h.sla_percentage||0)>=90||String(h.sla_percentage||'').replace('%','')>=90)?'var(--green)':'var(--red)');
-    html+=row('Black SLA',h.black_sla);
+    html+=row('Black SLA',fmtSLA(h.black_sla));
     html+=row('Voicemail',h.voicemail_count);
     html+=row('Beneficiary',h.beneficiary);
     
