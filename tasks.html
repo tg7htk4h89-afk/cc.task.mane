@@ -823,7 +823,7 @@ function kcard(t){
   var pd={Critical:'kp-c',High:'kp-h',Medium:'kp-m',Low:'kp-l'}[t.priority]||'kp-m';
   var pf=t.status==='Completed'?'pg':t.is_overdue==='TRUE'?'pd':pct>70?'pw':'';
   var tl2=t.status==='Completed'?'<span class="k-time kt-ok">Done ✓</span>':tr.overdue?'<span class="k-time kt-danger">'+tr.label+'</span>':tr.diffMs<7200000?'<span class="k-time kt-warn">'+tr.label+'</span>':'<span class="k-time kt-ok">'+tr.label+'</span>';
-  return '<button class="k-card'+(ov?' is-overdue':'')+(t.status==='Completed'?' is-done':'')+'" onclick="openTaskModal('" + t.task_id + "')">"'
+  return '<button class="k-card'+(ov?' is-overdue':'')+(t.status==='Completed'?' is-done':'')+'" onclick="openTaskModal(\''+t.task_id+'\')">'
     +'<div class="k-card-id">'+t.task_id+'</div>'
     +'<div class="k-card-top"><div class="k-card-title">'+UTILS.esc(t.title)+'</div><div class="k-avatar" style="background:'+c[0]+';color:'+c[1]+'">'+UTILS.ini(t.assigned_to_name)+'</div></div>'
     +'<div class="k-card-tags"><span class="k-tag '+tl+'">'+t.category+'</span>'+(t.recurring_flag==='TRUE'?'<span class="k-tag ktag-r">↺</span>':'')+'</div>'
@@ -974,7 +974,7 @@ function renderTaskModal(d) {
   ];
   tmTabs.forEach(function(tb, i){
     var active = i === 0;
-    html += '<button id="'+tb.id+'" onclick="switchTmTab(''+tb.id+'')" style="flex:1;background:none;border:none;border-bottom:'+(active?'2px solid #60A5FA':'2px solid transparent')+';padding:11px 6px 9px;font-size:12px;font-weight:'+(active?'700':'500')+';color:'+(active?'#fff':'rgba(255,255,255,.45)')+';cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s">';
+    html += '<button id="'+tb.id+'" onclick="switchTmTab(\''+tb.id+'\')" style="flex:1;background:none;border:none;border-bottom:'+(active?'2px solid #60A5FA':'2px solid transparent')+';padding:11px 6px 9px;font-size:12px;font-weight:'+(active?'700':'500')+';color:'+(active?'#fff':'rgba(255,255,255,.45)')+';cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s">';
     html += tb.label;
     if(tb.badge) html += ' <span style="background:rgba(255,255,255,.18);color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:3px">'+tb.badge+'</span>';
     html += '</button>';
