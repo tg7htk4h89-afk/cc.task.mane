@@ -699,6 +699,7 @@ input, select, textarea { font-family: var(--font); }
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -822,7 +823,7 @@ function kcard(t){
   var pd={Critical:'kp-c',High:'kp-h',Medium:'kp-m',Low:'kp-l'}[t.priority]||'kp-m';
   var pf=t.status==='Completed'?'pg':t.is_overdue==='TRUE'?'pd':pct>70?'pw':'';
   var tl2=t.status==='Completed'?'<span class="k-time kt-ok">Done ✓</span>':tr.overdue?'<span class="k-time kt-danger">'+tr.label+'</span>':tr.diffMs<7200000?'<span class="k-time kt-warn">'+tr.label+'</span>':'<span class="k-time kt-ok">'+tr.label+'</span>';
-  return '<button class="k-card'+(ov?' is-overdue':'')+(t.status==='Completed'?' is-done':'')+'" onclick="location.href=\'/cc.task.mane/task-detail.html?id='+t.task_id+'\'">'
+  return '<button class="k-card'+(ov?' is-overdue':'')+(t.status==='Completed'?' is-done':'')+'" onclick="openTaskModal('" + t.task_id + "')">"'
     +'<div class="k-card-id">'+t.task_id+'</div>'
     +'<div class="k-card-top"><div class="k-card-title">'+UTILS.esc(t.title)+'</div><div class="k-avatar" style="background:'+c[0]+';color:'+c[1]+'">'+UTILS.ini(t.assigned_to_name)+'</div></div>'
     +'<div class="k-card-tags"><span class="k-tag '+tl+'">'+t.category+'</span>'+(t.recurring_flag==='TRUE'?'<span class="k-tag ktag-r">↺</span>':'')+'</div>'
@@ -865,5 +866,268 @@ if(document.getElementById('srch'))document.getElementById('srch').addEventListe
 loadT();
 
 </script>
+
+<!-- ══ TASK DETAIL MODAL ═══════════════════════════════════════ -->
+<div id="taskModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;padding:16px;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:660px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.4);position:relative">
+    <button onclick="closeTaskModal()" style="position:absolute;top:14px;right:14px;z-index:20;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:15px;color:#fff;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+    <div id="taskModalBody" style="overflow-y:auto;flex:1;min-height:0"></div>
+  </div>
+</div>
+
+<script>
+var currentTask = null;
+
+function openTaskModal(taskId) {
+  var m = document.getElementById('taskModal');
+  m.style.display = 'flex';
+  document.getElementById('taskModalBody').innerHTML = '<div style="padding:60px;text-align:center;color:#94A3B8"><div style="width:40px;height:40px;border:3px solid #E2E8F0;border-top-color:#1A4A7A;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px"></div>Loading...</div>';
+  API.get('tasks_detail', {task_id: taskId}).then(function(d) {
+    currentTask = d;
+    renderTaskModal(d);
+  }).catch(function(ex) {
+    document.getElementById('taskModalBody').innerHTML = '<div style="padding:40px;text-align:center;color:#EF4444">Error: ' + UTILS.esc(ex.message) + '</div>';
+  });
+}
+
+function closeTaskModal() {
+  document.getElementById('taskModal').style.display = 'none';
+  currentTask = null;
+  loadT(); // refresh board
+}
+
+function renderTaskModal(d) {
+  var t = d.task;
+  var comments = d.comments || [];
+  var activity = d.activity || [];
+  var tr = UTILS.tr(t.due_datetime);
+  var isA = t.assigned_to_user_id === AUTH.getUserId();
+  var isM = AUTH.hasRole(['HoD','CC Manager','Manager']);
+  var canAct = (isA || isM) && t.status !== 'Completed' && t.status !== 'Cancelled';
+
+  var statusColors = {
+    'New':'#6366F1','InProgress':'#3B82F6','Completed':'#10B981',
+    'Blocked':'#EF4444','Escalated':'#F59E0B','Cancelled':'#94A3B8'
+  };
+  var statusBgs = {
+    'New':'#EEF2FF','InProgress':'#EFF6FF','Completed':'#ECFDF5',
+    'Blocked':'#FEF2F2','Escalated':'#FFFBEB','Cancelled':'#F8FAFC'
+  };
+  var priColors = {Critical:'#EF4444',High:'#F59E0B',Medium:'#3B82F6',Low:'#10B981'};
+  var sc = statusColors[t.status] || '#94A3B8';
+  var sb = statusBgs[t.status] || '#F8FAFC';
+  var pc = priColors[t.priority] || '#94A3B8';
+  var pct = Math.min(100, Number(t.progress_percentage) || 0);
+
+  var avatarColors = ['#6366F1','#8B5CF6','#EC4899','#F59E0B','#10B981','#3B82F6','#0EA472','#EF4444'];
+  function aColor(name){ return avatarColors[(name||'A').charCodeAt(0) % avatarColors.length]; }
+  function avatar(name, size){
+    size = size || 36;
+    var c = aColor(name);
+    var ini = String(name||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+    return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+c+';display:flex;align-items:center;justify-content:center;font-size:'+(size*0.38|0)+'px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 2px 6px '+c+'44">'+ini+'</div>';
+  }
+
+  var html = '';
+
+  // ── HEADER ──────────────────────────────────────────────────────
+  html += '<div style="background:linear-gradient(160deg,#0D1F3C 0%,#1E3A6E 60%,#1A4A7A 100%);padding:22px 24px 0;flex-shrink:0">';
+  // Top row — priority + status + ID
+  html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">';
+  html += '<span style="font-size:10px;font-weight:700;background:'+sb+';color:'+sc+';padding:3px 12px;border-radius:20px">'+t.status+'</span>';
+  html += '<span style="font-size:10px;font-weight:700;background:'+pc+'22;color:'+pc+';padding:3px 10px;border-radius:20px">'+t.priority+'</span>';
+  if (t.is_overdue === 'TRUE' && t.status !== 'Completed') html += '<span style="font-size:10px;font-weight:700;background:#FEF2F2;color:#EF4444;padding:3px 10px;border-radius:20px">⚠ OVERDUE</span>';
+  html += '<span style="font-size:10px;color:rgba(255,255,255,.35);margin-left:auto">'+UTILS.esc(t.task_id)+'</span>';
+  html += '</div>';
+  // Title + avatar
+  html += '<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px">';
+  html += '<div style="flex:1;min-width:0">';
+  html += '<div style="font-size:20px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:5px">'+UTILS.esc(t.title)+'</div>';
+  html += '<div style="font-size:11px;color:rgba(255,255,255,.4)">'+UTILS.esc(t.category)+'  ·  Assigned by '+UTILS.esc(t.assigned_by_name||'—')+'</div>';
+  html += '</div>';
+  html += '<div style="flex-shrink:0;text-align:center">';
+  html += avatar(t.assigned_to_name, 48);
+  html += '<div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:4px;max-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+UTILS.esc((t.assigned_to_name||'').split(' ')[0])+'</div>';
+  html += '</div></div>';
+  // Stats strip
+  html += '<div style="display:flex;background:rgba(0,0,0,.15);border-radius:10px 10px 0 0;overflow:hidden;margin:0 -24px">';
+  html += '<div style="flex:1;padding:10px 16px;border-right:1px solid rgba(255,255,255,.06)">';
+  html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">⏰ Due</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:'+(tr.overdue?'#FCA5A5':'rgba(255,255,255,.9)')+'">'+UTILS.fdt(t.due_datetime)+'</div>';
+  html += '<div style="font-size:10px;color:rgba(255,255,255,.4)">'+tr.label+'</div>';
+  html += '</div>';
+  html += '<div style="flex:1;padding:10px 16px;border-right:1px solid rgba(255,255,255,.06)">';
+  html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">📋 Category</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9)">'+UTILS.esc(t.category||'—')+'</div>';
+  html += '</div>';
+  html += '<div style="flex:1;padding:10px 16px">';
+  html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">📊 Progress</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9)">'+pct+'%</div>';
+  html += '</div>';
+  html += '</div>';
+  // Tabs
+  html += '<div style="display:flex;background:rgba(0,0,0,.2);margin:0 -24px">';
+  var tmTabs = [
+    {id:'tmtab-detail',  label:'Details'},
+    {id:'tmtab-comments',label:'Comments', badge: comments.length > 0 ? String(comments.length) : ''},
+    {id:'tmtab-activity',label:'Activity',  badge: activity.length > 0 ? String(activity.length) : ''}
+  ];
+  tmTabs.forEach(function(tb, i){
+    var active = i === 0;
+    html += '<button id="'+tb.id+'" onclick="switchTmTab(''+tb.id+'')" style="flex:1;background:none;border:none;border-bottom:'+(active?'2px solid #60A5FA':'2px solid transparent')+';padding:11px 6px 9px;font-size:12px;font-weight:'+(active?'700':'500')+';color:'+(active?'#fff':'rgba(255,255,255,.45)')+';cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s">';
+    html += tb.label;
+    if(tb.badge) html += ' <span style="background:rgba(255,255,255,.18);color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:3px">'+tb.badge+'</span>';
+    html += '</button>';
+  });
+  html += '</div>';
+  html += '</div>'; // end header
+
+  // ── PANELS ──────────────────────────────────────────────────────
+  html += '<div style="padding:20px 22px 24px;min-height:200px">';
+
+  // DETAIL PANEL
+  html += '<div id="tmpanel-detail">';
+  if (t.description) {
+    html += '<div style="background:#EFF6FF;border-left:3px solid #3B82F6;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#1E3A5F;line-height:1.6">'+UTILS.esc(t.description)+'</div>';
+  }
+  // Progress bar
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">';
+  html += '<div style="flex:1;background:#E2E8F0;border-radius:6px;height:8px;overflow:hidden">';
+  html += '<div style="height:100%;border-radius:6px;background:'+(pct>=100?'#10B981':pct>50?'#3B82F6':'#F59E0B')+';width:'+pct+'%;transition:width .5s"></div>';
+  html += '</div>';
+  html += '<span style="font-size:12px;font-weight:700;color:'+(pct>=100?'#059669':'#64748B')+'">'+pct+'%</span>';
+  html += '</div>';
+  // Meta grid
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">';
+  html += '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px">';
+  html += '<div style="font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Assigned To</div>';
+  html += '<div style="display:flex;align-items:center;gap:8px">'+avatar(t.assigned_to_name,28)+'<span style="font-weight:600;font-size:13px;color:#0F172A">'+UTILS.esc(t.assigned_to_name||'—')+'</span></div>';
+  html += '</div>';
+  html += '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px">';
+  html += '<div style="font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Assigned By</div>';
+  html += '<div style="display:flex;align-items:center;gap:8px">'+avatar(t.assigned_by_name,28)+'<span style="font-weight:600;font-size:13px;color:#0F172A">'+UTILS.esc(t.assigned_by_name||'—')+'</span></div>';
+  html += '</div>';
+  html += '</div>';
+  // SLA
+  if(t.sla_value) {
+    html += '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px;color:#92400E">⏱ SLA: <b>'+UTILS.esc(t.sla_value+' '+t.sla_unit)+'</b></div>';
+  }
+  // Action buttons
+  if (canAct) {
+    html += '<div style="display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #F1F5F9;padding-top:16px">';
+    if(t.status === 'New') html += '<button onclick="updateTask('InProgress')" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer">▶ Start</button>';
+    html += '<button onclick="updateTask('Completed')" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer">✓ Complete</button>';
+    if(isM) html += '<button onclick="updateTask('Escalated')" style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer">⚡ Escalate</button>';
+    if(isM) html += '<button onclick="updateTask('Cancelled')" style="background:#fff;border:1.5px solid #E2E8F0;color:#94A3B8;border-radius:10px;padding:10px 18px;font-size:13px;cursor:pointer">✕ Cancel</button>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // COMMENTS PANEL
+  html += '<div id="tmpanel-comments" style="display:none">';
+  if(comments.length === 0){
+    html += '<div style="text-align:center;padding:36px 0 20px">';
+    html += '<div style="width:52px;height:52px;border-radius:50%;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px">💬</div>';
+    html += '<div style="font-size:13px;font-weight:600;color:#64748B">No comments yet</div>';
+    html += '</div>';
+  } else {
+    html += '<div style="display:flex;flex-direction:column;gap:12px;max-height:260px;overflow-y:auto;margin-bottom:16px;padding-right:4px">';
+    comments.forEach(function(c){
+      var ac = aColor(c.author_name);
+      var isMgr = c.is_manager_note === 'TRUE';
+      html += '<div style="display:flex;gap:10px">';
+      html += '<div style="width:36px;height:36px;border-radius:50%;background:'+ac+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#fff">'+UTILS.ini(c.author_name)+'</div>';
+      html += '<div style="flex:1;min-width:0">';
+      html += '<div style="background:'+(isMgr?'#EFF6FF':'#F8FAFC')+';border:1px solid '+(isMgr?'#BFDBFE':'#E2E8F0')+';border-radius:4px 14px 14px 14px;padding:11px 14px">';
+      html += '<div style="display:flex;justify-content:space-between;margin-bottom:5px">';
+      html += '<span style="font-size:12px;font-weight:700;color:#0F172A">'+UTILS.esc(c.author_name)+(isMgr?' <span style="font-size:9px;background:#BFDBFE;color:#1E40AF;padding:1px 6px;border-radius:10px">Manager</span>':'')+'</span>';
+      html += '<span style="font-size:10px;color:#94A3B8">'+UTILS.fdt(c.created_datetime)+'</span>';
+      html += '</div>';
+      html += '<div style="font-size:13px;color:#334155;line-height:1.5;white-space:pre-wrap">'+UTILS.esc(c.comment_text)+'</div>';
+      html += '</div></div></div>';
+    });
+    html += '</div>';
+  }
+  // Composer
+  var myAc = aColor(AUTH.getSession()&&AUTH.getSession().full_name||'?');
+  html += '<div style="display:flex;gap:10px;align-items:flex-end;padding-top:14px;border-top:1px solid #F1F5F9">';
+  html += '<div style="width:36px;height:36px;border-radius:50%;background:'+myAc+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#fff">'+UTILS.ini((AUTH.getSession()&&AUTH.getSession().full_name)||'?')+'</div>';
+  html += '<textarea id="tmCmt" rows="2" placeholder="Write a comment..." style="flex:1;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:12px;font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;background:#F8FAFC;outline:none;min-width:0"></textarea>';
+  html += '<button onclick="addTaskComment()" style="background:linear-gradient(135deg,#1E3A6E,#1A4A7A);color:#fff;border:none;border-radius:12px;padding:11px 20px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">Send</button>';
+  html += '</div>';
+  html += '</div>';
+
+  // ACTIVITY PANEL
+  html += '<div id="tmpanel-activity" style="display:none">';
+  if(activity.length === 0){
+    html += '<div style="text-align:center;padding:36px 0;color:#94A3B8;font-size:13px">No activity yet</div>';
+  } else {
+    html += '<div style="display:flex;flex-direction:column;gap:0;max-height:320px;overflow-y:auto">';
+    activity.forEach(function(a, idx){
+      html += '<div style="display:flex;gap:12px;padding:10px 0;'+(idx>0?'border-top:1px solid #F1F5F9':'')+'">';
+      html += '<div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:32px">';
+      html += '<div style="width:8px;height:8px;border-radius:50%;background:#3B82F6;margin-top:4px"></div>';
+      if(idx < activity.length-1) html += '<div style="width:1px;flex:1;background:#E2E8F0;margin-top:4px"></div>';
+      html += '</div>';
+      html += '<div style="flex:1;min-width:0">';
+      html += '<div style="font-size:12px;font-weight:600;color:#0F172A">'+UTILS.esc(a.performed_by_name||'System')+'</div>';
+      html += '<div style="font-size:12px;color:#64748B;margin-top:2px">'+UTILS.esc(a.action_description||a.action||'')+'</div>';
+      html += '<div style="font-size:10px;color:#94A3B8;margin-top:3px">'+UTILS.fdt(a.performed_datetime||a.created_datetime||'')+'</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  html += '</div>'; // end panels
+
+  document.getElementById('taskModalBody').innerHTML = html;
+}
+
+function switchTmTab(activeId) {
+  var map = {'tmtab-detail':'tmpanel-detail','tmtab-comments':'tmpanel-comments','tmtab-activity':'tmpanel-activity'};
+  Object.keys(map).forEach(function(tabId){
+    var tab = document.getElementById(tabId);
+    var panel = document.getElementById(map[tabId]);
+    var active = tabId === activeId;
+    if(tab){ tab.style.color = active?'#fff':'rgba(255,255,255,.45)'; tab.style.borderBottom = active?'2px solid #60A5FA':'2px solid transparent'; tab.style.fontWeight = active?'700':'500'; }
+    if(panel) panel.style.display = active ? '' : 'none';
+  });
+}
+
+async function updateTask(status) {
+  if(!currentTask) return;
+  var tid = currentTask.task.task_id;
+  var notes = '';
+  if(status === 'Completed') notes = prompt('Completion notes (optional):') || '';
+  try {
+    await API.post('tasks_update', {task_id: tid, status: status, completion_notes: notes});
+    UTILS.toast('Task ' + status.toLowerCase(), 'success');
+    var fresh = await API.get('tasks_detail', {task_id: tid});
+    currentTask = fresh;
+    renderTaskModal(fresh);
+  } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
+}
+
+async function addTaskComment() {
+  if(!currentTask) return;
+  var txt = (document.getElementById('tmCmt')||{}).value || '';
+  txt = txt.trim();
+  if(!txt) { UTILS.toast('Write a comment first', 'error'); return; }
+  try {
+    await API.post('tasks_comment', {task_id: currentTask.task.task_id, comment_text: txt});
+    var fresh = await API.get('tasks_detail', {task_id: currentTask.task.task_id});
+    currentTask = fresh;
+    renderTaskModal(fresh);
+    switchTmTab('tmtab-comments');
+  } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
+}
+
+// Close modal on backdrop click
+document.getElementById('taskModal').addEventListener('click', function(e){
+  if(e.target === this) closeTaskModal();
+});
+</script>
+
 </body>
 </html>
