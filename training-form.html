@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New Training Plan — CC Task Manager</title>
+<title>New Training Plan — CC Task Manager</title><!-- FIX-v5 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -90,7 +90,7 @@ body{background:#F0F4F9;color:#0A1628}
   <header class="top-bar"><div class="breadcrumb">New Training Plan</div></header>
   <div class="page-content">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <div><h1 class="page-title">Create Training Plan</h1><p class="page-sub">Assign coaching or training to agents, teams, or the whole department</p></div>
+      <div><h1 class="page-title">Create Training Plan <span style="font-size:10px;background:#0EA472;color:#fff;padding:2px 8px;border-radius:10px;font-weight:600;vertical-align:middle">v5</span></h1><p class="page-sub">Assign coaching or training to agents, teams, or the whole department</p></div>
       <a href="/cc.task.mane/training.html" class="btn btn-secondary">Back</a>
     </div>
 
@@ -177,7 +177,7 @@ body{background:#F0F4F9;color:#0A1628}
       <div id="panel-team" style="display:none">
         <div class="field">
           <label>Select Team Leader <span class="req">*</span></label>
-          <select id="fTeamTL">
+          <select id="fTeamTL" onchange="showTeamPreview()">
             <option value="">Select team leader...</option>
           </select>
         </div>
@@ -258,10 +258,20 @@ var selectedTrainers = [];
 var currentTargetType = 'individual';
 
 // Load users
+var teamMap = {}; // TL full_name -> array of agent objects
 (async function(){
   try{
     var d = await API.get('agents_reference', {});
     allUsers = (d.agents||[]).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+    // Build teamMap keyed by team_leader name — done once at load, exact string match
+    var MGMT_R = ['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'];
+    allUsers.forEach(function(u){
+      if(u.team_leader && !MGMT_R.includes(u.role)){
+        var key = u.team_leader.trim();
+        if(!teamMap[key]) teamMap[key] = [];
+        teamMap[key].push(u);
+      }
+    });
     populateSingleAgent();
     populateTeamTLs();
     populateMultiAgents();
@@ -284,23 +294,26 @@ function populateTeamTLs(){
   tls.forEach(function(u){
     var o=document.createElement('option');o.value=u.user_id;o.textContent=u.full_name;sel.appendChild(o);
   });
-  sel.addEventListener('change', showTeamPreview);
 }
 
 function showTeamPreview(){
   var tlId = document.getElementById('fTeamTL').value;
+  if(!tlId){document.getElementById('teamPreview').style.display='none';return;}
   var tl = allUsers.find(function(u){return u.user_id===tlId;});
   if(!tl){document.getElementById('teamPreview').style.display='none';return;}
+  var tlName = (tl.full_name||tl.name||'').trim();
+  var SKIP = ['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'];
+  // Build fresh from allUsers every call - no global dependency
   var members = allUsers.filter(function(u){
-    var tlName = tl.full_name||tl.name;
-    return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role) &&
-           (u.team_leader===tlName || u.team===tl.team);
+    if(SKIP.includes(u.role)) return false;
+    var tl_col = (u.team_leader||'').trim();
+    return tl_col === tlName;
   });
   var list = document.getElementById('teamPreviewList');
-  list.innerHTML = members.map(function(m){
-    return '<span style="display:inline-flex;padding:3px 8px;background:#E8F1FB;color:#1365A0;border-radius:5px;font-size:11px;font-weight:600">'+m.full_name+'</span>';
-  }).join('');
-  document.getElementById('teamPreview').style.display = members.length ? '' : 'none';
+  list.innerHTML = members.length
+    ? members.map(function(m){return '<span style="display:inline-flex;padding:3px 8px;background:#E8F1FB;color:#1365A0;border-radius:5px;font-size:11px;font-weight:600">'+(m.full_name||m.name)+'</span>';}).join('')
+    : '<span style="font-size:12px;color:var(--t3)">No agents (tlName='+tlName+', total='+allUsers.length+')</span>';
+  document.getElementById('teamPreview').style.display = '';
 }
 
 function updateDeptCount(){
@@ -348,7 +361,7 @@ function populateMultiAgents(){
 }
 
 function populateTrainers(){
-  var trainers = allUsers.filter(function(u){return ['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);});
+  var trainers = allUsers.filter(function(u){ return u.active_flag !== 'FALSE' && u.active_flag !== false; });
   buildDropdownItems('trainersDDItems', trainers, selectedTrainers, 'toggleTrainer');
 }
 
@@ -451,8 +464,10 @@ async function submitTraining(){
     var tlId=document.getElementById('fTeamTL').value;
     if(!tlId){showMsg('Please select a team leader','error');return;}
     var tl=allUsers.find(function(u){return u.user_id===tlId;});
-    targetAgents=allUsers.filter(function(u){return (u.team===tl.team||u.reports_to===tl.full_name)&&['Agent','QA Agent'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name};});
-    if(!targetAgents.length){showMsg('No agents found for this team','error');return;}
+    var tlName=(tl.full_name||tl.name||'').trim();
+    var teamAgents = teamMap[tlName] || [];
+    targetAgents = teamAgents.map(function(u){return {user_id:u.user_id,name:u.full_name||u.name};});
+    if(!targetAgents.length){showMsg('No agents found for team leader: '+tlName,'error');return;}
   } else if(currentTargetType==='department'){
     targetAgents=allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name||u.name};});
   }
