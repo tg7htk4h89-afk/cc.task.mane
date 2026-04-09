@@ -903,7 +903,7 @@ function renderCard(d) {
       html += '<div id="row_'+log.agent_user_id+'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:'+(done?'#DCFCE7':'var(--bg2)')+';border:1px solid '+(done?'#86EFAC':'var(--border)')+';border-radius:8px">';
       // Checkbox
       if (canMark) {
-        html += '<input type="checkbox" '+(done?'checked':'')+' onchange="markAgent(''+log.agent_user_id+'',''+UTILS.esc(log.agent_name)+'',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">';
+        html += '<input type="checkbox" '+(done?'checked':'')+' onchange="markAgent(\"'+log.agent_user_id+'\",\"'+log.agent_name+'\",this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">';
       } else {
         html += '<div style="width:16px;height:16px;border-radius:4px;background:'+(done?'var(--green)':'var(--border)')+';display:flex;align-items:center;justify-content:center">'+(done?'<svg width=10 height=10 fill=none stroke=#fff stroke-width=2 viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':'')+'</div>';
       }
