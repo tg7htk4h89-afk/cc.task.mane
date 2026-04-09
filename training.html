@@ -932,84 +932,55 @@ function renderCard(d) {
   var pendingExt = exts.find(function(x){ return x.status==='Pending'; });
   var latestExt  = exts[0] || null;
 
-  // ── Pending request — show to managers for approval ──
   if (pendingExt && isManager) {
     html += '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:14px 16px;margin-bottom:10px">';
-    html += '<div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:6px">⏳ Pending Request from '+UTILS.esc(pendingExt.requested_by_name)+'</div>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
-    html += '<div><div style="font-size:10px;color:var(--t3);font-weight:600">Current Deadline</div><div style="font-size:13px;font-weight:600;color:var(--t1)">'+(pendingExt.current_deadline||'Not set')+'</div></div>';
-    html += '<div><div style="font-size:10px;color:var(--t3);font-weight:600">Requested Deadline</div><div style="font-size:13px;font-weight:700;color:#1877C5">'+pendingExt.requested_deadline+'</div></div>';
+    html += '<div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:6px">⏳ Pending from '+UTILS.esc(pendingExt.requested_by_name)+'</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">';
+    html += '<div><div style="font-size:10px;color:var(--t3);font-weight:600">Current</div><div style="font-size:13px;font-weight:600;color:var(--t1)">'+(pendingExt.current_deadline||'Not set')+'</div></div>';
+    html += '<div><div style="font-size:10px;color:var(--t3);font-weight:600">Requested</div><div style="font-size:13px;font-weight:700;color:#1877C5">'+pendingExt.requested_deadline+'</div></div>';
     html += '</div>';
-    html += '<div style="font-size:12px;color:var(--t2);background:#FFF;border-radius:6px;padding:8px 10px;margin-bottom:10px;border:1px solid var(--border)"><strong>Reason:</strong> '+UTILS.esc(pendingExt.reason)+'</div>';
+    html += '<div style="font-size:12px;color:var(--t2);background:#FFF;border-radius:6px;padding:8px 10px;margin-bottom:10px;border:1px solid var(--border)"><b>Reason:</b> '+UTILS.esc(pendingExt.reason)+'</div>';
+    html += '<input type="text" id="reviewNotes" placeholder="Add note (optional)..." style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;box-sizing:border-box;margin-bottom:8px">';
     html += '<div style="display:flex;gap:8px">';
-    html += '<input type="text" id="reviewNotes" placeholder="Add note (optional)..." style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit">';
-    html += '<button onclick="reviewExtension(\''+pendingExt.ext_id+'\',\'Approved\')" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer">✅ Approve</button>';
-    html += '<button onclick="reviewExtension(\''+pendingExt.ext_id+'\',\'Rejected\')" style="background:#E5383B;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer">❌ Reject</button>';
-    html += '</div>';
-    html += '</div>';
+    html += '<button data-extid="'+pendingExt.ext_id+'" data-dec="Approved" onclick="handleExtReview(this)" style="flex:1;background:#0EA472;color:#fff;border:none;border-radius:6px;padding:8px;font-size:12px;font-weight:700;cursor:pointer">✅ Approve</button>';
+    html += '<button data-extid="'+pendingExt.ext_id+'" data-dec="Rejected" onclick="handleExtReview(this)" style="flex:1;background:#E5383B;color:#fff;border:none;border-radius:6px;padding:8px;font-size:12px;font-weight:700;cursor:pointer">❌ Reject</button>';
+    html += '</div></div>';
   }
 
-  // ── Show last reviewed request if any ──
   if (latestExt && latestExt.status !== 'Pending') {
-    var extColor = latestExt.status==='Approved'?'#166534':'#991B1B';
-    var extBg    = latestExt.status==='Approved'?'#DCFCE7':'#FEE2E2';
-    var extBd    = latestExt.status==='Approved'?'#86EFAC':'#FECACA';
-    var extIcon  = latestExt.status==='Approved'?'✅':'❌';
-    html += '<div style="background:'+extBg+';border:1px solid '+extBd+';border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:'+extColor+'">';
-    html += extIcon+' Last request by <strong>'+UTILS.esc(latestExt.requested_by_name)+'</strong> was <strong>'+latestExt.status+'</strong>';
+    var extBg = latestExt.status==='Approved'?'#DCFCE7':'#FEE2E2';
+    var extBd = latestExt.status==='Approved'?'#86EFAC':'#FECACA';
+    var extCl = latestExt.status==='Approved'?'#166534':'#991B1B';
+    html += '<div style="background:'+extBg+';border:1px solid '+extBd+';border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:'+extCl+'">';
+    html += (latestExt.status==='Approved'?'✅':'❌')+' Last request by <b>'+UTILS.esc(latestExt.requested_by_name)+'</b> was <b>'+latestExt.status+'</b>';
     if (latestExt.reviewed_by_name) html += ' by '+UTILS.esc(latestExt.reviewed_by_name);
     if (latestExt.review_notes) html += ' — '+UTILS.esc(latestExt.review_notes);
     html += '</div>';
   }
 
-  // ── Show pending status to non-managers ──
   if (pendingExt && !isManager) {
-    html += '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:#1E40AF">⏳ Your extension request to <strong>'+pendingExt.requested_deadline+'</strong> is pending manager approval.</div>';
+    html += '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:#1E40AF">⏳ Extension to <b>'+pendingExt.requested_deadline+'</b> is pending manager approval.</div>';
   }
 
-  // ── Request Extension form / button ──
-  var canRequest = !isManager && !pendingExt && (isTrainer || S.user_id === d.created_by_user_id);
-  if (canRequest) {
-    html += '<div id="extFormWrap" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px">';
-    html += '<div style="font-size:12px;font-weight:700;color:var(--t1);margin-bottom:10px">Request Deadline Extension</div>';
-    html += '<div style="display:grid;grid-template-columns:1fr;gap:10px">';
-    html += '<div><div style="font-size:11px;font-weight:600;color:var(--t3);margin-bottom:4px">Current Deadline</div>';
-    html += '<div style="font-size:13px;font-weight:600;color:var(--t1);">'+(d.deadline||'Not set')+'</div></div>';
-    html += '<div><label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">New Deadline *</label>';
-    html += '<input type="date" id="extNewDate" min="'+UTILS.today()+'" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;box-sizing:border-box"></div>';
-    html += '<div><label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">Reason *</label>';
-    html += '<textarea id="extReason" rows="3" placeholder="Explain why the extension is needed..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>';
-    html += '</div>';
-    html += '<div style="display:flex;gap:8px;margin-top:10px">';
-    html += '<button onclick="submitExtension()" style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:12px;font-weight:700;cursor:pointer">Submit Request</button>';
-    html += '<button onclick="document.getElementById(\'extFormWrap\').style.display=\'none\'" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-size:12px;cursor:pointer">Cancel</button>';
-    html += '</div>';
-    html += '</div>';
-    html += '<button onclick="document.getElementById(\'extFormWrap\').style.display=\'block\';this.style.display=\'none\'" style="background:var(--bg);border:1px dashed var(--border);border-radius:8px;padding:9px 18px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;width:100%">📅 Request Deadline Extension</button>';
+  html += '<div id="extFormWrap" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px">';
+  html += '<div style="font-size:12px;font-weight:700;color:var(--t1);margin-bottom:10px">'+(isManager?'Update Deadline':'Request Deadline Extension')+'</div>';
+  html += '<div style="font-size:11px;font-weight:600;color:var(--t3);margin-bottom:2px">Current Deadline</div>';
+  html += '<div style="font-size:13px;font-weight:600;color:var(--t1);margin-bottom:10px">'+(d.deadline||'Not set')+'</div>';
+  html += '<label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">New Deadline *</label>';
+  html += '<input type="date" id="extNewDate" min="'+UTILS.today()+'" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;box-sizing:border-box;margin-bottom:10px">';
+  html += '<label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">'+(isManager?'Reason':'Reason *')+'</label>';
+  html += '<textarea id="extReason" rows="3" placeholder="'+(isManager?'Reason for extension...':'Explain why the extension is needed...')+'" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box;margin-bottom:10px"></textarea>';
+  html += '<div style="display:flex;gap:8px">';
+  html += '<button onclick="submitExtension()" style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:12px;font-weight:700;cursor:pointer">'+(isManager?'Apply Extension':'Submit Request')+'</button>';
+  html += '<button onclick="toggleExtForm(false)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-size:12px;cursor:pointer">Cancel</button>';
+  html += '</div></div>';
+
+  var canShowExtBtn = !pendingExt && (isManager || isTrainer || ['HoD','CC Manager','Manager','TL','QA Manager'].includes(S.role));
+  if (canShowExtBtn) {
+    html += '<button id="extOpenBtn" onclick="toggleExtForm(true)" style="background:var(--bg);border:1px dashed var(--border);border-radius:8px;padding:9px 18px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;width:100%">📅 '+(isManager?'Extend Deadline':'Request Deadline Extension')+'</button>';
   }
 
-  // Managers can also request extension for any training (on behalf)
-  if (isManager && !pendingExt) {
-    html += '<div id="extFormWrap" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px">';
-    html += '<div style="font-size:12px;font-weight:700;color:var(--t1);margin-bottom:10px">Update Deadline</div>';
-    html += '<div style="display:grid;grid-template-columns:1fr;gap:10px">';
-    html += '<div><div style="font-size:11px;font-weight:600;color:var(--t3);margin-bottom:4px">Current Deadline</div>';
-    html += '<div style="font-size:13px;font-weight:600;color:var(--t1);">'+(d.deadline||'Not set')+'</div></div>';
-    html += '<div><label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">New Deadline *</label>';
-    html += '<input type="date" id="extNewDate" min="'+UTILS.today()+'" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;box-sizing:border-box"></div>';
-    html += '<div><label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">Reason</label>';
-    html += '<textarea id="extReason" rows="2" placeholder="Reason for extension..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea></div>';
-    html += '</div>';
-    html += '<div style="display:flex;gap:8px;margin-top:10px">';
-    html += '<button onclick="submitExtension()" style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:12px;font-weight:700;cursor:pointer">Apply Extension</button>';
-    html += '<button onclick="document.getElementById(\'extFormWrap\').style.display=\'none\'" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-size:12px;cursor:pointer">Cancel</button>';
-    html += '</div>';
-    html += '</div>';
-    html += '<button onclick="document.getElementById(\'extFormWrap\').style.display=\'block\';this.style.display=\'none\'" style="background:var(--bg);border:1px dashed var(--border);border-radius:8px;padding:9px 18px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;width:100%">📅 Extend Deadline</button>';
-  }
-
-  html += '</div>';  // close extension section
-
+  html += '</div>';
   document.getElementById('cardBody').innerHTML = html;
 }
 
@@ -1046,6 +1017,31 @@ async function markAgent(agentId, agentName, checked) {
 }
 
 function logP(id){openCard(id);}
+
+function toggleExtForm(show) {
+  var wrap = document.getElementById('extFormWrap');
+  var btn  = document.getElementById('extOpenBtn');
+  if (!wrap) return;
+  wrap.style.display = show ? 'block' : 'none';
+  if (btn) btn.style.display = show ? 'none' : 'block';
+}
+
+async function handleExtReview(el) {
+  var extId    = el.getAttribute('data-extid');
+  var decision = el.getAttribute('data-dec');
+  if (!extId || !decision) return;
+  var notes = (document.getElementById('reviewNotes') || {}).value || '';
+  if (!confirm((decision === 'Approved' ? 'Approve' : 'Reject') + ' this extension request?')) return;
+  try {
+    await API.post('training_ext_review', { ext_id: extId, decision: decision, review_notes: notes });
+    UTILS.toast('Extension ' + decision.toLowerCase() + ' successfully', 'success');
+    var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
+    currentTraining = fresh;
+    renderCard(fresh);
+  } catch(ex) {
+    UTILS.toast('Error: ' + ex.message, 'error');
+  }
+}
 
 async function submitExtension() {
   if (!currentTraining) return;
