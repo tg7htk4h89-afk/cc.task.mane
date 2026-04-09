@@ -699,6 +699,7 @@ input, select, textarea { font-family: var(--font); }
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 
+@keyframes tdSpin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -790,31 +791,226 @@ var tid=new URLSearchParams(location.search).get('id');
 if(!tid)location.href='/cc.task.mane/tasks.html';
 var PRI={Critical:'badge-red',High:'badge-orange',Medium:'badge-blue',Low:'badge-green'};
 var STA={Completed:'sp-completed',Overdue:'sp-overdue',Escalated:'sp-escalated',InProgress:'sp-inprogress',New:'sp-new',Assigned:'sp-inprogress',Pending:'sp-pending'};
-async function loadTD(){
-  document.getElementById('tContent').innerHTML='<div style="padding:32px;color:var(--t3)">Loading...</div>';
-  try{
-    var d=await API.get('tasks_detail',{task_id:tid});
-    var t=d.task;var tr=UTILS.tr(t.due_datetime);
-    var isA=t.assigned_to_user_id===AUTH.getUserId();var isM=AUTH.hasRole(['HoD','Manager']);
-    document.getElementById('tContent').innerHTML=
-      '<div class="form-card">'
-      +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px"><span class="badge badge-gray">'+t.task_id+'</span><span class="badge '+(PRI[t.priority]||'badge-gray')+'">'+t.priority+'</span><span class="status-pill '+(STA[t.status]||'sp-new')+'">'+t.status+'</span>'+(t.is_overdue==='TRUE'?'<span class="badge badge-red">OVERDUE</span>':'')+'</div>'
-      +'<h2 style="font-size:18px;font-weight:800;color:var(--t1);margin-bottom:8px">'+UTILS.esc(t.title)+'</h2>'
-      +(t.description?'<p style="color:var(--t2);font-size:13px;line-height:1.6;margin-bottom:16px">'+UTILS.esc(t.description)+'</p>':'')
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'
-      +'<div><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Assigned To</div><div style="display:flex;align-items:center;gap:8px">'+UTILS.av(t.assigned_to_name,28)+'<span style="font-weight:600;font-size:13px">'+UTILS.esc(t.assigned_to_name)+'</span></div></div>'
-      +'<div><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Due</div><div style="font-weight:600;font-size:13px;color:'+(tr.overdue?'var(--red)':'var(--t1)')+'">'+UTILS.fdt(t.due_datetime)+' ('+tr.label+')</div></div>'
-      +'</div>'
-      +'<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Progress</div><div class="progress-wrap"><div class="progress-bar" style="height:8px;border-radius:4px"><div class="progress-fill" style="width:'+(t.progress_percentage||0)+'%"></div></div><span class="progress-label">'+(t.progress_percentage||0)+'%</span></div></div>'
-      +((isA||isM)&&t.status!=='Completed'?'<div style="display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:16px"><button onclick="upd(\'InProgress\')" class="btn btn-secondary btn-sm">Start</button><button onclick="upd(\'Completed\')" class="btn btn-primary btn-sm">Complete</button>'+(isM?'<button onclick="upd(\'Escalated\')" class="btn btn-danger btn-sm">Escalate</button>':'')+'</div>':'')
-      +'</div>'
-      +'<div class="form-card" style="margin-top:14px"><div class="form-section-title">Comments</div>'
-      +'<div id="cmts" style="margin-bottom:16px">'+(d.comments&&d.comments.length?d.comments.map(function(c){return'<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'+UTILS.av(c.author_name,22)+'<span style="font-weight:600;font-size:12px">'+UTILS.esc(c.author_name)+'</span>'+(c.is_manager_note==='TRUE'?'<span class="badge badge-purple">Manager</span>':'')+'<span style="font-size:10px;color:var(--t3);margin-left:auto">'+UTILS.fdt(c.created_datetime)+'</span></div><div style="font-size:12px;color:var(--t2);padding-left:30px">'+UTILS.esc(c.comment_text)+'</div></div>';}).join(''):'<div style="color:var(--t3);font-size:12px;padding:8px 0">No comments yet</div>')+'</div>'
-      +'<div style="display:flex;gap:8px"><textarea id="cmt" placeholder="Add a comment..." style="flex:1;height:60px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;resize:none;outline:none"></textarea><button onclick="addC()" class="btn btn-primary btn-sm" style="align-self:flex-end">Send</button></div></div>';
-  }catch(ex){document.getElementById('tContent').innerHTML='<div style="padding:32px;color:var(--t3)">Could not load task: '+UTILS.esc(ex.message)+'</div>';}
+
+var avatarColorsTD = ['#6366F1','#8B5CF6','#EC4899','#F59E0B','#10B981','#3B82F6','#0EA472','#EF4444'];
+function aColorTD(name){ return avatarColorsTD[(name||'A').charCodeAt(0) % avatarColorsTD.length]; }
+function avatarTD(name, size){
+  size = size || 36;
+  var c = aColorTD(name);
+  var ini = String(name||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+  return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+c+';display:flex;align-items:center;justify-content:center;font-size:'+(size*0.38|0)+'px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 2px 8px '+c+'44">'+ini+'</div>';
 }
-async function upd(status){var notes=status==='Completed'?prompt('Completion notes (optional):'):'';try{await API.post('tasks_update',{task_id:tid,status:status,completion_notes:notes||''});UTILS.toast('Updated','success');loadTD();}catch(ex){UTILS.toast('Error: '+ex.message,'error');}}
-async function addC(){var txt=document.getElementById('cmt').value.trim();if(!txt)return;try{await API.post('tasks_comment',{task_id:tid,comment_text:txt});document.getElementById('cmt').value='';UTILS.toast('Comment added','success');loadTD();}catch(ex){UTILS.toast('Error: '+ex.message,'error');}}
+
+function switchTDTab(activeId){
+  var map={'tdtab-detail':'tdpanel-detail','tdtab-comments':'tdpanel-comments','tdtab-activity':'tdpanel-activity'};
+  Object.keys(map).forEach(function(tabId){
+    var tab=document.getElementById(tabId);
+    var panel=document.getElementById(map[tabId]);
+    var active=tabId===activeId;
+    if(tab){tab.style.color=active?'#fff':'rgba(255,255,255,.45)';tab.style.borderBottom=active?'2px solid #60A5FA':'2px solid transparent';tab.style.fontWeight=active?'700':'500';}
+    if(panel) panel.style.display=active?'':'none';
+  });
+}
+
+var currentTD = null;
+
+async function loadTD(){
+  document.getElementById('tContent').innerHTML='<div style="padding:60px;text-align:center;color:#94A3B8"><div style="width:40px;height:40px;border:3px solid #E2E8F0;border-top-color:#1A4A7A;border-radius:50%;animation:tdSpin .8s linear infinite;margin:0 auto 12px"></div>Loading task...</div>';
+  try{
+    var d = await API.get('tasks_detail',{task_id:tid});
+    currentTD = d;
+    renderTD(d);
+  }catch(ex){
+    document.getElementById('tContent').innerHTML='<div style="padding:40px;text-align:center;color:#EF4444">Could not load: '+UTILS.esc(ex.message)+'</div>';
+  }
+}
+
+function renderTD(d){
+  var t = d.task;
+  var comments = d.comments || [];
+  var activity = d.activity || [];
+  var tr = UTILS.tr(t.due_datetime);
+  var isA = t.assigned_to_user_id === AUTH.getUserId();
+  var isM = AUTH.hasRole(['HoD','CC Manager','Manager']);
+  var canAct = (isA || isM) && t.status !== 'Completed' && t.status !== 'Cancelled';
+  var pct = Math.min(100, Number(t.progress_percentage) || 0);
+
+  var statusColors={New:'#6366F1',InProgress:'#3B82F6',Completed:'#10B981',Blocked:'#EF4444',Escalated:'#F59E0B',Cancelled:'#94A3B8',Assigned:'#6366F1'};
+  var statusBgs={New:'#EEF2FF',InProgress:'#EFF6FF',Completed:'#ECFDF5',Blocked:'#FEF2F2',Escalated:'#FFFBEB',Cancelled:'#F8FAFC',Assigned:'#EEF2FF'};
+  var priColors={Critical:'#EF4444',High:'#F59E0B',Medium:'#3B82F6',Low:'#10B981'};
+  var sc=statusColors[t.status]||'#94A3B8';
+  var sb=statusBgs[t.status]||'#F8FAFC';
+  var pc=priColors[t.priority]||'#94A3B8';
+
+  var html='';
+
+  // ── CARD WRAPPER ────────────────────────────────────────────────
+  html += '<div style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 32px rgba(0,0,0,.10);max-width:720px;margin:0 auto;border:1px solid #E2E8F0">';
+
+  // ── HEADER ──────────────────────────────────────────────────────
+  html += '<div style="background:linear-gradient(160deg,#0D1F3C 0%,#1E3A6E 60%,#1A4A7A 100%);padding:22px 28px 0">';
+
+  // Status + priority + ID row
+  html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">';
+  html += '<span style="font-size:10px;font-weight:700;background:'+sb+';color:'+sc+';padding:3px 12px;border-radius:20px">'+t.status+'</span>';
+  html += '<span style="font-size:10px;font-weight:700;background:'+pc+'22;color:'+pc+';padding:3px 10px;border-radius:20px">'+t.priority+'</span>';
+  if(t.is_overdue==='TRUE'&&t.status!=='Completed') html += '<span style="font-size:10px;font-weight:700;background:#FEF2F2;color:#EF4444;padding:3px 10px;border-radius:20px">⚠ OVERDUE</span>';
+  if(t.recurring_flag==='TRUE') html += '<span style="font-size:10px;font-weight:700;background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);padding:3px 10px;border-radius:20px">↺ Recurring</span>';
+  html += '<span style="font-size:10px;color:rgba(255,255,255,.3);margin-left:auto">'+UTILS.esc(t.task_id)+'</span>';
+  html += '</div>';
+
+  // Title + avatar
+  html += '<div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:18px">';
+  html += '<div style="flex:1;min-width:0">';
+  html += '<div style="font-size:22px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:6px">'+UTILS.esc(t.title)+'</div>';
+  html += '<div style="font-size:11px;color:rgba(255,255,255,.4)">'+UTILS.esc(t.category||'Task')+'  ·  Assigned by '+UTILS.esc(t.assigned_by_name||'—')+'</div>';
+  html += '</div>';
+  html += '<div style="flex-shrink:0;text-align:center">';
+  html += avatarTD(t.assigned_to_name, 52);
+  html += '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;max-width:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+UTILS.esc((t.assigned_to_name||'').split(' ')[0])+'</div>';
+  html += '</div></div>';
+
+  // Stats strip
+  html += '<div style="display:flex;background:rgba(0,0,0,.15);border-radius:10px 10px 0 0;overflow:hidden;margin:0 -28px">';
+  html += '<div style="flex:1;padding:11px 18px;border-right:1px solid rgba(255,255,255,.06)">';
+  html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">⏰ Due</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:'+(tr.overdue?'#FCA5A5':'rgba(255,255,255,.9)')+'">'+UTILS.fdt(t.due_datetime)+'</div>';
+  html += '<div style="font-size:10px;color:rgba(255,255,255,.4)">'+tr.label+'</div>';
+  html += '</div>';
+  html += '<div style="flex:1;padding:11px 18px;border-right:1px solid rgba(255,255,255,.06)">';
+  html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">📋 Category</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9)">'+UTILS.esc(t.category||'—')+'</div>';
+  html += '</div>';
+  html += '<div style="flex:1;padding:11px 18px">';
+  html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">📊 Progress</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9)">'+pct+'%</div>';
+  html += '</div>';
+  html += '</div>';
+
+  // Tab bar
+  html += '<div style="display:flex;background:rgba(0,0,0,.2);margin:0 -28px">';
+  [{id:'tdtab-detail',label:'Details'},{id:'tdtab-comments',label:'Comments',badge:comments.length},{id:'tdtab-activity',label:'Activity',badge:activity.length}].forEach(function(tb,i){
+    var active=i===0;
+    html += '<button id="'+tb.id+'" onclick="switchTDTab(\''+tb.id+'\')" style="flex:1;background:none;border:none;border-bottom:'+(active?'2px solid #60A5FA':'2px solid transparent')+';padding:11px 6px 9px;font-size:12px;font-weight:'+(active?'700':'500')+';color:'+(active?'#fff':'rgba(255,255,255,.45)')+';cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s">';
+    html += tb.label;
+    if(tb.badge) html += ' <span style="background:rgba(255,255,255,.18);color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:3px">'+tb.badge+'</span>';
+    html += '</button>';
+  });
+  html += '</div></div>'; // end header
+
+  // ── PANELS ──────────────────────────────────────────────────────
+  html += '<div style="padding:22px 28px 28px">';
+
+  // DETAILS
+  html += '<div id="tdpanel-detail">';
+  if(t.description){
+    html += '<div style="background:#EFF6FF;border-left:3px solid #3B82F6;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#1E3A5F;line-height:1.6">'+UTILS.esc(t.description)+'</div>';
+  }
+  // Progress bar
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">';
+  html += '<div style="flex:1;background:#E2E8F0;border-radius:6px;height:8px;overflow:hidden">';
+  html += '<div style="height:100%;border-radius:6px;background:'+(pct>=100?'#10B981':pct>50?'#3B82F6':'#F59E0B')+';width:'+pct+'%;transition:width .5s"></div>';
+  html += '</div>';
+  html += '<span style="font-size:13px;font-weight:700;color:'+(pct>=100?'#059669':'#64748B')+'">'+pct+'%</span>';
+  html += '</div>';
+  // Meta grid
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">';
+  html += '<div style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px">';
+  html += '<div style="font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Assigned To</div>';
+  html += '<div style="display:flex;align-items:center;gap:10px">'+avatarTD(t.assigned_to_name,32)+'<span style="font-weight:600;font-size:13px;color:#0F172A">'+UTILS.esc(t.assigned_to_name||'—')+'</span></div>';
+  html += '</div>';
+  html += '<div style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px">';
+  html += '<div style="font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Assigned By</div>';
+  html += '<div style="display:flex;align-items:center;gap:10px">'+avatarTD(t.assigned_by_name,32)+'<span style="font-weight:600;font-size:13px;color:#0F172A">'+UTILS.esc(t.assigned_by_name||'—')+'</span></div>';
+  html += '</div>';
+  html += '</div>';
+  if(t.sla_value){
+    html += '<div style="background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#92400E">⏱ SLA: <b>'+UTILS.esc(t.sla_value+' '+t.sla_unit)+'</b></div>';
+  }
+  // Actions
+  if(canAct){
+    html += '<div style="display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #F1F5F9;padding-top:18px">';
+    if(t.status==='New'||t.status==='Assigned') html += '<button onclick="updTD(\'InProgress\')" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px #3B82F633">▶ Start</button>';
+    html += '<button onclick="updTD(\'Completed\')" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px #10B98133">✓ Complete</button>';
+    if(isM) html += '<button onclick="updTD(\'Escalated\')" style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer">⚡ Escalate</button>';
+    if(isM) html += '<button onclick="updTD(\'Cancelled\')" style="background:#fff;border:1.5px solid #E2E8F0;color:#94A3B8;border-radius:10px;padding:11px 18px;font-size:13px;cursor:pointer">✕ Cancel</button>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // COMMENTS
+  html += '<div id="tdpanel-comments" style="display:none">';
+  if(comments.length===0){
+    html += '<div style="text-align:center;padding:40px 0 20px"><div style="width:52px;height:52px;border-radius:50%;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px">💬</div><div style="font-size:13px;font-weight:600;color:#64748B">No comments yet</div></div>';
+  } else {
+    html += '<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:18px">';
+    comments.forEach(function(c){
+      var ac=aColorTD(c.author_name);
+      var isMgr=c.is_manager_note==='TRUE';
+      html += '<div style="display:flex;gap:10px">';
+      html += '<div style="width:36px;height:36px;border-radius:50%;background:'+ac+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#fff">'+UTILS.ini(c.author_name)+'</div>';
+      html += '<div style="flex:1;min-width:0"><div style="background:'+(isMgr?'#EFF6FF':'#F8FAFC')+';border:1px solid '+(isMgr?'#BFDBFE':'#E2E8F0')+';border-radius:4px 14px 14px 14px;padding:11px 14px">';
+      html += '<div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:700;color:#0F172A">'+UTILS.esc(c.author_name)+(isMgr?' <span style="font-size:9px;background:#BFDBFE;color:#1E40AF;padding:1px 6px;border-radius:10px">Manager</span>':'')+'</span><span style="font-size:10px;color:#94A3B8">'+UTILS.fdt(c.created_datetime)+'</span></div>';
+      html += '<div style="font-size:13px;color:#334155;line-height:1.5;white-space:pre-wrap">'+UTILS.esc(c.comment_text)+'</div>';
+      html += '</div></div></div>';
+    });
+    html += '</div>';
+  }
+  var myS=AUTH.getSession()||{};var myAc=aColorTD(myS.full_name||'?');
+  html += '<div style="display:flex;gap:10px;align-items:flex-end;padding-top:14px;border-top:1px solid #F1F5F9">';
+  html += '<div style="width:36px;height:36px;border-radius:50%;background:'+myAc+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#fff">'+UTILS.ini(myS.full_name||'?')+'</div>';
+  html += '<textarea id="tdCmt" rows="2" placeholder="Write a comment..." style="flex:1;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:12px;font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;background:#F8FAFC;outline:none;min-width:0"></textarea>';
+  html += '<button onclick="addTDComment()" style="background:linear-gradient(135deg,#1E3A6E,#1A4A7A);color:#fff;border:none;border-radius:12px;padding:11px 20px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">Send</button>';
+  html += '</div></div>';
+
+  // ACTIVITY
+  html += '<div id="tdpanel-activity" style="display:none">';
+  if(activity.length===0){
+    html += '<div style="text-align:center;padding:40px;color:#94A3B8;font-size:13px">No activity yet</div>';
+  } else {
+    html += '<div style="display:flex;flex-direction:column">';
+    activity.forEach(function(a,idx){
+      html += '<div style="display:flex;gap:12px;padding:12px 0;'+(idx>0?'border-top:1px solid #F1F5F9':'')+'">';
+      html += '<div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:32px">';
+      html += '<div style="width:10px;height:10px;border-radius:50%;background:#3B82F6;border:2px solid #EFF6FF;margin-top:2px;flex-shrink:0"></div>';
+      if(idx<activity.length-1) html += '<div style="width:2px;flex:1;background:#E2E8F0;margin-top:4px"></div>';
+      html += '</div>';
+      html += '<div style="flex:1;min-width:0;padding-bottom:4px">';
+      html += '<div style="font-size:13px;font-weight:600;color:#0F172A">'+UTILS.esc(a.performed_by_name||'System')+'</div>';
+      html += '<div style="font-size:12px;color:#64748B;margin-top:2px">'+UTILS.esc(a.action_description||a.action||a.action_type||'')+'</div>';
+      html += '<div style="font-size:10px;color:#94A3B8;margin-top:3px">'+UTILS.fdt(a.performed_datetime||a.created_datetime||'')+'</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  html += '</div></div>'; // end panels + card wrapper
+
+  document.getElementById('tContent').innerHTML = html;
+}
+
+async function updTD(status){
+  var notes = status==='Completed' ? (prompt('Completion notes (optional):')||'') : '';
+  try{
+    await API.post('tasks_update',{task_id:tid,status:status,completion_notes:notes});
+    UTILS.toast('Task '+status.toLowerCase(),'success');
+    loadTD();
+  }catch(ex){UTILS.toast('Error: '+ex.message,'error');}
+}
+
+async function addTDComment(){
+  var txt=(document.getElementById('tdCmt')||{}).value||'';
+  txt=txt.trim();
+  if(!txt){UTILS.toast('Write a comment first','error');return;}
+  try{
+    await API.post('tasks_comment',{task_id:tid,comment_text:txt});
+    UTILS.toast('Comment added','success');
+    loadTD();
+    setTimeout(function(){switchTDTab('tdtab-comments');},400);
+  }catch(ex){UTILS.toast('Error: '+ex.message,'error');}
+}
+
 loadTD();
 
 </script>
