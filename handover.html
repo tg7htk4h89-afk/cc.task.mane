@@ -155,7 +155,9 @@ document.getElementById('hDate').value=today;
 var SHIFTS=['Morning','Evening'];
 var SC={Morning:'sm',Evening:'se'};
 
-function sCol(sla){if(!sla)return'';var n=parseInt(sla);return n>=90?'g':n>=75?'a':'r';}
+function fmtSLAclient(v){if(!v||v==='')return'';var s=String(v).trim();if(s.indexOf('%')!==-1)return s;var n=Number(s);if(isNaN(n))return s;if(n<=1)return Math.round(n*100)+'%';return n+'%';}
+
+function sCol(sla){if(!sla)return'';var n=parseFloat(sla);if(n<=1&&n>0)n=Math.round(n*100);return n>=90?'g':n>=75?'a':'r';}
 
 function shiftCard(shift,d){
   var cls=SC[shift]||'sm';
@@ -170,7 +172,7 @@ function shiftCard(shift,d){
     ['My Calls',d.my_offered+' offered / '+d.my_handled+' handled',''],
     ['Handling Rate',hr+'%',hr>=90?'g':hr>=75?'a':'r'],
     ['Prev Shift',d.prev_offered+' / '+d.prev_handled,''],
-    ['SLA',d.sla||'-',sCol(d.sla)],
+    ['SLA',fmtSLAclient(d.sla)||'-',sCol(d.sla)],
     ['Black SLA',d.black_sla||'-',''],
     ['Avg Talk',d.avg_talk||'-',''],
     ['Avg Hold',d.avg_hold||'-',''],
@@ -299,10 +301,10 @@ async function viewHO(id){
     html+=row('Attendance',h.attendance);
     html+=row('Issue on Shift',h.issue_on_shift);
     html+=row('Issue Time / Resolved',h.issue_time_resolved);
-    html+=row('Avg Talk Time',String(h.avg_talk_time||'').replace(/-/g,':'));
-    html+=row('Avg Hold Time',String(h.avg_hold_time||'').replace(/-/g,':'));
-    html+=row('Avg Waiting Time',String(h.avg_waiting_time||'').replace(/-/g,':'));
-    html+=row('SLA',h.sla_percentage,parseInt(h.sla_percentage||0)>=90?'var(--green)':'var(--red)');
+    html+=row('Avg Talk Time',h.avg_talk_time||'');
+    html+=row('Avg Hold Time',h.avg_hold_time||'');
+    html+=row('Avg Waiting Time',h.avg_waiting_time||'');
+    html+=row('SLA',h.sla_percentage,(parseInt(h.sla_percentage||0)>=90||String(h.sla_percentage||'').replace('%','')>=90)?'var(--green)':'var(--red)');
     html+=row('Black SLA',h.black_sla);
     html+=row('Voicemail',h.voicemail_count);
     html+=row('Beneficiary',h.beneficiary);
