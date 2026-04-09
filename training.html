@@ -892,33 +892,42 @@ function renderCard(d) {
     html += '<div style="background:#F0F6FE;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--t2);line-height:1.6">'+UTILS.esc(d.description)+'</div>';
   }
 
-  // Agent checklist
-  html += '<div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Agent Checklist</div>';
-  html += '<div style="display:flex;flex-direction:column;gap:6px" id="agentList">';
+  // Agent checklist — with search for large groups
+  var totalAgents = d.logs ? d.logs.length : 0;
+  html += '<div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Agent Checklist <span style="font-weight:400;color:var(--t3);font-size:10px;text-transform:none">('+d.completed_agents+'/'+totalAgents+' completed)</span></div>';
+
+  // Search box — only show if more than 5 agents
+  if (totalAgents > 5) {
+    html += '<div style="position:relative;margin-bottom:8px">';
+    html += '<input type="text" id="agentSearch" oninput="filterAgentRows(this.value)" placeholder="🔍  Search agents..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box">';
+    html += '</div>';
+  }
+
+  html += '<div style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;padding-right:2px" id="agentList">';
 
   if (!d.logs || !d.logs.length) {
     html += '<div style="color:var(--t3);font-size:13px;padding:16px;text-align:center">No agents assigned</div>';
   } else {
     d.logs.forEach(function(log) {
       var done = log.status === 'Completed';
-      html += '<div id="row_'+log.agent_user_id+'" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:'+(done?'#DCFCE7':'var(--bg2)')+';border:1px solid '+(done?'#86EFAC':'var(--border)')+';border-radius:8px">';
-      html += '<div style="width:22px;height:22px;border-radius:50%;background:'+(done?'#0EA472':'var(--border)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">';
-      if (done) html += '<svg width=12 height=12 fill=none stroke=#fff stroke-width=2.5 viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+      html += '<div id="row_'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name).toLowerCase()+'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:'+(done?'#DCFCE7':'var(--bg2)')+';border:1px solid '+(done?'#86EFAC':'var(--border)')+';border-radius:8px">';
+      html += '<div style="width:20px;height:20px;border-radius:50%;background:'+(done?'#0EA472':'var(--border)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">';
+      if (done) html += '<svg width=11 height=11 fill=none stroke=#fff stroke-width=2.5 viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
       html += '</div>';
       html += '<div style="flex:1;min-width:0">';
       html += '<div style="font-size:13px;font-weight:600;color:var(--t1)">'+UTILS.esc(log.agent_name)+'</div>';
       if (done && log.marked_by_name) {
-        html += '<div style="font-size:11px;color:#166534;font-weight:600;margin-top:1px">✓ Marked by '+UTILS.esc(log.marked_by_name)+(log.marked_datetime?' · '+log.marked_datetime.slice(0,10):'')+'</div>';
+        html += '<div style="font-size:10px;color:#166534;font-weight:600;margin-top:1px">✓ '+UTILS.esc(log.marked_by_name)+(log.marked_datetime?' · '+log.marked_datetime.slice(0,10):'')+'</div>';
       }
       html += '</div>';
       if (canMark) {
         if (!done) {
-          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,true)" style="background:#0EA472;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✓ Mark Done</button>';
+          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,true)" style="background:#0EA472;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">✓ Mark Done</button>';
         } else {
-          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,false)" style="background:var(--bg);color:var(--t3);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-size:12px;cursor:pointer;flex-shrink:0">↩ Undo</button>';
+          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,false)" style="background:var(--bg);color:var(--t3);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:11px;cursor:pointer;flex-shrink:0">↩ Undo</button>';
         }
       } else {
-        html += '<span style="font-size:10px;font-weight:700;color:'+(done?'#166534':'#854D0E')+';background:'+(done?'#DCFCE7':'#FEF9C3')+';padding:3px 10px;border-radius:4px">'+(done?'Completed':'Pending')+'</span>';
+        html += '<span style="font-size:10px;font-weight:700;color:'+(done?'#166534':'#854D0E')+';background:'+(done?'#DCFCE7':'#FEF9C3')+';padding:3px 8px;border-radius:4px">'+(done?'Done':'Pending')+'</span>';
       }
       html += '</div>';
     });
@@ -926,6 +935,39 @@ function renderCard(d) {
   html += '</div>';
 
   html += '<div id="markError" style="display:none;margin-top:8px;padding:10px 14px;background:#FEE2E2;border-radius:8px;font-size:12px;color:#991B1B;border:1px solid #FECACA"></div>';
+
+  // ── Comments Section ──────────────────────────────────────────
+  html += '<div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px">';
+  html += '<div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">💬 Comments</div>';
+
+  var comments = d.comments || [];
+  if (comments.length === 0) {
+    html += '<div style="color:var(--t3);font-size:12px;text-align:center;padding:12px">No comments yet</div>';
+  } else {
+    comments.forEach(function(c) {
+      var isMgr = ['HoD','CC Manager','Manager'].includes(c.author_role);
+      html += '<div style="display:flex;gap:10px;margin-bottom:10px">';
+      html += '<div style="width:30px;height:30px;border-radius:50%;background:'+(isMgr?'#1A4A7A':'var(--border)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:'+(isMgr?'#fff':'var(--t2)')+'">'+UTILS.esc(c.author_name).charAt(0)+'</div>';
+      html += '<div style="flex:1;background:var(--bg2);border-radius:8px;padding:10px 12px;border:1px solid var(--border)">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+      html += '<span style="font-size:12px;font-weight:700;color:var(--t1)">'+UTILS.esc(c.author_name)+'</span>';
+      html += '<span style="font-size:10px;color:var(--t3)">'+UTILS.fdt(c.created_datetime)+'</span>';
+      html += '</div>';
+      html += '<div style="font-size:13px;color:var(--t2);line-height:1.5;white-space:pre-wrap">'+UTILS.esc(c.comment_text)+'</div>';
+      html += '</div></div>';
+    });
+  }
+
+  // Comment input — available to ALL users
+  html += '<div style="display:flex;gap:8px;margin-top:8px;align-items:flex-end">';
+  html += '<div style="width:30px;height:30px;border-radius:50%;background:#1A4A7A;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:#fff">'+UTILS.esc(S.display_name||S.full_name||'?').charAt(0)+'</div>';
+  html += '<div style="flex:1">';
+  html += '<textarea id="commentInput" rows="2" placeholder="Write a comment..." style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"></textarea>';
+  html += '</div>';
+  html += '<button onclick="submitComment()" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;height:38px">Send</button>';
+  html += '</div>';
+  html += '</div>';
+
 
   // ── Deadline Extension Section ──────────────────────────────────
   html += '<div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px">';
@@ -1033,6 +1075,38 @@ async function markAgent(agentId, agentName, checked) {
 }
 
 function logP(id){openCard(id);}
+
+function filterAgentRows(query) {
+  var q = (query || '').toLowerCase().trim();
+  var rows = document.querySelectorAll('#agentList [data-name]');
+  rows.forEach(function(row) {
+    row.style.display = (!q || row.dataset.name.includes(q)) ? '' : 'none';
+  });
+}
+
+async function submitComment() {
+  if (!currentTraining) return;
+  var input = document.getElementById('commentInput');
+  var text  = (input ? input.value : '').trim();
+  if (!text) { UTILS.toast('Please write a comment first', 'error'); return; }
+
+  var btn = document.querySelector('button[onclick="submitComment()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '...'; }
+
+  try {
+    await API.post('training_comment', {
+      training_id:  currentTraining.training_id,
+      comment_text: text
+    });
+    // Refresh card to show new comment
+    var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
+    currentTraining = fresh;
+    renderCard(fresh);
+  } catch(ex) {
+    UTILS.toast('Error: ' + ex.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+  }
+}
 
 function toggleExtForm(show) {
   var wrap = document.getElementById('extFormWrap');
