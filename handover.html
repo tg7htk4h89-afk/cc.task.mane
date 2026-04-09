@@ -153,6 +153,16 @@ var today=new Date(Date.now()+3*3600000).toISOString().slice(0,10);
 document.getElementById('hDate').value=today;
 
 var SHIFTS=['Morning','Evening'];
+
+function fmtSLA(v){
+  if(!v&&v!==0)return'-';
+  var s=String(v).trim();
+  if(s.indexOf('%')!==-1)return s;
+  var n=Number(s);
+  if(isNaN(n))return s;
+  if(n<=1)return Math.round(n*100)+'%';
+  return n+'%';
+}
 var SC={Morning:'sm',Evening:'se'};
 
 function fmtSLAclient(v){if(!v||v==='')return'';var s=String(v).trim();if(s.indexOf('%')!==-1)return s;var n=Number(s);if(isNaN(n))return s;if(n<=1)return Math.round(n*100)+'%';return n+'%';}
