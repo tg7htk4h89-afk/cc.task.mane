@@ -292,10 +292,9 @@ function showTeamPreview(){
   var tl = allUsers.find(function(u){return u.user_id===tlId;});
   if(!tl){document.getElementById('teamPreview').style.display='none';return;}
   var tlName = (tl.full_name || tl.name || '').trim();
+  var MGMT = ['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'];
   var members = allUsers.filter(function(u){
-    if(['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role)) return false;
-    // Match by TL user_id (most reliable) OR by name string
-    return u.team_leader_id === tlId || (u.team_leader||'').trim() === tlName;
+    return !MGMT.includes(u.role) && (u.team_leader||'').trim() === tlName;
   });
   var list = document.getElementById('teamPreviewList');
   list.innerHTML = members.length
@@ -453,9 +452,9 @@ async function submitTraining(){
     if(!tlId){showMsg('Please select a team leader','error');return;}
     var tl=allUsers.find(function(u){return u.user_id===tlId;});
     var tlName = (tl.full_name||tl.name||'').trim();
+    var MGMT = ['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'];
     targetAgents=allUsers.filter(function(u){
-      if(['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role)) return false;
-      return u.team_leader_id === tlId || (u.team_leader||'').trim() === tlName;
+      return !MGMT.includes(u.role) && (u.team_leader||'').trim() === tlName;
     }).map(function(u){return {user_id:u.user_id,name:u.full_name||u.name};});
     if(!targetAgents.length){showMsg('No agents found for this team','error');return;}
   } else if(currentTargetType==='department'){
