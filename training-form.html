@@ -272,7 +272,7 @@ var currentTargetType = 'individual';
 
 function populateSingleAgent(){
   var sel = document.getElementById('fSingleAgent');
-  var agents = allUsers.filter(function(u){return ['Agent','QA Agent'].includes(u.role);});
+  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager'].includes(u.role);});
   agents.forEach(function(u){
     var o=document.createElement('option');o.value=u.user_id;o.textContent=u.full_name+' ('+u.team+')';sel.appendChild(o);
   });
@@ -291,11 +291,10 @@ function showTeamPreview(){
   var tlId = document.getElementById('fTeamTL').value;
   var tl = allUsers.find(function(u){return u.user_id===tlId;});
   if(!tl){document.getElementById('teamPreview').style.display='none';return;}
-  var members = allUsers.filter(function(u){return u.team_leader===tl.full_name||u.reports_to===tl.full_name;});
-  if(!members.length){
-    // fallback: match by team name
-    members = allUsers.filter(function(u){return u.team===tl.team&&['Agent','QA Agent'].includes(u.role);});
-  }
+  var members = allUsers.filter(function(u){
+    return !['HoD','TL','CC Manager','Manager','QA Manager'].includes(u.role) &&
+           (u.team_leader===tl.full_name || u.reports_to===tl.full_name || u.team===tl.team);
+  });
   var list = document.getElementById('teamPreviewList');
   list.innerHTML = members.map(function(m){
     return '<span style="display:inline-flex;padding:3px 8px;background:#E8F1FB;color:#1365A0;border-radius:5px;font-size:11px;font-weight:600">'+m.full_name+'</span>';
@@ -304,17 +303,26 @@ function showTeamPreview(){
 }
 
 function updateDeptCount(){
-  var agents = allUsers.filter(function(u){return ['Agent','QA Agent'].includes(u.role);});
+  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager'].includes(u.role);});
   document.getElementById('deptCount').textContent = agents.length + ' agents across all teams will be assigned this training';
 }
 
+function getRoleGroup(role){
+  if(['HoD','CC Manager'].includes(role)) return 'CC Management';
+  if(['Manager','QA Manager'].includes(role)) return 'Management';
+  if(role==='TL') return 'Team Leaders';
+  if(role==='AL') return 'Assistant Leaders';
+  if(role==='QA'||role==='QA Agent') return 'Quality Assurance';
+  if(role==='BackOffice') return 'Back Office';
+  return 'Agents';
+}
 function buildDropdownItems(containerId, items, selectedArr, onToggle){
   var c = document.getElementById(containerId);
   if(!c) return;
   // Group by team
   var groups = {};
   items.forEach(function(u){
-    var g = u.team || 'Other';
+    var g = onToggle==='toggleTrainer' ? getRoleGroup(u.role) : (u.team || 'Other');
     if(!groups[g]) groups[g] = [];
     groups[g].push(u);
   });
@@ -334,12 +342,12 @@ function buildDropdownItems(containerId, items, selectedArr, onToggle){
 }
 
 function populateMultiAgents(){
-  var agents = allUsers.filter(function(u){return ['Agent','QA Agent'].includes(u.role);});
+  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager'].includes(u.role);});
   buildDropdownItems('agentsDDItems', agents, selectedAgents, 'toggleAgent');
 }
 
 function populateTrainers(){
-  var trainers = allUsers.filter(function(u){return ['TL','Manager','CC Manager','HoD','QA Manager'].includes(u.role);});
+  var trainers = allUsers.slice().sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
   buildDropdownItems('trainersDDItems', trainers, selectedTrainers, 'toggleTrainer');
 }
 
@@ -445,7 +453,7 @@ async function submitTraining(){
     targetAgents=allUsers.filter(function(u){return (u.team===tl.team||u.reports_to===tl.full_name)&&['Agent','QA Agent'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name};});
     if(!targetAgents.length){showMsg('No agents found for this team','error');return;}
   } else if(currentTargetType==='department'){
-    targetAgents=allUsers.filter(function(u){return ['Agent','QA Agent'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name};});
+    targetAgents=allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name};});
   }
 
   var btn=document.querySelector('button.btn-primary');
