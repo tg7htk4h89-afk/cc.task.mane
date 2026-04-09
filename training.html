@@ -1,511 +1,1253 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New Training Plan — CC Task Manager</title><!-- FIX-v5 -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training — CC Task Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:'IBM Plex Sans',system-ui,sans-serif}
-body{background:#F0F4F9;color:#0A1628}
-:root{--bg:#fff;--bg2:#F8FAFC;--t1:#0A1628;--t2:#4A5568;--t3:#8A9BB0;--border:#E4EAF3;--blue:#1877C5;--green:#0EA472;--red:#E5383B;--amber:#F4A523;--sidebar:#0D1B3E}
-.app-layout{display:flex;min-height:100vh}
-.sidebar{width:220px;background:var(--sidebar);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
-.sidebar-header{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.08)}
-.sidebar-logomark{width:36px;height:36px;background:linear-gradient(135deg,#1877C5,#0EA472);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;margin-bottom:10px}
-.sidebar-title{font-size:13px;font-weight:700;color:#fff}.sidebar-sub{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}
-.sidebar-nav{flex:1;padding:12px 10px}
-.nav-section{font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;padding:14px 8px 6px}
-.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.6);text-decoration:none;margin-bottom:2px;transition:all .15s}
-.nav-item:hover{background:rgba(255,255,255,0.08);color:#fff}.nav-item.active{background:#1877C5;color:#fff}
-.sidebar-footer{padding:12px 10px;border-top:1px solid rgba(255,255,255,0.08)}
-.user-chip{display:flex;align-items:center;gap:8px}
-.user-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1877C5,#0EA472);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
-.user-name{font-size:11px;font-weight:600;color:#fff}.user-role{font-size:9px;color:rgba(255,255,255,0.4)}
-.btn-logout{background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);padding:4px;margin-left:auto}
-.main-content{margin-left:220px;flex:1;display:flex;flex-direction:column}
-.top-bar{height:56px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:50}
-.breadcrumb{font-size:13px;font-weight:600;color:var(--t1)}
-.page-content{padding:24px;flex:1;max-width:860px}
-.page-title{font-size:20px;font-weight:800;color:var(--t1);letter-spacing:-0.5px;margin-bottom:4px}
-.page-sub{font-size:12px;color:var(--t3);margin-bottom:24px}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;text-decoration:none}
-.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#1565A8}
-.btn-secondary{background:var(--bg2);color:var(--t2);border:1px solid var(--border)}
-.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px}
-.card-title{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-.form-full{grid-column:1/-1}
-.field{display:flex;flex-direction:column;gap:6px}
-.field label{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px}
-.field input,.field select,.field textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--t1);background:var(--bg2);outline:none;font-family:inherit;transition:border-color .15s}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);background:#fff}
-.field textarea{resize:vertical;min-height:80px}
-.req{color:var(--red)}
-/* Multi-select pill UI */
-.multi-select-wrap{position:relative}
-.pill-container{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);min-height:42px;cursor:pointer;transition:border-color .15s}
-.pill-container:focus-within,.pill-container.open{border-color:var(--blue);background:#fff}
-.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#E8F1FB;color:#1365A0;border-radius:5px;font-size:11px;font-weight:600}
-.pill button{background:none;border:none;cursor:pointer;color:#1365A0;padding:0;font-size:13px;line-height:1;display:flex;align-items:center}
-.pill-placeholder{font-size:13px;color:var(--t3);padding:2px 2px}
-.dropdown-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--blue);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.1);z-index:200;max-height:260px;overflow-y:auto}
-.dropdown-search{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
-.dropdown-search input{border:none;outline:none;font-size:13px;color:var(--t1);background:none;flex:1;font-family:inherit}
-.dropdown-group-label{padding:8px 12px 4px;font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;background:var(--bg2)}
-.dropdown-option{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;font-size:13px;color:var(--t1);transition:background .1s}
-.dropdown-option:hover{background:#F0F6FE}
-.dropdown-option.selected{background:#E8F1FB;color:#1365A0}
-.dropdown-option .chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.dropdown-option.selected .chk{background:var(--blue);border-color:var(--blue)}
-.chk-mark{display:none;color:#fff;font-size:10px;font-weight:700}
-.dropdown-option.selected .chk-mark{display:block}
-.target-tabs{display:flex;gap:0;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px}
-.target-tab{flex:1;padding:8px 6px;font-size:11px;font-weight:600;text-align:center;cursor:pointer;color:var(--t3);background:#fff;border:none;font-family:inherit;transition:all .15s}
-.target-tab.active{background:var(--blue);color:#fff}
-.tag{display:inline-flex;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
-.tag-blue{background:#E8F1FB;color:#1365A0}
+/* ═══════════════════════════════════════════════
+   Contact Center Task Manager — Design System v2
+   Clean Enterprise | Deep Navy + Precision Blue
+═══════════════════════════════════════════════ */
+
+/* ── Design Tokens ─────────────────────────── */
+:root {
+  /* Brand */
+  --navy:        #060F24;
+  --navy-2:      #0D1B3E;
+  --navy-3:      #142556;
+  --blue:        #1877C5;
+  --blue-dim:    rgba(24,119,197,0.12);
+  --blue-light:  #E8F1FB;
+
+  /* Semantic */
+  --green:       #0EA472;
+  --green-dim:   #E6F7F2;
+  --red:         #E5383B;
+  --red-dim:     #FEE8E8;
+  --amber:       #F4A523;
+  --amber-dim:   #FEF5E7;
+  --purple:      #7B61FF;
+  --purple-dim:  #F0EEFF;
+
+  /* Surface */
+  --bg:          #F0F4F9;
+  --card:        #FFFFFF;
+  --card-hover:  #FAFCFF;
+  --border:      #E4EAF3;
+  --border-2:    #D0D9E8;
+
+  /* Text */
+  --t1:          #0A1628;
+  --t2:          #4A5568;
+  --t3:          #8A9BB0;
+  --t4:          #B8C5D4;
+
+  /* Sidebar */
+  --sb:          var(--navy);
+  --sb-text:     rgba(255,255,255,0.5);
+  --sb-active-bg:rgba(24,119,197,0.18);
+  --sb-active:   #5BA8E8;
+  --sb-width:    224px;
+  --topbar-h:    52px;
+
+  /* Type */
+  --font: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  /* Radius */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+
+  /* Shadow */
+  --sh-sm: 0 1px 3px rgba(10,22,40,0.06), 0 1px 2px rgba(10,22,40,0.04);
+  --sh-md: 0 4px 12px rgba(10,22,40,0.08), 0 1px 3px rgba(10,22,40,0.05);
+  --sh-lg: 0 12px 32px rgba(10,22,40,0.12), 0 4px 8px rgba(10,22,40,0.06);
+
+  /* Transitions */
+  --ease: 150ms ease;
+}
+
+/* ── Reset ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 13px; scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--t1);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font-family: var(--font); cursor: pointer; }
+input, select, textarea { font-family: var(--font); }
+
+/* ── App Layout ─────────────────────────────── */
+.app-layout { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ────────────────────────────────── */
+.sidebar {
+  width: var(--sb-width);
+  background: var(--sb);
+  display: flex; flex-direction: column;
+  position: fixed; left: 0; top: 0; bottom: 0;
+  z-index: 200;
+  overflow-y: auto;
+  transition: transform var(--ease);
+}
+.sidebar-header {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.sidebar-logomark {
+  width: 34px; height: 34px;
+  background: var(--blue); border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; color: #fff;
+  letter-spacing: -0.5px; margin-bottom: 10px;
+}
+.sidebar-title { color: #fff; font-size: 14px; font-weight: 700; letter-spacing: -0.3px; }
+.sidebar-sub   { color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+.sidebar-nav   { padding: 10px 0; flex: 1; }
+.nav-section {
+  padding: 10px 18px 4px;
+  font-size: 9px; font-weight: 700;
+  color: rgba(255,255,255,0.22);
+  letter-spacing: 1.2px; text-transform: uppercase;
+  margin-top: 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; margin: 1px 8px;
+  border-radius: var(--r-md);
+  color: var(--sb-text); font-size: 12px; font-weight: 500;
+  transition: all var(--ease); cursor: pointer; text-decoration: none;
+}
+.nav-item svg { width: 16px; height: 16px; stroke-width: 2; flex-shrink: 0; }
+.nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); text-decoration: none; }
+.nav-item.active { background: var(--sb-active-bg); color: var(--sb-active); }
+.nav-item .nav-badge {
+  margin-left: auto;
+  background: var(--red); color: #fff;
+  font-size: 9px; font-weight: 700;
+  border-radius: 5px; padding: 1px 5px;
+  line-height: 1.4;
+}
+.sidebar-footer {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.user-chip { display: flex; align-items: center; gap: 10px; }
+.user-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--blue); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.user-name  { color: #fff; font-size: 12px; font-weight: 600; }
+.user-role  { color: rgba(255,255,255,0.4); font-size: 10px; }
+.btn-logout {
+  margin-left: auto; background: none; border: none;
+  color: rgba(255,255,255,0.3); padding: 4px;
+  border-radius: var(--r-sm); transition: color var(--ease);
+  display: flex; align-items: center;
+}
+.btn-logout:hover { color: var(--red); }
+.btn-logout svg { width: 14px; height: 14px; }
+.sidebar-toggle {
+  display: none; background: none; border: none;
+  padding: 6px; color: var(--t2);
+}
+.sidebar-toggle svg { width: 20px; height: 20px; }
+
+/* ── Main Content ───────────────────────────── */
+.main-content { margin-left: var(--sb-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── Top Bar ────────────────────────────────── */
+.top-bar {
+  height: var(--topbar-h);
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex; align-items: center; gap: 14px;
+  position: sticky; top: 0; z-index: 100;
+}
+.breadcrumb { font-size: 13px; font-weight: 600; color: var(--t1); flex: 1; }
+.breadcrumb span { color: var(--t3); font-weight: 400; }
+.search-bar {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: 7px 12px;
+  display: flex; align-items: center; gap: 8px;
+  transition: border-color var(--ease);
+}
+.search-bar:focus-within { border-color: var(--blue); }
+.search-bar svg { width: 14px; height: 14px; color: var(--t3); stroke: var(--t3); flex-shrink: 0; }
+.search-bar input {
+  background: none; border: none; outline: none;
+  font-size: 12px; color: var(--t1); width: 200px;
+}
+.search-bar input::placeholder { color: var(--t4); }
+.notif-bell {
+  width: 32px; height: 32px; border-radius: var(--r-md);
+  background: var(--bg); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; transition: background var(--ease);
+}
+.notif-bell:hover { background: var(--blue-light); border-color: var(--blue); }
+.notif-bell svg { width: 15px; height: 15px; stroke: var(--t2); }
+.notif-badge {
+  position: absolute; top: 4px; right: 4px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--red); border: 1.5px solid var(--card);
+}
+.notif-badge.hidden { display: none; }
+.date-chip {
+  font-size: 11px; color: var(--t3); font-weight: 500;
+  white-space: nowrap; display: none;
+}
+
+/* ── Page Content ───────────────────────────── */
+.page-content { padding: 24px; flex: 1; }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.page-title  { font-size: 20px; font-weight: 800; color: var(--t1); letter-spacing: -0.5px; line-height: 1.2; }
+.page-sub    { font-size: 12px; color: var(--t3); margin-top: 3px; }
+.page-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Buttons ────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--r-md);
+  font-size: 12px; font-weight: 600; font-family: var(--font);
+  border: none; cursor: pointer; transition: all var(--ease);
+  white-space: nowrap; line-height: 1;
+}
+.btn svg { width: 13px; height: 13px; }
+.btn-primary  { background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(24,119,197,0.25); }
+.btn-primary:hover  { background: #1565A8; box-shadow: 0 4px 14px rgba(24,119,197,0.35); }
+.btn-secondary { background: var(--card); color: var(--t1); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--bg); border-color: var(--border-2); }
+.btn-danger   { background: var(--red); color: #fff; }
+.btn-danger:hover { background: #C12D2F; }
+.btn-ghost    { background: none; color: var(--t2); border: none; padding: 6px 10px; }
+.btn-ghost:hover { background: var(--bg); color: var(--t1); }
+.btn-sm       { padding: 5px 12px; font-size: 11px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── KPI Cards ──────────────────────────────── */
+.kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+.kpi-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 16px;
+  box-shadow: var(--sh-sm); position: relative; overflow: hidden;
+  transition: box-shadow var(--ease), transform var(--ease);
+}
+.kpi-card:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
+.kpi-card::after {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+}
+.kpi-blue::after   { background: var(--blue); }
+.kpi-red::after    { background: var(--red); }
+.kpi-green::after  { background: var(--green); }
+.kpi-amber::after  { background: var(--amber); }
+.kpi-purple::after { background: var(--purple); }
+.kpi-icon {
+  width: 34px; height: 34px; border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+}
+.kpi-icon svg { width: 16px; height: 16px; }
+.kpi-icon.blue   { background: var(--blue-light); }
+.kpi-icon.blue svg { stroke: var(--blue); }
+.kpi-icon.red    { background: var(--red-dim); }
+.kpi-icon.red svg { stroke: var(--red); }
+.kpi-icon.green  { background: var(--green-dim); }
+.kpi-icon.green svg { stroke: var(--green); }
+.kpi-icon.amber  { background: var(--amber-dim); }
+.kpi-icon.amber svg { stroke: var(--amber); }
+.kpi-icon.purple { background: var(--purple-dim); }
+.kpi-icon.purple svg { stroke: var(--purple); }
+.kpi-value { font-size: 24px; font-weight: 800; color: var(--t1); line-height: 1; letter-spacing: -0.5px; }
+.kpi-value.red    { color: var(--red); }
+.kpi-value.green  { color: var(--green); }
+.kpi-label { font-size: 11px; color: var(--t2); margin-top: 5px; font-weight: 500; }
+.kpi-delta { font-size: 10px; font-weight: 600; margin-top: 6px; display: flex; align-items: center; gap: 3px; }
+.kpi-delta.up  { color: var(--green); }
+.kpi-delta.dn  { color: var(--red); }
+.kpi-delta.neutral { color: var(--t3); }
+
+/* ── Chart Cards ────────────────────────────── */
+.chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 20px; }
+.chart-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 18px; box-shadow: var(--sh-sm);
+}
+.chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.chart-title  { font-size: 13px; font-weight: 700; color: var(--t1); }
+.chart-sub    { font-size: 11px; color: var(--t3); }
+.chart-wrap   { position: relative; height: 200px; }
+
+/* ── Panel ──────────────────────────────────── */
+.panel {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 18px; box-shadow: var(--sh-sm);
+  overflow: hidden;
+}
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.panel-title  { font-size: 13px; font-weight: 700; color: var(--t1); }
+.panel-link   { font-size: 11px; font-weight: 600; color: var(--blue); cursor: pointer; }
+.panel-link:hover { text-decoration: underline; }
+
+/* ── Bottom grid ────────────────────────────── */
+.bottom-grid { display: grid; grid-template-columns: 1fr 1fr 300px; gap: 12px; }
+
+/* ── Task list rows ─────────────────────────── */
+.task-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background var(--ease);
+  border-radius: var(--r-sm); margin: 0 -4px; padding-left: 4px;
+}
+.task-row:last-child { border-bottom: none; }
+.task-row:hover .task-title { color: var(--blue); }
+.priority-line { width: 3px; height: 34px; border-radius: 2px; flex-shrink: 0; }
+.pl-critical { background: var(--red); }
+.pl-high     { background: var(--amber); }
+.pl-medium   { background: var(--blue); }
+.pl-low      { background: var(--green); }
+.task-info   { flex: 1; min-width: 0; }
+.task-title  { font-size: 12px; font-weight: 600; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color var(--ease); }
+.task-meta   { font-size: 10px; color: var(--t3); margin-top: 2px; }
+.task-av-sm {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; flex-shrink: 0;
+}
+.status-pill {
+  font-size: 10px; font-weight: 600;
+  padding: 3px 8px; border-radius: 5px; white-space: nowrap; flex-shrink: 0;
+}
+.sp-inprogress { background: var(--blue-light);  color: #1060A0; }
+.sp-overdue    { background: var(--red-dim);      color: #A32020; }
+.sp-completed  { background: var(--green-dim);    color: #0A6E4A; }
+.sp-new        { background: var(--purple-dim);   color: #4E38A0; }
+.sp-pending    { background: var(--amber-dim);    color: #8A5A0A; }
+.sp-escalated  { background: #F3E8FF;              color: #5B21B6; }
+
+/* ── Notification items ─────────────────────── */
+.notif-item {
+  display: flex; gap: 10px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-severity { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.ns-critical { background: var(--red); }
+.ns-warning  { background: var(--amber); }
+.ns-info     { background: var(--green); }
+.notif-title { font-size: 11px; font-weight: 600; color: var(--t1); }
+.notif-body  { font-size: 10px; color: var(--t2); margin-top: 2px; line-height: 1.4; }
+.notif-time  { font-size: 9px; color: var(--t3); margin-top: 3px; font-weight: 500; }
+
+/* ── Score panel ────────────────────────────── */
+.score-ring-wrap { position: relative; width: 96px; height: 96px; margin: 4px auto 12px; }
+.score-ring-wrap canvas { width: 96px !important; height: 96px !important; }
+.score-center-val {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 22px; font-weight: 800; color: var(--t1); text-align: center; line-height: 1;
+}
+.score-center-lbl { font-size: 9px; color: var(--t3); font-weight: 500; margin-top: 2px; }
+.score-breakdown .sr {
+  display: flex; align-items: center;
+  padding: 5px 0; border-bottom: 1px solid var(--border);
+}
+.score-breakdown .sr:last-child { border-bottom: none; }
+.sr-lbl { font-size: 10px; color: var(--t2); min-width: 110px; }
+.sr-bar { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin: 0 8px; }
+.sr-fill { height: 100%; border-radius: 2px; background: var(--blue); }
+.sr-val { font-size: 10px; font-weight: 700; color: var(--t1); min-width: 24px; text-align: right; }
+
+/* ── KANBAN BOARD ───────────────────────────── */
+.kanban-wrap { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 12px; align-items: flex-start; }
+.kanban-wrap::-webkit-scrollbar { height: 6px; }
+.kanban-wrap::-webkit-scrollbar-track { background: var(--bg); border-radius: 3px; }
+.kanban-wrap::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
+
+.kanban-col { min-width: 272px; max-width: 272px; display: flex; flex-direction: column; gap: 8px; }
+.kanban-col-header {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 12px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 3px solid var(--border);
+}
+.kcol-new        .kanban-col-header { border-top-color: #7B61FF; }
+.kcol-inprogress .kanban-col-header { border-top-color: var(--blue); }
+.kcol-pending    .kanban-col-header { border-top-color: var(--amber); }
+.kcol-overdue    .kanban-col-header { border-top-color: var(--red); }
+.kcol-escalated  .kanban-col-header { border-top-color: #9B59B6; }
+.kcol-completed  .kanban-col-header { border-top-color: var(--green); }
+.kcol-title { font-size: 12px; font-weight: 700; color: var(--t1); display: flex; align-items: center; gap: 8px; }
+.kcol-dot { width: 8px; height: 8px; border-radius: 50%; }
+.kcol-count {
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--t2); font-size: 11px; font-weight: 600;
+  border-radius: 6px; padding: 2px 8px;
+}
+
+/* ── Task Card (Kanban) ─────────────────────── */
+.k-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 14px;
+  cursor: pointer; transition: all var(--ease);
+  box-shadow: var(--sh-sm); width: 100%; font-family: var(--font); text-align: left;
+}
+.k-card:hover { box-shadow: var(--sh-md); border-color: var(--border-2); transform: translateY(-1px); }
+.k-card.is-overdue { border-left: 3px solid var(--red); border-radius: 0 var(--r-lg) var(--r-lg) 0; }
+.k-card.is-done    { opacity: 0.75; }
+.k-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+.k-card-title { font-size: 12px; font-weight: 700; color: var(--t1); line-height: 1.4; flex: 1; }
+.k-card-id { font-size: 9px; color: var(--t3); font-weight: 600; margin-bottom: 6px; font-family: var(--mono); }
+.k-card-desc { font-size: 11px; color: var(--t2); line-height: 1.5; margin-bottom: 10px; }
+.k-card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+.k-tag {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: 5px;
+}
+.ktag-c  { background: #F0EEFF; color: #4E38A0; }
+.ktag-q  { background: var(--blue-light); color: #0F5EA0; }
+.ktag-o  { background: var(--green-dim); color: #0A6030; }
+.ktag-s  { background: var(--amber-dim); color: #7A4800; }
+.ktag-t  { background: #FDE8F3; color: #8B1A5A; }
+.ktag-h  { background: #E0F2FE; color: #065080; }
+.ktag-g  { background: var(--bg); color: var(--t2); }
+.ktag-e  { background: var(--red-dim); color: #8A1818; }
+.ktag-r  { background: var(--purple-dim); color: #4E38A0; }
+.ktag-m  { background: var(--green-dim); color: #0A5030; }
+.k-card-footer { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--border); padding-top: 8px; }
+.k-priority { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.kp-c{background:var(--red)} .kp-h{background:var(--amber)} .kp-m{background:var(--blue)} .kp-l{background:var(--green)}
+.k-progress { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.k-prog-fill { height: 100%; border-radius: 2px; background: var(--blue); }
+.k-prog-fill.pw { background: var(--amber); }
+.k-prog-fill.pd { background: var(--red); }
+.k-prog-fill.pg { background: var(--green); }
+.k-time { font-size: 10px; font-weight: 600; white-space: nowrap; }
+.kt-ok     { color: var(--green); }
+.kt-warn   { color: var(--amber); }
+.kt-danger { color: var(--red); }
+.k-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; flex-shrink: 0;
+}
+.k-plus-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--bg); border: 1.5px dashed var(--border-2);
+  color: var(--t3); font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 2px auto 0; cursor: pointer; transition: all var(--ease);
+}
+.k-plus-btn:hover { background: var(--blue-light); border-color: var(--blue); color: var(--blue); }
+.k-empty {
+  background: var(--bg); border: 1.5px dashed var(--border-2);
+  border-radius: var(--r-lg); padding: 18px;
+  text-align: center; color: var(--t3); font-size: 11px; font-weight: 500;
+}
+
+/* ── Forms ──────────────────────────────────── */
+.form-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; box-shadow: var(--sh-sm); margin-bottom: 14px; }
+.form-section-title { font-size: 13px; font-weight: 700; color: var(--t1); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 11px; font-weight: 600; color: var(--t2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%; padding: 9px 12px;
+  border: 1px solid var(--border); border-radius: var(--r-md);
+  font-size: 13px; color: var(--t1); background: var(--card);
+  transition: border-color var(--ease), box-shadow var(--ease); outline: none;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(24,119,197,0.12);
+}
+.form-group textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.form-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.req { color: var(--red); }
+
+/* ── Tables ─────────────────────────────────── */
+.table-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-sm); overflow: hidden; }
+.table-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+.table-filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-select {
+  padding: 7px 12px; border: 1px solid var(--border);
+  border-radius: var(--r-md); font-size: 12px; font-family: var(--font);
+  background: var(--bg); color: var(--t1); outline: none; cursor: pointer;
+  transition: border-color var(--ease);
+}
+.filter-select:focus { border-color: var(--blue); }
+.table-wrap { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  text-align: left; padding: 10px 16px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--t3);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg); white-space: nowrap;
+}
+.data-table td { padding: 11px 16px; font-size: 12px; border-bottom: 1px solid var(--border); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #FAFCFF; }
+.data-table tr.row-overdue td { background: #FFF5F5; }
+
+/* ── Badges ─────────────────────────────────── */
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 5px; font-size: 10px; font-weight: 600; letter-spacing: 0.2px; white-space: nowrap; }
+.badge-blue    { background: var(--blue-light);  color: #0F5EA0; }
+.badge-indigo  { background: #E8E6FF; color: #3D2DB0; }
+.badge-yellow  { background: #FFFBEB; color: #856C00; }
+.badge-green   { background: var(--green-dim);   color: #0A6030; }
+.badge-red     { background: var(--red-dim);     color: #8A1818; }
+.badge-gray    { background: var(--bg);           color: var(--t2); }
+.badge-purple  { background: var(--purple-dim);  color: #4E38A0; }
+.badge-orange  { background: var(--amber-dim);   color: #7A4800; }
+
+/* ── Progress ───────────────────────────────── */
+.progress-wrap { display: flex; align-items: center; gap: 8px; }
+.progress-bar  { flex: 1; background: var(--border); border-radius: 3px; height: 5px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; background: var(--blue); transition: width 0.5s ease; }
+.progress-fill.success { background: var(--green); }
+.progress-fill.warning { background: var(--amber); }
+.progress-fill.danger  { background: var(--red); }
+.progress-label { font-size: 11px; color: var(--t2); white-space: nowrap; min-width: 36px; text-align: right; }
+
+/* ── Handover cards ─────────────────────────── */
+.handover-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.ho-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 16px; cursor: pointer;
+  box-shadow: var(--sh-sm); transition: all var(--ease);
+}
+.ho-card:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
+.ho-card.missing { border-color: var(--red); background: #FFFAFB; }
+.ho-card.missing::before { content: 'MISSING'; font-size: 9px; font-weight: 700; color: var(--red); letter-spacing: 1px; margin-bottom: 8px; display: block; }
+.shift-chip { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 5px; display: inline-flex; align-items: center; }
+.shift-morning   { background: #FEF9C3; color: #7A5F00; }
+.shift-afternoon { background: var(--amber-dim); color: #7A4800; }
+.shift-evening   { background: var(--purple-dim); color: #4E38A0; }
+.shift-night     { background: #F0F0F5; color: #4A4A6A; }
+.quality-score { font-size: 22px; font-weight: 800; }
+
+/* ── Training cards ─────────────────────────── */
+.training-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+.trn-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 16px; cursor: pointer;
+  box-shadow: var(--sh-sm); transition: all var(--ease);
+}
+.trn-card:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
+.trn-card.delayed { border-left: 3px solid var(--red); border-radius: 0 var(--r-lg) var(--r-lg) 0; }
+.trend-chip { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 5px; }
+.trend-ahead   { background: var(--green-dim);  color: #0A6030; }
+.trend-ontrack { background: var(--blue-light); color: #0F5EA0; }
+.trend-behind  { background: var(--amber-dim);  color: #7A4800; }
+.trend-atrisk  { background: var(--red-dim);    color: #8A1818; }
+
+/* ── Sales ranks ────────────────────────────── */
+.rank-list { display: flex; flex-direction: column; gap: 8px; }
+.rank-row {
+  display: grid; grid-template-columns: 24px 20px 1fr auto auto;
+  align-items: center; gap: 10px;
+  padding: 11px 14px; background: var(--card);
+  border: 1px solid var(--border); border-radius: var(--r-md);
+  box-shadow: var(--sh-sm); transition: all var(--ease);
+}
+.rank-row:hover { box-shadow: var(--sh-md); }
+.rank-row.r1 { border-left: 3px solid #F4A523; background: #FFFCF0; border-radius: 0 var(--r-md) var(--r-md) 0; }
+.rank-row.r2 { border-left: 3px solid #9DAEC2; border-radius: 0 var(--r-md) var(--r-md) 0; }
+.rank-row.r3 { border-left: 3px solid #CD7C2F; background: #FFF9F5; border-radius: 0 var(--r-md) var(--r-md) 0; }
+.rank-pos  { font-size: 12px; font-weight: 800; color: var(--t3); text-align: center; }
+.rank-medal { font-size: 14px; text-align: center; }
+.rank-name { font-size: 12px; font-weight: 600; color: var(--t1); }
+.rank-team { font-size: 10px; color: var(--t3); }
+.rank-amount { font-size: 12px; font-weight: 700; text-align: right; white-space: nowrap; }
+.rank-pct  { font-size: 11px; font-weight: 700; text-align: right; white-space: nowrap; }
+
+/* ── Toast ──────────────────────────────────── */
+.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--navy-2); color: #fff;
+  border-radius: var(--r-lg); padding: 12px 16px;
+  box-shadow: var(--sh-lg); min-width: 260px; max-width: 380px;
+  border-left: 3px solid var(--blue);
+  animation: slideUp 0.3s ease; opacity: 1; transition: opacity 0.3s;
+}
+.toast svg { width: 15px; height: 15px; flex-shrink: 0; }
+.toast span { font-size: 12px; flex: 1; }
+.toast.success { border-left-color: var(--green); }
+.toast.success svg { stroke: var(--green); }
+.toast.error   { border-left-color: var(--red); }
+.toast.error svg { stroke: var(--red); }
+.toast.warning { border-left-color: var(--amber); }
+.toast.warning svg { stroke: var(--amber); }
+@keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* ── Modal ──────────────────────────────────── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(6,15,36,0.55); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(3px); animation: fadeIn 0.2s ease; }
+.modal { background: var(--card); border-radius: var(--r-xl); box-shadow: var(--sh-lg); width: 100%; max-width: 520px; max-height: 90vh; display: flex; flex-direction: column; border: 1px solid var(--border); }
+.modal-header { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title  { font-size: 15px; font-weight: 700; color: var(--t1); }
+.modal-close  { background: var(--bg); border: none; width: 28px; height: 28px; border-radius: var(--r-sm); cursor: pointer; font-size: 16px; color: var(--t2); display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { background: var(--border); }
+.modal-body   { padding: 20px 22px; overflow-y: auto; }
+.modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── Skeleton loader ────────────────────────── */
+.skeleton-wrap { padding: 14px; }
+.skeleton-row { height: 48px; background: linear-gradient(90deg, var(--bg) 25%, var(--border) 50%, var(--bg) 75%); background-size: 200% 100%; animation: shimmer 1.6s infinite; border-radius: var(--r-md); margin-bottom: 10px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ── Empty state ────────────────────────────── */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 20px; color: var(--t3); text-align: center; gap: 12px; }
+.empty-state svg { width: 40px; height: 40px; stroke: var(--t4); }
+.empty-state-title { font-size: 14px; font-weight: 600; color: var(--t2); }
+.empty-state-sub   { font-size: 12px; }
+
+/* ── Notification drawer ────────────────────── */
+.notif-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 340px;
+  background: var(--card); box-shadow: var(--sh-lg);
+  z-index: 500; display: flex; flex-direction: column;
+  border-left: 1px solid var(--border);
+  transform: translateX(0); transition: transform var(--ease);
+}
+.notif-drawer.hidden { transform: translateX(100%); }
+.notif-drawer-header { padding: 16px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.notif-drawer-header h3 { font-size: 14px; font-weight: 700; flex: 1; color: var(--t1); }
+.notif-drawer-header button { background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 4px 10px; font-size: 11px; color: var(--t2); cursor: pointer; font-family: var(--font); }
+.notif-list { flex: 1; overflow-y: auto; }
+.notif-list .notif-item { padding: 12px 18px; cursor: pointer; transition: background var(--ease); }
+.notif-list .notif-item.unread { background: #F5F9FF; }
+.notif-list .notif-item:hover { background: var(--bg); }
+.notif-unread-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); flex-shrink: 0; margin-top: 5px; }
+
+/* ── Login page ─────────────────────────────── */
+.login-page { background: var(--navy); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.login-card { background: var(--card); border-radius: var(--r-xl); padding: 40px; width: 400px; max-width: 100%; box-shadow: var(--sh-lg); }
+.login-logo { margin-bottom: 32px; }
+.login-logomark { width: 48px; height: 48px; background: var(--blue); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; color: #fff; letter-spacing: -0.5px; margin-bottom: 14px; }
+.login-heading { font-size: 20px; font-weight: 800; color: var(--t1); letter-spacing: -0.5px; }
+.login-sub { font-size: 12px; color: var(--t3); margin-top: 4px; }
+.form-error { background: var(--red-dim); color: #8A1818; border-radius: var(--r-md); padding: 10px 12px; font-size: 12px; margin-top: 10px; }
+.login-footer { text-align: center; margin-top: 20px; font-size: 11px; color: var(--t3); }
+
+/* ── Utility ────────────────────────────────── */
+.hidden { display: none !important; }
+.mono   { font-family: var(--mono); }
+.t-muted   { color: var(--t3); }
+.t-danger  { color: var(--red); }
+.t-success { color: var(--green); }
+.t-warning { color: var(--amber); }
+.t-blue    { color: var(--blue); }
+.fw-700    { font-weight: 700; }
+.flex      { display: flex; }
+.flex-center  { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.gap-2 { gap: 8px; } .gap-3 { gap: 12px; } .gap-4 { gap: 16px; }
+.mt-4 { margin-top: 16px; } .mb-4 { margin-bottom: 16px; }
+.mb-5 { margin-bottom: 20px; } .p-4 { padding: 16px; }
+
+/* ── Responsive ─────────────────────────────── */
+@media (max-width: 1280px) {
+  .kpi-grid  { grid-template-columns: repeat(3, 1fr); }
+  .bottom-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 1024px) {
+  .chart-grid  { grid-template-columns: 1fr; }
+  .bottom-grid { grid-template-columns: 1fr; }
+  .kpi-grid    { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-toggle { display: flex; align-items: center; }
+  .main-content { margin-left: 0; }
+  .top-bar { padding: 0 16px; }
+  .search-bar { display: none; }
+  .page-content { padding: 16px; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-row, .form-row-3 { grid-template-columns: 1fr; }
+  .kanban-wrap { padding-bottom: 70px; }
+  .page-content { padding-bottom: 80px; }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .kpi-value { font-size: 20px; }
+}
+
+
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+
 </style>
 </head>
-<body class="app-layout">
-<nav class="sidebar">
-  <div class="sidebar-header"><div class="sidebar-logomark">KIB</div><div class="sidebar-title">CC Task Manager</div><div class="sidebar-sub">Kuwait International Bank</div></div>
-  <div class="sidebar-nav">
-    <div class="nav-section">Main</div>
-    <a href="/cc.task.mane/index.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</a>
-    <a href="/cc.task.mane/tasks.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Tasks</a>
-    <a href="/cc.task.mane/handover.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Handover</a>
-    <a href="/cc.task.mane/training.html" class="nav-item active"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Training</a>
-    <a href="/cc.task.mane/sales.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>Sales</a>
-    <div class="nav-section">System</div>
-    <a href="/cc.task.mane/notifications.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</a>
-    <a href="/cc.task.mane/settings.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Settings</a>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logomark">KIB</div>
+    <div class="sidebar-title">CC Task Manager</div>
+    <div class="sidebar-sub">Kuwait International Bank</div>
   </div>
-  <div class="sidebar-footer"><div class="user-chip"><div class="user-avatar" id="avatarInitials">?</div><div><div class="user-name" id="sidebarName">...</div><div class="user-role" id="sidebarRole"></div></div><button class="btn-logout" onclick="AUTH.logout()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button></div></div>
+  <div class="sidebar-nav"><div class='nav-section'>Main</div><a href="/cc.task.mane/index.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</a><a href="/cc.task.mane/tasks.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Tasks</a><a href="/cc.task.mane/handover.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Handover</a><a href="/cc.task.mane/training.html" class="nav-item active"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Training</a><a href="/cc.task.mane/sales.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>Sales</a><div class='nav-section'>System</div><a href="/cc.task.mane/notifications.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</a><a href="/cc.task.mane/settings.html" class="nav-item" data-roles="HoD"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Settings</a></div>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar" id="avatarInitials">?</div>
+      <div><div class="user-name" id="sidebarName">...</div><div class="user-role" id="sidebarRole"></div></div>
+      <button class="btn-logout" onclick="AUTH.logout()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+    </div>
+  </div>
 </nav>
-
 <main class="main-content">
-  <header class="top-bar"><div class="breadcrumb">New Training Plan</div></header>
-  <div class="page-content">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <div><h1 class="page-title">Create Training Plan <span style="font-size:10px;background:#0EA472;color:#fff;padding:2px 8px;border-radius:10px;font-weight:600;vertical-align:middle">v5</span></h1><p class="page-sub">Assign coaching or training to agents, teams, or the whole department</p></div>
-      <a href="/cc.task.mane/training.html" class="btn btn-secondary">Back</a>
+<header class="top-bar">
+  <button class="sidebar-toggle" id="sidebarToggle"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <div class="breadcrumb">Training</div>
+  <div class="search-bar"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" id="srch" placeholder="Search..."></div>
+  <button class="notif-bell" id="notifBell" onclick="loadBell()"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><div class="notif-badge hidden" id="notifBadge"></div></button>
+</header>
+<div class="page-content">
+  <div class="page-header">
+    <div><h1 class="page-title">Coaching & Training</h1></div>
+    <div class="page-actions">
+      <select class="filter-select" id="tSt"><option value="">All Statuses</option><option>InProgress</option><option>Delayed</option><option>Completed</option><option>Assigned</option></select>
+      <a href="/cc.task.mane/training-form.html" class="btn btn-primary" data-roles="HoD,Manager">New Plan</a>
     </div>
-
-    <!-- Training Info -->
-    <div class="card">
-      <div class="card-title">Training Information</div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Title <span class="req">*</span></label>
-          <input type="text" id="fTitle" placeholder="e.g. Transfer to Dirwaza Product Knowledge">
-        </div>
-        <div class="field">
-          <label>Category <span class="req">*</span></label>
-          <select id="fCat">
-            <option value="">Select category...</option>
-            <option>Product Knowledge</option>
-            <option>Compliance</option>
-            <option>Soft Skills</option>
-            <option>Process</option>
-            <option>System Training</option>
-            <option>Sales Technique</option>
-            <option>Quality Assurance</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Priority</label>
-          <select id="fPri">
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-            <option value="Critical">Critical</option>
-            <option value="Low">Low</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Deadline <span class="req">*</span></label>
-          <input type="date" id="fDeadline">
-        </div>
-        <div class="field form-full">
-          <label>Description</label>
-          <textarea id="fDesc" placeholder="Training objectives, materials, what agents should know after completion..."></textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- Target Selection -->
-    <div class="card">
-      <div class="card-title">Who Receives This Training</div>
-
-      <!-- Target type tabs -->
-      <div class="target-tabs">
-        <button class="target-tab active" onclick="setTargetType('individual')" id="tab-individual">Individual</button>
-        <button class="target-tab" onclick="setTargetType('multiple')" id="tab-multiple">Multiple Agents</button>
-        <button class="target-tab" onclick="setTargetType('team')" id="tab-team">Team</button>
-        <button class="target-tab" onclick="setTargetType('department')" id="tab-department">Department</button>
-      </div>
-
-      <!-- Individual -->
-      <div id="panel-individual">
-        <div class="field">
-          <label>Select Agent <span class="req">*</span></label>
-          <select id="fSingleAgent"><option value="">Select agent...</option></select>
-        </div>
-      </div>
-
-      <!-- Multiple agents -->
-      <div id="panel-multiple" style="display:none">
-        <div class="field">
-          <label>Select Agents <span class="req">*</span></label>
-          <div class="multi-select-wrap">
-            <div class="pill-container" id="agentsPills" onclick="toggleDropdown('agentsDD')">
-              <span class="pill-placeholder" id="agentsPlaceholder">Click to select agents...</span>
-            </div>
-            <div class="dropdown-list" id="agentsDD" style="display:none">
-              <div class="dropdown-search"><svg width="14" height="14" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" id="agentsSearch" placeholder="Search agents..." oninput="filterDropdown('agentsSearch','agentsDDItems')"></div>
-              <div id="agentsDDItems"></div>
-            </div>
-          </div>
-          <div style="font-size:11px;color:var(--t3);margin-top:4px" id="agentsCount">0 agents selected</div>
-        </div>
-      </div>
-
-      <!-- Team -->
-      <div id="panel-team" style="display:none">
-        <div class="field">
-          <label>Select Team Leader <span class="req">*</span></label>
-          <select id="fTeamTL" onchange="showTeamPreview()">
-            <option value="">Select team leader...</option>
-          </select>
-        </div>
-        <div id="teamPreview" style="display:none;margin-top:12px;padding:12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
-          <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Team members that will receive training</div>
-          <div id="teamPreviewList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-        </div>
-      </div>
-
-      <!-- Department -->
-      <div id="panel-department" style="display:none">
-        <div style="padding:14px;background:#E8F1FB;border-radius:8px;border:1px solid #B8D4F0">
-          <div style="font-size:13px;font-weight:600;color:#1365A0;margin-bottom:4px">All department agents will be assigned</div>
-          <div style="font-size:12px;color:#4A7AB5" id="deptCount">Loading count...</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Trainer Selection -->
-    <div class="card">
-      <div class="card-title">Assign Trainer(s)</div>
-      <div class="field">
-        <label>Trainers <span class="req">*</span> <span style="font-size:10px;font-weight:400;color:var(--t3)">(select one or more)</span></label>
-        <div class="multi-select-wrap">
-          <div class="pill-container" id="trainerPills" onclick="toggleDropdown('trainersDD')">
-            <span class="pill-placeholder" id="trainersPlaceholder">Click to select trainers...</span>
-          </div>
-          <div class="dropdown-list" id="trainersDD" style="display:none">
-            <div class="dropdown-search"><svg width="14" height="14" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" id="trainersSearch" placeholder="Search trainers..." oninput="filterDropdown('trainersSearch','trainersDDItems')"></div>
-            <div id="trainersDDItems"></div>
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--t3);margin-top:4px" id="trainersCount">0 trainers selected</div>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:10px;align-items:center">
-      <button class="btn btn-primary" onclick="submitTraining()">Create Training Plan</button>
-      <a href="/cc.task.mane/training.html" class="btn btn-secondary">Cancel</a>
-    </div>
-    <div id="msg" style="display:none;margin-top:12px;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600"></div>
   </div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+    <div class="kpi-card kpi-blue"   style="padding:12px 16px"><div class="kpi-value"       id="tA" style="font-size:20px">—</div><div class="kpi-label">Active</div></div>
+    <div class="kpi-card kpi-red"    style="padding:12px 16px"><div class="kpi-value red"   id="tD" style="font-size:20px">—</div><div class="kpi-label">Delayed</div></div>
+    <div class="kpi-card kpi-green"  style="padding:12px 16px"><div class="kpi-value green" id="tC" style="font-size:20px">—</div><div class="kpi-label">Completed</div></div>
+    <div class="kpi-card kpi-purple" style="padding:12px 16px"><div class="kpi-value"       id="tP" style="font-size:20px">—</div><div class="kpi-label">Avg Progress</div></div>
+  </div>
+  <div class="training-grid" id="tGrid"></div>
+</div>
 </main>
-
 <script>
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbzgCYbHCXZ4pZJ-hGcexuE5ei_i9u3cvx0FUZ6oBwzzZKHgqO5YE7HIFc5bu9d2xUhWfw/exec';
-var SES_KEY = 'kib_ops_session';
 
-var API = {
+var GAS_URL='https://script.google.com/macros/s/AKfycbzgCYbHCXZ4pZJ-hGcexuE5ei_i9u3cvx0FUZ6oBwzzZKHgqO5YE7HIFc5bu9d2xUhWfw/exec';
+var SES_KEY='kib_ops_session';
+var API={
   _s:function(){try{return JSON.parse(localStorage.getItem(SES_KEY));}catch(e){return null;}},
   _t:function(){var s=this._s();return s?s.session_token:null;},
-  get:async function(a,p){
-    var url=new URL(GAS_URL);url.searchParams.set('action',a);
+  get:async function(action,params){
+    var url=new URL(GAS_URL);url.searchParams.set('action',action);
     var t=this._t();if(t)url.searchParams.set('session_token',t);
-    Object.keys(p||{}).forEach(function(k){if(p[k]!=null&&p[k]!=='')url.searchParams.set(k,p[k]);});
-    var r=await fetch(url.toString(),{redirect:'follow'});var d=await r.json();
-    if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:'Error');return d.data;
+    Object.keys(params||{}).forEach(function(k){if(params[k]!=null&&params[k]!=='')url.searchParams.set(k,params[k]);});
+    var r=await fetch(url.toString(),{redirect:'follow'});
+    var d=await r.json();if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:'API error');return d.data;
   },
-  post:async function(a,body){
-    var p=Object.assign({},body||{},{action:a});var t=this._t();if(t)p.session_token=t;
+  post:async function(action,body){
+    var p=Object.assign({},body||{},{action:action});
+    var t=this._t();if(t)p.session_token=t;
     var r=await fetch(GAS_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(p)});
-    var d=await r.json();if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:'Error');return d.data;
+    var txt=await r.text();var d;try{d=JSON.parse(txt);}catch(e){throw new Error('Invalid response');}
+    if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:'API error');return d.data;
   }
 };
 var AUTH={
   getSession:function(){try{var s=JSON.parse(localStorage.getItem(SES_KEY));return s&&new Date(s.expires_at)>new Date()?s:null;}catch(e){return null;}},
-  requireAuth:function(){if(!this.getSession())location.href='/cc.task.mane/login.html';},
-  logout:function(){localStorage.removeItem(SES_KEY);location.href='/cc.task.mane/login.html';}
+  requireAuth:function(){if(!this.getSession())window.location.href='/cc.task.mane/login.html';},
+  logout:function(){localStorage.removeItem(SES_KEY);window.location.href='/cc.task.mane/login.html';},
+  hasRole:function(r){var s=this.getSession();if(!s)return false;return Array.isArray(r)?r.indexOf(s.role)!==-1:s.role===r;},
+  canDo:function(a){var s=this.getSession();if(!s)return false;var m={'tasks.create':['HoD','Manager'],'handover.create':['HoD','Manager','TL','AL'],'training.create':['HoD','Manager'],'sales.entry':['HoD','Manager','TL','AL'],'settings.edit':['HoD']};return m[a]?m[a].indexOf(s.role)!==-1:true;},
+  getUserId:function(){var s=this.getSession();return s?s.user_id:null;},
+  getRole:function(){var s=this.getSession();return s?s.role:'';}
 };
+var UTILS={
+  esc:function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');},
+  fdt:function(iso){if(!iso)return'-';try{var d=new Date(iso);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}catch(e){return String(iso).slice(0,16);}},
+  fd:function(iso){if(!iso)return'-';try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch(e){return String(iso).slice(0,10);}},
+  today:function(){return new Date(Date.now()+3*3600000).toISOString().slice(0,10);},
+  tr:function(iso){if(!iso)return{label:'-',overdue:false,diffMs:0};var diff=new Date(iso)-Date.now(),abs=Math.abs(diff);var label=abs<3600000?Math.floor(abs/60000)+'m':abs<86400000?Math.floor(abs/3600000)+'h':Math.floor(abs/86400000)+'d';return{label:diff<0?label+' over':label+' left',overdue:diff<0,diffMs:diff};},
+  ini:function(n){return String(n||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();},
+  _avc:[['#dbeafe','#1d4ed8'],['#ede9fe','#6d28d9'],['#dcfce7','#15803d'],['#ffedd5','#c2410c'],['#fce7f3','#be185d'],['#ccfbf1','#0f766e']],
+  avc:function(n){var h=0,s=String(n||'');for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))&0xffff;return this._avc[h%this._avc.length];},
+  av:function(n,sz){sz=sz||28;var c=this.avc(n);return'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+c[0]+';color:'+c[1]+';display:flex;align-items:center;justify-content:center;font-size:'+Math.round(sz*.38)+'px;font-weight:700;flex-shrink:0">'+this.ini(n)+'</div>';},
+  toast:function(msg,type){var c={success:'#0EA472',error:'#E5383B',warning:'#F4A523',info:'#1877C5'};var t=document.createElement('div');t.style.cssText='position:fixed;bottom:20px;right:20px;background:#0D1B3E;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;border-left:3px solid '+(c[type]||c.info)+';box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:9999;max-width:340px;font-family:inherit';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},3500);},
+  empty:function(id,title,sub){var el=document.getElementById(id);if(!el)return;el.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;padding:40px 20px;color:#8A9BB0;text-align:center;gap:8px"><svg width="36" height="36" fill="none" stroke="#B8C5D4" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg><div style="font-size:13px;font-weight:600;color:#4A5568">'+(title||'No data')+'</div>'+(sub?'<div style="font-size:11px">'+sub+'</div>':'')+'</div>';},
+  loader:function(id){var el=document.getElementById(id);if(!el)return;el.innerHTML='<div style="padding:20px;display:flex;flex-direction:column;gap:10px"><div style="height:44px;background:linear-gradient(90deg,#F0F4F9 25%,#E4EAF3 50%,#F0F4F9 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;border-radius:8px"></div><div style="height:44px;background:linear-gradient(90deg,#F0F4F9 25%,#E4EAF3 50%,#F0F4F9 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;border-radius:8px"></div></div>';},
+  setUser:function(s){if(!s)return;var i=document.getElementById('avatarInitials'),n=document.getElementById('sidebarName'),r=document.getElementById('sidebarRole');if(i)i.textContent=this.ini(s.full_name);if(n)n.textContent=s.display_name||s.full_name.split(' ')[0];if(r)r.textContent=s.role;document.querySelectorAll('[data-roles]').forEach(function(el){var roles=el.getAttribute('data-roles').split(',').map(function(r){return r.trim();});if(roles.indexOf(s.role)===-1)el.style.display='none';});},
+  sidebar:function(){var btn=document.getElementById('sidebarToggle'),sb=document.getElementById('sidebar');if(btn&&sb)btn.addEventListener('click',function(){sb.classList.toggle('open');});}
+};
+
+
 AUTH.requireAuth();
-var S=AUTH.getSession();
-function ini(n){return String(n||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();}
-if(S){var av=document.getElementById('avatarInitials'),nm=document.getElementById('sidebarName'),rl=document.getElementById('sidebarRole');if(av)av.textContent=ini(S.full_name);if(nm)nm.textContent=S.display_name||S.full_name.split(' ')[0];if(rl)rl.textContent=S.role;}
+UTILS.setUser(AUTH.getSession());
+var S = AUTH.getSession() || {};
+UTILS.sidebar();
+async function loadBell(){
+  try{var d=await API.get('notif_list',{limit:'5',unread_only:'true'});var nb=document.getElementById('notifBadge');if(nb){if(d.unread_count>0){nb.textContent=d.unread_count;nb.classList.remove('hidden');}else{nb.classList.add('hidden');}}}catch(e){}
+}
+loadBell();setInterval(loadBell,60000);
 
-var allUsers = [];
-var selectedAgents = [];
-var selectedTrainers = [];
-var currentTargetType = 'individual';
-
-// Load users
-var teamMap = {}; // TL full_name -> array of agent objects
-(async function(){
+var TR={Ahead:'trend-ahead',OnTrack:'trend-ontrack',Behind:'trend-behind',AtRisk:'trend-atrisk',Delayed:'trend-atrisk'};
+async function loadT(){
+  UTILS.loader('tGrid');
   try{
-    var d = await API.get('agents_reference', {});
-    allUsers = (d.agents||[]).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
-    // Build teamMap keyed by team_leader name — done once at load, exact string match
-    var MGMT_R = ['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'];
-    allUsers.forEach(function(u){
-      if(u.team_leader && !MGMT_R.includes(u.role)){
-        var key = u.team_leader.trim();
-        if(!teamMap[key]) teamMap[key] = [];
-        teamMap[key].push(u);
-      }
-    });
-    populateSingleAgent();
-    populateTeamTLs();
-    populateMultiAgents();
-    populateTrainers();
-    updateDeptCount();
-  }catch(e){console.error(e);}
-})();
-
-function populateSingleAgent(){
-  var sel = document.getElementById('fSingleAgent');
-  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);});
-  agents.forEach(function(u){
-    var o=document.createElement('option');o.value=u.user_id;o.textContent=(u.full_name||u.name)+' ('+(u.team||'')+')'+(u.team_leader?' - '+u.team_leader:'');sel.appendChild(o);
-  });
+    var p={};var st=document.getElementById('tSt').value;if(st)p.status=st;
+    var d=await API.get('training_list',p);
+    var plans=d.plans||[];
+    var act=plans.filter(function(t){return['InProgress','Assigned','Started'].includes(t.status)});
+    var del=plans.filter(function(t){return t.status==='Delayed'||t.trend_status==='AtRisk'});
+    var comp=plans.filter(function(t){return t.status==='Completed'});
+    document.getElementById('tA').textContent=act.length;
+    document.getElementById('tD').textContent=del.length;
+    document.getElementById('tC').textContent=comp.length;
+    document.getElementById('tP').textContent=(act.length?Math.round(act.reduce(function(s,t){return s+Number(t.completion_pct||t.progress_percentage||0)},0)/act.length):0)+'%';
+    if(!plans.length){UTILS.empty('tGrid','No training plans');return;}
+    document.getElementById('tGrid').innerHTML=plans.map(function(p){
+      var pct=Number(p.completion_pct||p.progress_percentage||0);
+      var del=p.status==='Delayed';
+      var statusColor={'Assigned':'#F4A523','InProgress':'#1877C5','Completed':'#0EA472','Delayed':'#E5383B'};
+      var col=statusColor[p.status]||'#8A9BB0';
+      var typeBadge={'individual':'1 agent','multiple_agents':'Multi','team':'Team','department':'Dept'};
+      var card = '<div class="trn-card '+(del?'delayed':'');
+      card += '" style="cursor:pointer;border-left:3px solid '+col+'" onclick="openCard(\''+p.training_id+'\')">';
+      card += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:8px">';
+      card += '<div style="font-weight:700;font-size:13px;color:var(--t1);flex:1">'+UTILS.esc(p.title||'(No title)')+'</div>';
+      card += '<span style="font-size:10px;font-weight:700;color:'+col+';background:'+col+'18;padding:2px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0">'+p.status+'</span></div>';
+      card += '<div style="font-size:11px;color:var(--t3);margin-bottom:10px">'+(p.category||'')+(p.target_type?' - '+(typeBadge[p.target_type]||p.target_type):'')+(p.trainer_names?' - '+p.trainer_names:'')+'</div>';
+      card += '<div class="progress-wrap" style="margin-bottom:8px"><div class="progress-bar"><div class="progress-fill '+(del?'danger':pct>=100?'success':'')+'" style="width:'+pct+'%"></div></div><span class="progress-label">'+pct+'%</span></div>';
+      card += '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)">';
+      card += '<span>Due: '+(p.deadline||'N/A')+'</span>';
+      card += '<span>'+(p.completed_agents||0)+'/'+(p.total_agents||'?')+' agents</span></div>';
+      card += '</div>';
+      return card;
+    }).join('');
+  }catch(ex){UTILS.empty('tGrid','Could not load training',ex.message);}
 }
 
-function populateTeamTLs(){
-  var sel = document.getElementById('fTeamTL');
-  var tls = allUsers.filter(function(u){return u.role==='TL'||u.role==='Team Leader';});
-  tls.forEach(function(u){
-    var o=document.createElement('option');o.value=u.user_id;o.textContent=u.full_name;sel.appendChild(o);
-  });
+var currentTraining = null;
+
+async function openCard(id) {
+  var cm=document.getElementById('cardModal');cm.style.display='flex';
+  document.getElementById('cardBody').innerHTML = '<div style="padding:32px;text-align:center;color:var(--t3)">Loading...</div>';
+  try {
+    var d = await API.get('training_detail', {training_id: id});
+    currentTraining = d;
+    renderCard(d);
+  } catch(ex) {
+    document.getElementById('cardBody').innerHTML = '<div style="color:var(--red);padding:16px">Error: '+ex.message+'</div>';
+  }
 }
 
-function showTeamPreview(){
-  var tlId = document.getElementById('fTeamTL').value;
-  if(!tlId){document.getElementById('teamPreview').style.display='none';return;}
-  var tl = allUsers.find(function(u){return u.user_id===tlId;});
-  if(!tl){document.getElementById('teamPreview').style.display='none';return;}
-  var tlName = (tl.full_name||tl.name||'').trim();
-  var SKIP = ['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'];
-  // Build fresh from allUsers every call - no global dependency
-  var members = allUsers.filter(function(u){
-    if(SKIP.includes(u.role)) return false;
-    var tl_col = (u.team_leader||'').trim();
-    return tl_col === tlName;
-  });
-  var list = document.getElementById('teamPreviewList');
-  list.innerHTML = members.length
-    ? members.map(function(m){return '<span style="display:inline-flex;padding:3px 8px;background:#E8F1FB;color:#1365A0;border-radius:5px;font-size:11px;font-weight:600">'+(m.full_name||m.name)+'</span>';}).join('')
-    : '<span style="font-size:12px;color:var(--t3)">No agents (tlName='+tlName+', total='+allUsers.length+')</span>';
-  document.getElementById('teamPreview').style.display = '';
+function closeCard() {
+  document.getElementById('cardModal').style.display = 'none';
+  currentTraining = null;
+  loadT();
 }
 
-function updateDeptCount(){
-  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);});
-  document.getElementById('deptCount').textContent = agents.length + ' agents across all teams will be assigned this training';
-}
+function renderCard(d) {
+  var isTrainer = d.trainers && d.trainers.some(function(t){ return t.user_id === S.user_id || t.name === S.full_name; });
+  var isManager = ['HoD','CC Manager','Manager'].includes(S.role);
+  var canMark   = isManager || isTrainer || ['TL','QA Manager'].includes(S.role);
+  var statusCol = {'Assigned':'#F59E0B','InProgress':'#3B82F6','Completed':'#10B981','Delayed':'#EF4444'};
+  var statusBg  = {'Assigned':'#FFFBEB','InProgress':'#EFF6FF','Completed':'#ECFDF5','Delayed':'#FEF2F2'};
+  var col  = statusCol[d.status] || '#94A3B8';
+  var colBg= statusBg[d.status] || '#F8FAFC';
+  var pct  = d.completion_pct || 0;
+  var totalAgents = d.logs ? d.logs.length : 0;
+  var comments = d.comments || [];
+  var exts = d.extensions || [];
+  var pendingExt = exts.find(function(x){ return x.status==='Pending'; });
+  var latestExt  = exts[0] || null;
+  var canShowExtBtn = !pendingExt && (isManager || isTrainer || ['HoD','CC Manager','Manager','TL','QA Manager'].includes(S.role));
 
-function getRoleGroup(role){
-  if(['HoD','CC Manager'].includes(role)) return 'CC Management';
-  if(['Manager','QA Manager'].includes(role)) return 'Management';
-  if(role==='TL') return 'Team Leaders';
-  if(role==='AL') return 'Assistant Leaders';
-  if(role==='QA'||role==='QA Agent') return 'Quality Assurance';
-  if(role==='BackOffice') return 'Back Office';
-  return 'Agents';
-}
-function buildDropdownItems(containerId, items, selectedArr, onToggle){
-  var c = document.getElementById(containerId);
-  if(!c) return;
-  // Group by team
-  var groups = {};
-  items.forEach(function(u){
-    var g = onToggle==='toggleTrainer' ? getRoleGroup(u.role) : (u.team || 'Other');
-    if(!groups[g]) groups[g] = [];
-    groups[g].push(u);
-  });
+  // ── Progress ring SVG ─────────────────────────────────────────
+  var r = 28; var circ = 2 * Math.PI * r;
+  var dash = pct / 100 * circ;
+  var ringColor = pct >= 100 ? '#10B981' : pct > 0 ? '#3B82F6' : '#E2E8F0';
+
   var html = '';
-  Object.keys(groups).forEach(function(g){
-    html += '<div class="dropdown-group-label">'+g+'</div>';
-    groups[g].forEach(function(u){
-      var isSel = selectedArr.some(function(x){return x.user_id===u.user_id;});
-      html += '<div class="dropdown-option '+(isSel?'selected':'')+'" data-id="'+u.user_id+'" data-name="'+u.full_name+'" onclick="'+onToggle+'(\''+u.user_id+'\',\''+u.full_name+'\')">'
-        +'<div class="chk"><span class="chk-mark">✓</span></div>'
-        +'<span>'+u.full_name+'</span>'
-        +'<span style="margin-left:auto;font-size:10px;color:var(--t3)">'+u.role+'</span>'
-        +'</div>';
+  var isOverdue = d.deadline && new Date(d.deadline) < new Date() && d.status !== 'Completed';
+
+  // ══ HEADER BAND ═══════════════════════════════════════════════
+  html += '<div style="background:linear-gradient(135deg,#0F2744 0%,#1A4A7A 100%);padding:18px 22px 0;flex-shrink:0">';
+
+  // Top row: title left, ring right
+  html += '<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:12px">';
+  // Left: title + meta + status
+  html += '<div style="flex:1;min-width:0">';
+  html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">';
+  html += '<span style="font-size:10px;font-weight:700;color:'+col+';background:'+colBg+';padding:2px 10px;border-radius:20px">'+d.status+'</span>';
+  html += '<span style="font-size:10px;color:rgba(255,255,255,.4)">'+UTILS.esc(d.category)+' · '+UTILS.esc(d.target_type)+'</span>';
+  html += '</div>';
+  html += '<div style="font-size:19px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:4px">'+UTILS.esc(d.title)+'</div>';
+  html += '<div style="font-size:11px;color:rgba(255,255,255,.45)">By '+UTILS.esc(d.created_by_name)+'</div>';
+  html += '</div>';
+  // Right: progress ring
+  html += '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px">';
+  html += '<svg width=64 height=64 viewBox="0 0 70 70">';
+  html += '<circle cx=35 cy=35 r='+r+' fill=none stroke=rgba(255,255,255,0.1) stroke-width=7/>';
+  html += '<circle cx=35 cy=35 r='+r+' fill=none stroke="'+ringColor+'" stroke-width=7 stroke-linecap=round stroke-dasharray="'+dash+' '+circ+'" transform="rotate(-90 35 35)"/>';
+  html += '<text x=35 y=38 text-anchor=middle font-size=12 font-weight=800 fill=#fff font-family=inherit>'+pct+'%</text>';
+  html += '</svg>';
+  html += '<div style="font-size=9px;color:rgba(255,255,255,.4);font-size:9px">'+d.completed_agents+'/'+totalAgents+'</div>';
+  html += '</div></div>';
+
+  // ── Stats bar ──────────────────────────────────────────────────
+  html += '<div style="display:flex;gap:0;border-top:1px solid rgba(255,255,255,.08)">';
+  // Deadline
+  html += '<div style="flex:1;padding:10px 0;border-right:1px solid rgba(255,255,255,.08)">';
+  html += '<div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Deadline</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:'+(isOverdue?'#FCA5A5':'rgba(255,255,255,.9)')+'">'+(isOverdue?'⚠ ':'')+(d.deadline||'Not set')+'</div>';
+  html += '</div>';
+  // Trainers
+  html += '<div style="flex:2;padding:10px 12px;border-right:1px solid rgba(255,255,255,.08)">';
+  html += '<div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Trainer(s)</div>';
+  html += '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(d.trainer_names||'—')+'</div>';
+  html += '</div>';
+  // Progress text
+  html += '<div style="flex:1;padding:10px 0 10px 12px">';
+  html += '<div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Progress</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9)">'+d.completed_agents+'/'+totalAgents+'</div>';
+  html += '</div>';
+  // ── TAB BAR ───────────────────────────────────────────────────
+  html += '<div style="display:flex;gap:0;border-top:1px solid rgba(255,255,255,.1)">';
+  var tabs = [
+    {id:'tab-checklist', label:'Checklist', badge: d.completed_agents+'/'+totalAgents},
+    {id:'tab-comments',  label:'Comments',  badge: comments.length > 0 ? String(comments.length) : ''},
+    {id:'tab-extension', label:'Extension', badge: pendingExt ? '!' : ''}
+  ];
+  tabs.forEach(function(t, i) {
+    html += '<button id="'+t.id+'" onclick="switchTab(\''+t.id+'\')" style="flex:1;background:none;border:none;padding:10px 6px 8px;font-size:12px;font-weight:600;color:'+(i===0?'#fff':'rgba(255,255,255,.45)')+';cursor:pointer;border-bottom:'+(i===0?'2px solid #60A5FA':'2px solid transparent')+';font-family:inherit;transition:all .2s;white-space:nowrap">'+t.label+(t.badge?'<span style="margin-left:5px;background:'+(t.badge==='!'?'#EF4444':'rgba(255,255,255,.2)')+';color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px">'+t.badge+'</span>':'')+'</button>';
+  });
+  html += '</div>';
+  html += '</div>'; // end header band
+
+  // ══ TAB PANELS ════════════════════════════════════════════════
+  html += '<div style="padding:18px 22px 22px">';
+
+  // ── CHECKLIST PANEL ───────────────────────────────────────────
+  html += '<div id="panel-checklist">';
+  if (d.description) {
+    html += '<div style="background:#F0F6FE;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--t2);line-height:1.6;border-left:3px solid var(--blue)">'+UTILS.esc(d.description)+'</div>';
+  }
+  // Progress bar
+  html += '<div style="background:#E2E8F0;border-radius:4px;height:6px;margin-bottom:14px;overflow:hidden">';
+  html += '<div style="height:100%;border-radius:4px;background:'+(pct>=100?'#10B981':'#3B82F6')+';width:'+pct+'%;transition:width .5s"></div>';
+  html += '</div>';
+  // Search
+  if (totalAgents > 5) {
+    html += '<div style="position:relative;margin-bottom:10px">';
+    html += '<div style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none">🔍</div>';
+    html += '<input type="text" id="agentSearch" oninput="filterAgentRows(this.value)" placeholder="Search agents..." style="width:100%;padding:8px 12px 8px 32px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box">';
+    html += '</div>';
+  }
+  // Agent list
+  html += '<div style="display:flex;flex-direction:column;gap:5px;max-height:calc(100vh - 380px);overflow-y:auto;min-height:120px" id="agentList">';
+  if (!d.logs || !d.logs.length) {
+    html += '<div style="color:var(--t3);font-size:13px;padding:24px;text-align:center">No agents assigned</div>';
+  } else {
+    d.logs.forEach(function(log) {
+      var done = log.status === 'Completed';
+      html += '<div id="row_'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name).toLowerCase()+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:'+(done?'#F0FDF4':'#F8FAFC')+';border:1px solid '+(done?'#BBF7D0':'#E2E8F0')+';border-radius:8px;transition:all .2s">';
+      // Avatar with initial
+      html += '<div style="width:32px;height:32px;border-radius:50%;background:'+(done?'#10B981':'#94A3B8')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:#fff">'+UTILS.esc(log.agent_name).charAt(0)+'</div>';
+      html += '<div style="flex:1;min-width:0">';
+      html += '<div style="font-size:13px;font-weight:600;color:var(--t1)">'+UTILS.esc(log.agent_name)+'</div>';
+      if (done && log.marked_by_name) {
+        html += '<div style="font-size:10px;color:#059669;font-weight:600;margin-top:1px">✓ by '+UTILS.esc(log.marked_by_name)+(log.marked_datetime?' · '+log.marked_datetime.slice(0,10):'')+'</div>';
+      }
+      html += '</div>';
+      if (canMark) {
+        if (!done) {
+          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,true)" style="background:#10B981;color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">✓ Done</button>';
+        } else {
+          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,false)" style="background:#fff;color:#94A3B8;border:1px solid #E2E8F0;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;flex-shrink:0">↩</button>';
+        }
+      } else {
+        html += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;'+(done?'background:#D1FAE5;color:#065F46':'background:#FEF3C7;color:#92400E')+'">'+(done?'Done':'Pending')+'</span>';
+      }
+      html += '</div>';
     });
-  });
-  c.innerHTML = html;
+  }
+  html += '</div>';
+  html += '<div id="markError" style="display:none;margin-top:8px;padding:10px 14px;background:#FEE2E2;border-radius:8px;font-size:12px;color:#991B1B"></div>';
+  html += '</div>'; // end checklist panel
+
+  // ── COMMENTS PANEL ────────────────────────────────────────────
+  html += '<div id="panel-comments" style="display:none">';
+  if (comments.length === 0) {
+    html += '<div style="text-align:center;padding:28px 0 16px">';
+    html += '<div style="font-size:32px;margin-bottom:8px">💬</div>';
+    html += '<div style="font-size:13px;color:var(--t3)">No comments yet — be the first</div>';
+    html += '</div>';
+  } else {
+    html += '<div style="display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 420px);overflow-y:auto;min-height:80px;margin-bottom:14px">';
+    comments.forEach(function(c) {
+      var isMgr = ['HoD','CC Manager','Manager','CC Manager'].includes(c.author_role);
+      var avatarBg = isMgr ? '#1A4A7A' : '#64748B';
+      html += '<div style="display:flex;gap:10px">';
+      html += '<div style="width:34px;height:34px;border-radius:50%;background:'+avatarBg+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:#fff">'+UTILS.esc(c.author_name).charAt(0)+'</div>';
+      html += '<div style="flex:1;background:var(--bg2);border-radius:0 10px 10px 10px;padding:10px 14px;border:1px solid var(--border)">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">';
+      html += '<span style="font-size:12px;font-weight:700;color:var(--t1)">'+UTILS.esc(c.author_name)+'</span>';
+      html += '<span style="font-size:10px;color:var(--t3)">'+UTILS.fdt(c.created_datetime)+'</span>';
+      html += '</div>';
+      html += '<div style="font-size:13px;color:var(--t2);line-height:1.5;white-space:pre-wrap">'+UTILS.esc(c.comment_text)+'</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+  // Comment composer
+  html += '<div style="display:flex;gap:10px;align-items:flex-end;padding-top:10px;border-top:1px solid var(--border)">';
+  html += '<div style="width:34px;height:34px;border-radius:50%;background:#1A4A7A;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:#fff">'+UTILS.esc(S.display_name||S.full_name||'?').charAt(0)+'</div>';
+  html += '<textarea id="commentInput" rows="2" placeholder="Write a comment..." style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;min-width:0"></textarea>';
+  html += '<button onclick="submitComment()" style="background:#1A4A7A;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">Send</button>';
+  html += '</div>';
+  html += '</div>'; // end comments panel
+
+  // ── EXTENSION PANEL ───────────────────────────────────────────
+  html += '<div id="panel-extension" style="display:none">';
+
+  if (pendingExt && isManager) {
+    html += '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:16px;margin-bottom:12px">';
+    html += '<div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:10px">⏳ Pending request from '+UTILS.esc(pendingExt.requested_by_name)+'</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">';
+    html += '<div style="background:#fff;border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:2px">Current</div><div style="font-size:14px;font-weight:700;color:var(--t1)">'+(pendingExt.current_deadline||'Not set')+'</div></div>';
+    html += '<div style="background:#EFF6FF;border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:2px">Requested</div><div style="font-size:14px;font-weight:700;color:#1877C5">'+pendingExt.requested_deadline+'</div></div>';
+    html += '</div>';
+    html += '<div style="background:#fff;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;color:var(--t2)"><b>Reason:</b> '+UTILS.esc(pendingExt.reason)+'</div>';
+    html += '<input type="text" id="reviewNotes" placeholder="Add review note (optional)..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;margin-bottom:10px">';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+    html += '<button data-extid="'+pendingExt.ext_id+'" data-dec="Approved" onclick="handleExtReview(this)" style="background:#10B981;color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer">✅ Approve</button>';
+    html += '<button data-extid="'+pendingExt.ext_id+'" data-dec="Rejected" onclick="handleExtReview(this)" style="background:#EF4444;color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer">❌ Reject</button>';
+    html += '</div></div>';
+  }
+
+  if (latestExt && latestExt.status !== 'Pending') {
+    var xBg = latestExt.status==='Approved'?'#ECFDF5':'#FEF2F2';
+    var xBd = latestExt.status==='Approved'?'#A7F3D0':'#FECACA';
+    var xCl = latestExt.status==='Approved'?'#065F46':'#991B1B';
+    html += '<div style="background:'+xBg+';border:1px solid '+xBd+';border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:'+xCl+'">';
+    html += (latestExt.status==='Approved'?'✅':'❌')+' Last request by <b>'+UTILS.esc(latestExt.requested_by_name)+'</b> — <b>'+latestExt.status+'</b>';
+    if (latestExt.reviewed_by_name) html += ' by '+UTILS.esc(latestExt.reviewed_by_name);
+    if (latestExt.review_notes) html += '<br><span style="opacity:.8">Note: '+UTILS.esc(latestExt.review_notes)+'</span>';
+    html += '</div>';
+  }
+
+  if (pendingExt && !isManager) {
+    html += '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px;margin-bottom:12px;font-size:13px;color:#1E40AF">⏳ Your extension request to <b>'+pendingExt.requested_deadline+'</b> is pending manager approval.</div>';
+  }
+
+  // Extension form
+  html += '<div id="extFormWrap" style="display:none;background:#F8FAFC;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px">';
+  html += '<div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:12px">'+(isManager?'📅 Update Deadline':'📅 Request Extension')+'</div>';
+  html += '<div style="background:#fff;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--t3)">Current deadline: <b style="color:var(--t1)">'+(d.deadline||'Not set')+'</b></div>';
+  html += '<label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">New Deadline *</label>';
+  html += '<input type="date" id="extNewDate" min="'+UTILS.today()+'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;margin-bottom:10px">';
+  html += '<label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">'+(isManager?'Reason':'Reason *')+'</label>';
+  html += '<textarea id="extReason" rows="3" placeholder="'+(isManager?'Reason for updating...':'Why is the extension needed?')+'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;margin-bottom:10px"></textarea>';
+  html += '<div style="display:flex;gap:8px">';
+  html += '<button onclick="submitExtension()" style="background:#1A4A7A;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">'+(isManager?'Apply':'Submit Request')+'</button>';
+  html += '<button onclick="toggleExtForm(false)" style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer">Cancel</button>';
+  html += '</div></div>';
+
+  if (canShowExtBtn) {
+    html += '<button id="extOpenBtn" onclick="toggleExtForm(true)" style="width:100%;background:#fff;border:2px dashed #CBD5E1;border-radius:10px;padding:12px;font-size:13px;font-weight:600;color:#64748B;cursor:pointer">📅 '+(isManager?'Extend Deadline':'Request Deadline Extension')+'</button>';
+  } else if (!pendingExt && !canShowExtBtn) {
+    html += '<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px">No extension actions available</div>';
+  }
+
+  html += '</div>'; // end extension panel
+  html += '</div>'; // end tab panels wrapper
+
+  document.getElementById('cardBody').innerHTML = html;
 }
 
-function populateMultiAgents(){
-  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);});
-  buildDropdownItems('agentsDDItems', agents, selectedAgents, 'toggleAgent');
-}
-
-function populateTrainers(){
-  var trainers = allUsers.filter(function(u){ return u.active_flag !== 'FALSE' && u.active_flag !== false; });
-  buildDropdownItems('trainersDDItems', trainers, selectedTrainers, 'toggleTrainer');
-}
-
-function toggleAgent(id, name){
-  var idx = selectedAgents.findIndex(function(x){return x.user_id===id;});
-  if(idx>-1) selectedAgents.splice(idx,1);
-  else selectedAgents.push({user_id:id,name:name});
-  updatePills('agentsPills','agentsPlaceholder',selectedAgents,'toggleAgent');
-  buildDropdownItems('agentsDDItems', allUsers.filter(function(u){return ['Agent','QA Agent'].includes(u.role);}), selectedAgents, 'toggleAgent');
-  document.getElementById('agentsCount').textContent = selectedAgents.length + ' agent'+(selectedAgents.length!==1?'s':'')+' selected';
-}
-
-function toggleTrainer(id, name){
-  var idx = selectedTrainers.findIndex(function(x){return x.user_id===id;});
-  if(idx>-1) selectedTrainers.splice(idx,1);
-  else selectedTrainers.push({user_id:id,name:name});
-  updatePills('trainerPills','trainersPlaceholder',selectedTrainers,'toggleTrainer');
-  populateTrainers();
-  document.getElementById('trainersCount').textContent = selectedTrainers.length + ' trainer'+(selectedTrainers.length!==1?'s':'')+' selected';
-}
-
-function updatePills(containerId, placeholderId, arr, removeFn){
-  var c = document.getElementById(containerId);
-  var existing = c.querySelectorAll('.pill');
-  existing.forEach(function(p){p.remove();});
-  var ph = document.getElementById(placeholderId);
-  if(arr.length===0){ph.style.display='';return;}
-  ph.style.display='none';
-  arr.forEach(function(item){
-    var pill = document.createElement('span');
-    pill.className='pill';
-    pill.innerHTML = item.name+' <button onclick="event.stopPropagation();'+removeFn+'(\''+item.user_id+'\',\''+item.name+'\')">×</button>';
-    c.insertBefore(pill, ph);
-  });
-}
-
-function toggleDropdown(id){
-  var dd = document.getElementById(id);
-  var isOpen = dd.style.display !== 'none';
-  document.querySelectorAll('.dropdown-list').forEach(function(d){d.style.display='none';});
-  dd.style.display = isOpen ? 'none' : '';
-}
-
-function filterDropdown(searchId, listId){
-  var q = document.getElementById(searchId).value.toLowerCase();
-  var items = document.getElementById(listId).querySelectorAll('.dropdown-option');
-  items.forEach(function(item){
-    var name = item.dataset.name ? item.dataset.name.toLowerCase() : '';
-    item.style.display = name.includes(q) ? '' : 'none';
-  });
-  var groups = document.getElementById(listId).querySelectorAll('.dropdown-group-label');
-  groups.forEach(function(g){
-    var next = g.nextElementSibling;
-    var hasVisible = false;
-    while(next && !next.classList.contains('dropdown-group-label')){
-      if(next.style.display!=='none') hasVisible=true;
-      next = next.nextElementSibling;
+async function markAgent(agentId, agentName, checked) {
+  if (!currentTraining) { UTILS.toast('Session error — please close and reopen the card', 'error'); return; }
+  var status = checked ? 'Completed' : 'Pending';
+  var row = document.getElementById('row_'+agentId);
+  if (row) {
+    row.style.opacity = '0.5';
+    row.style.pointerEvents = 'none';
+  }
+  try {
+    await API.post('training_mark', {
+      training_id:   currentTraining.training_id,
+      agent_user_id: agentId,
+      agent_name:    agentName,
+      status:        status
+    });
+    // Refresh card
+    var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
+    currentTraining = fresh;
+    try {
+      renderCard(fresh);
+    } catch(renderErr) {
+      // If renderCard crashes, manually update the badge and row color so UI isn't stuck
+      if (row) {
+        row.style.opacity = '';
+        row.style.pointerEvents = '';
+        row.style.background = checked ? '#DCFCE7' : 'var(--bg2)';
+        row.style.borderColor = checked ? '#86EFAC' : 'var(--border)';
+        var badge = row.querySelector('span');
+        if (badge) { badge.textContent = status; badge.style.color = checked?'#166534':'#854D0E'; badge.style.background = checked?'#DCFCE7':'#FEF9C3'; }
+      }
     }
-    g.style.display = hasVisible ? '' : 'none';
+    UTILS.toast((checked ? '✅ ' : '↩️ ') + agentName + ' marked as ' + status, 'success');
+  } catch(ex) {
+    UTILS.toast('Error: ' + ex.message, 'error');
+    var errDiv = document.getElementById('markError');
+    if (errDiv) { errDiv.textContent = 'Failed to save: ' + ex.message; errDiv.style.display = 'block'; }
+    if (row) {
+      row.style.opacity = '';
+      row.style.pointerEvents = '';
+      var cb = row.querySelector('input[type=checkbox]');
+      if (cb) cb.checked = !checked;
+    }
+  }
+}
+
+function logP(id){openCard(id);}
+
+function switchTab(activeId) {
+  var panels = {'tab-checklist':'panel-checklist','tab-comments':'panel-comments','tab-extension':'panel-extension'};
+  Object.keys(panels).forEach(function(tabId) {
+    var tab   = document.getElementById(tabId);
+    var panel = document.getElementById(panels[tabId]);
+    var isActive = tabId === activeId;
+    if (tab) {
+      tab.style.color       = isActive ? '#fff' : 'rgba(255,255,255,.45)';
+      tab.style.borderBottom= isActive ? '2px solid #60A5FA' : '2px solid transparent';
+    }
+    if (panel) panel.style.display = isActive ? '' : 'none';
   });
 }
 
-document.addEventListener('click', function(e){
-  if(!e.target.closest('.multi-select-wrap')){
-    document.querySelectorAll('.dropdown-list').forEach(function(d){d.style.display='none';});
-  }
-});
-
-function setTargetType(type){
-  currentTargetType = type;
-  ['individual','multiple','team','department'].forEach(function(t){
-    document.getElementById('panel-'+t).style.display = t===type ? '' : 'none';
-    document.getElementById('tab-'+t).classList.toggle('active', t===type);
+function filterAgentRows(query) {
+  var q = (query || '').toLowerCase().trim();
+  var rows = document.querySelectorAll('#agentList [data-name]');
+  rows.forEach(function(row) {
+    row.style.display = (!q || row.dataset.name.includes(q)) ? '' : 'none';
   });
 }
 
-async function submitTraining(){
-  var title    = document.getElementById('fTitle').value.trim();
-  var cat      = document.getElementById('fCat').value;
-  var deadline = document.getElementById('fDeadline').value;
-  var desc     = document.getElementById('fDesc').value;
-  var pri      = document.getElementById('fPri').value;
+async function submitComment() {
+  if (!currentTraining) return;
+  var input = document.getElementById('commentInput');
+  var text  = (input ? input.value : '').trim();
+  if (!text) { UTILS.toast('Please write a comment first', 'error'); return; }
 
-  if(!title){showMsg('Please enter a training title','error');return;}
-  if(!cat){showMsg('Please select a category','error');return;}
-  if(!deadline){showMsg('Please set a deadline','error');return;}
-  if(!selectedTrainers.length){showMsg('Please select at least one trainer','error');return;}
+  var btn = document.querySelector('button[onclick="submitComment()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '...'; }
 
-  // Build target agents list
-  var targetAgents = [];
-  if(currentTargetType==='individual'){
-    var sel=document.getElementById('fSingleAgent');
-    if(!sel.value){showMsg('Please select an agent','error');return;}
-    var u=allUsers.find(function(x){return x.user_id===sel.value;});
-    if(u) targetAgents=[{user_id:u.user_id,name:u.full_name}];
-  } else if(currentTargetType==='multiple'){
-    if(!selectedAgents.length){showMsg('Please select at least one agent','error');return;}
-    targetAgents=selectedAgents.map(function(a){return {user_id:a.user_id,name:a.name||a.full_name};});
-  } else if(currentTargetType==='team'){
-    var tlId=document.getElementById('fTeamTL').value;
-    if(!tlId){showMsg('Please select a team leader','error');return;}
-    var tl=allUsers.find(function(u){return u.user_id===tlId;});
-    var tlName=(tl.full_name||tl.name||'').trim();
-    var teamAgents = teamMap[tlName] || [];
-    targetAgents = teamAgents.map(function(u){return {user_id:u.user_id,name:u.full_name||u.name};});
-    if(!targetAgents.length){showMsg('No agents found for team leader: '+tlName,'error');return;}
-  } else if(currentTargetType==='department'){
-    targetAgents=allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name||u.name};});
-  }
-
-  var btn=document.querySelector('button.btn-primary');
-  btn.disabled=true;btn.textContent='Creating...';
-
-  try{
-    var d = await API.post('training_create', {
-      title:                  title,
-      category:               cat,
-      description:            desc,
-      priority:               pri,
-      deadline:               deadline,
-      target_type:            currentTargetType,
-      target_agents_json:     JSON.stringify(targetAgents),
-      assigned_trainers_json: JSON.stringify(selectedTrainers),
-      total_agents:           String(targetAgents.length)
+  try {
+    await API.post('training_comment', {
+      training_id:  currentTraining.training_id,
+      comment_text: text
     });
-    showMsg('Training plan created! ID: '+d.training_id,'success');
-    setTimeout(function(){location.href='/cc.task.mane/training.html';},1500);
-  }catch(ex){
-    showMsg('Error: '+ex.message,'error');
-    btn.disabled=false;btn.textContent='Create Training Plan';
+    // Refresh card to show new comment
+    var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
+    currentTraining = fresh;
+    renderCard(fresh);
+  } catch(ex) {
+    UTILS.toast('Error: ' + ex.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
   }
 }
 
-function showMsg(msg,type){
-  var el=document.getElementById('msg');
-  el.textContent=msg;
-  el.style.background=type==='success'?'#DCFCE7':'#FEE2E2';
-  el.style.color=type==='success'?'#166534':'#991B1B';
-  el.style.display='block';
+function toggleExtForm(show) {
+  var wrap = document.getElementById('extFormWrap');
+  var btn  = document.getElementById('extOpenBtn');
+  if (!wrap) return;
+  wrap.style.display = show ? 'block' : 'none';
+  if (btn) btn.style.display = show ? 'none' : 'block';
 }
 
-// Set default deadline to 2 weeks from now
-var d2w=new Date(Date.now()+14*86400000+3*3600000);
-document.getElementById('fDeadline').value=d2w.toISOString().slice(0,10);
+async function handleExtReview(el) {
+  var extId    = el.getAttribute('data-extid');
+  var decision = el.getAttribute('data-dec');
+  if (!extId || !decision) return;
+  var notes = (document.getElementById('reviewNotes') || {}).value || '';
+  if (!confirm((decision === 'Approved' ? 'Approve' : 'Reject') + ' this extension request?')) return;
+  try {
+    await API.post('training_ext_review', { ext_id: extId, decision: decision, review_notes: notes });
+    UTILS.toast('Extension ' + decision.toLowerCase() + ' successfully', 'success');
+    var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
+    currentTraining = fresh;
+    renderCard(fresh);
+  } catch(ex) {
+    UTILS.toast('Error: ' + ex.message, 'error');
+  }
+}
+
+async function submitExtension() {
+  if (!currentTraining) return;
+  var newDate = (document.getElementById('extNewDate') || {}).value || '';
+  var reason  = ((document.getElementById('extReason') || {}).value || '').trim();
+  if (!newDate) { UTILS.toast('Please select a new deadline', 'error'); return; }
+  if (!reason)  { UTILS.toast('Please enter a reason', 'error'); return; }
+
+  var btn = document.querySelector('#extFormWrap button');
+  try {
+    var d = await API.post('training_ext_request', {
+      training_id:        currentTraining.training_id,
+      requested_deadline: newDate,
+      reason:             reason
+    });
+    UTILS.toast(d.message || 'Extension request submitted', 'success');
+    // Refresh card
+    var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
+    currentTraining = fresh;
+    renderCard(fresh);
+  } catch(ex) {
+    UTILS.toast('Error: ' + ex.message, 'error');
+  }
+}
+
+async function reviewExtension(extId, decision) {
+  if (!currentTraining) return;
+  var notes = (document.getElementById('reviewNotes') || {}).value || '';
+  if (!confirm((decision === 'Approved' ? 'Approve' : 'Reject') + ' this extension request?')) return;
+  try {
+    await API.post('training_ext_review', {
+      ext_id:       extId,
+      decision:     decision,
+      review_notes: notes
+    });
+    UTILS.toast('Extension ' + decision.toLowerCase() + ' successfully', 'success');
+    // Refresh card
+    var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
+    currentTraining = fresh;
+    renderCard(fresh);
+  } catch(ex) {
+    UTILS.toast('Error: ' + ex.message, 'error');
+  }
+}
+
+document.getElementById('tSt').addEventListener('change',loadT);
+loadT();
+
 </script>
+
+<!-- Training Card Modal -->
+<div id="cardModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;padding:16px;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:680px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.4);position:relative">
+    <button onclick="closeCard()" style="position:absolute;top:14px;right:14px;z-index:20;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:15px;color:#fff;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+    <div id="cardBody" style="overflow-y:auto;flex:1;min-height:0"></div>
+  </div>
+</div>
 </body>
 </html>
