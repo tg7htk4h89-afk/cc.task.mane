@@ -963,7 +963,7 @@ function renderTaskModal(d) {
   ];
   tmTabs.forEach(function(tb, i){
     var active = i === 0;
-    html += '<button id="'+tb.id+'" onclick="switchTmTab(\''+tb.id+'\')" style="flex:1;background:none;border:none;border-bottom:'+(active?'2px solid #60A5FA':'2px solid transparent')+';padding:11px 6px 9px;font-size:12px;font-weight:'+(active?'700':'500')+';color:'+(active?'#fff':'rgba(255,255,255,.45)')+';cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s">';
+    html += '<button id="'+tb.id+'" data-tab="'+tb.id+'" onclick="switchTmTab(this.dataset.tab)" style="flex:1;background:none;border:none;border-bottom:'+(active?'2px solid #60A5FA':'2px solid transparent')+';padding:11px 6px 9px;font-size:12px;font-weight:'+(active?'700':'500')+';color:'+(active?'#fff':'rgba(255,255,255,.45)')+';cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s">';
     html += tb.label;
     if(tb.badge) html += ' <span style="background:rgba(255,255,255,.18);color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:3px">'+tb.badge+'</span>';
     html += '</button>';
@@ -1004,10 +1004,10 @@ function renderTaskModal(d) {
   // Action buttons
   if (canAct) {
     html += '<div style="display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #F1F5F9;padding-top:16px">';
-    if(t.status === 'New') html += '<button onclick="updateTask(\'InProgress\')" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer">▶ Start</button>';
-    html += '<button onclick="updateTask(\'Completed\')" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer">✓ Complete</button>';
-    if(isM) html += '<button onclick="updateTask(\'Escalated\')" style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer">⚡ Escalate</button>';
-    if(isM) html += '<button onclick="updateTask(\'Cancelled\')" style="background:#fff;border:1.5px solid #E2E8F0;color:#94A3B8;border-radius:10px;padding:10px 18px;font-size:13px;cursor:pointer">✕ Cancel</button>';
+    if(t.status === 'New'||t.status === 'Assigned') html += '<button data-s="InProgress" onclick="updateTask(this.dataset.s)" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer">▶ Start</button>';
+    html += '<button data-s="Completed" onclick="updateTask(this.dataset.s)" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer">✓ Complete</button>';
+    if(isM) html += '<button data-s="Escalated" onclick="updateTask(this.dataset.s)" style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer">⚡ Escalate</button>';
+    if(isM) html += '<button data-s="Cancelled" onclick="updateTask(this.dataset.s)" style="background:#fff;border:1.5px solid #E2E8F0;color:#94A3B8;border-radius:10px;padding:10px 18px;font-size:13px;cursor:pointer">✕ Cancel</button>';
     html += '</div>';
   }
   html += '</div>';
