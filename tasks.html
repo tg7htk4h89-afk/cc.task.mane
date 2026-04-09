@@ -1112,9 +1112,10 @@ async function addTaskComment() {
   } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
 }
 
-// Close modal on backdrop click
-document.getElementById('taskModal').addEventListener('click', function(e){
-  if(e.target === this) closeTaskModal();
+// Close modal on backdrop click — deferred so element exists
+document.addEventListener('DOMContentLoaded', function(){
+  var m = document.getElementById('taskModal');
+  if(m) m.addEventListener('click', function(e){ if(e.target===this) closeTaskModal(); });
 });
 loadT();
 
