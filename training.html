@@ -819,25 +819,18 @@ async function loadT(){
       var statusColor={'Assigned':'#F4A523','InProgress':'#1877C5','Completed':'#0EA472','Delayed':'#E5383B'};
       var col=statusColor[p.status]||'#8A9BB0';
       var typeBadge={'individual':'1 agent','multiple_agents':'Multi','team':'Team','department':'Dept'};
-      return '<div class="trn-card '+(del?'delayed':'')+'" style="cursor:pointer" onclick="openCard(\''+p.training_id+'\')">'
-'
-        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;gap:8px">'
-'
-        +'<div style="font-weight:700;font-size:13px;color:var(--t1)">'+UTILS.esc(p.title||p.subject||'(No title)')+'</div>'
-'
-        +'<span style="font-size:10px;font-weight:700;color:'+col+';background:'+col+'18;padding:2px 7px;border-radius:4px;white-space:nowrap">'+p.status+'</span></div>'
-'
-        +'<div style="font-size:11px;color:var(--t3);margin-bottom:10px">'+(p.category||'')+' · '+(typeBadge[p.target_type]||p.target_type||'')+(p.trainer_names?' · '+p.trainer_names:'')+'</div>'
-'
-        +'<div class="progress-wrap" style="margin-bottom:8px"><div class="progress-bar"><div class="progress-fill '+(del?'danger':pct>=100?'success':'')+'" style="width:'+pct+'%"></div></div><span class="progress-label">'+pct+'%</span></div>'
-'
-        +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)">'
-'
-        +'<span>Due: '+(p.deadline||'—')+'</span>'
-'
-        +'<span>'+(p.completed_agents||0)+'/'+(p.total_agents||'?')+' agents</span></div>'
-'
-        +'</div>';
+      var card = '<div class="trn-card '+(del?'delayed':'');
+      card += '" style="cursor:pointer;border-left:3px solid '+col+'" onclick="openCard(\''+p.training_id+'\')">';
+      card += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:8px">';
+      card += '<div style="font-weight:700;font-size:13px;color:var(--t1);flex:1">'+UTILS.esc(p.title||'(No title)')+'</div>';
+      card += '<span style="font-size:10px;font-weight:700;color:'+col+';background:'+col+'18;padding:2px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0">'+p.status+'</span></div>';
+      card += '<div style="font-size:11px;color:var(--t3);margin-bottom:10px">'+(p.category||'')+(p.target_type?' &middot; '+(typeBadge[p.target_type]||p.target_type):'')+(p.trainer_names?' &middot; '+p.trainer_names:'')+'</div>';
+      card += '<div class="progress-wrap" style="margin-bottom:8px"><div class="progress-bar"><div class="progress-fill '+(del?'danger':pct>=100?'success':'')+'" style="width:'+pct+'%"></div></div><span class="progress-label">'+pct+'%</span></div>';
+      card += '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)">';
+      card += '<span>Due: '+(p.deadline||'—')+'</span>';
+      card += '<span>'+(p.completed_agents||0)+'/'+(p.total_agents||'?')+' agents</span></div>';
+      card += '</div>';
+      return card;
     }).join('');
   }catch(ex){UTILS.empty('tGrid','Could not load training',ex.message);}
 }
