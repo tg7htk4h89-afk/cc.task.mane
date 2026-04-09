@@ -260,8 +260,8 @@ var currentTargetType = 'individual';
 // Load users
 (async function(){
   try{
-    var d = await API.get('users_list', {});
-    allUsers = (d.users||[]).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+    var d = await API.get('agents_reference', {});
+    allUsers = (d.agents||[]).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
     populateSingleAgent();
     populateTeamTLs();
     populateMultiAgents();
@@ -272,15 +272,15 @@ var currentTargetType = 'individual';
 
 function populateSingleAgent(){
   var sel = document.getElementById('fSingleAgent');
-  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager'].includes(u.role);});
+  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);});
   agents.forEach(function(u){
-    var o=document.createElement('option');o.value=u.user_id;o.textContent=u.full_name+' ('+u.team+')';sel.appendChild(o);
+    var o=document.createElement('option');o.value=u.user_id;o.textContent=(u.full_name||u.name)+' ('+(u.team||'')+')'+(u.team_leader?' - '+u.team_leader:'');sel.appendChild(o);
   });
 }
 
 function populateTeamTLs(){
   var sel = document.getElementById('fTeamTL');
-  var tls = allUsers.filter(function(u){return u.role==='TL';});
+  var tls = allUsers.filter(function(u){return u.role==='TL'||u.role==='Team Leader';});
   tls.forEach(function(u){
     var o=document.createElement('option');o.value=u.user_id;o.textContent=u.full_name;sel.appendChild(o);
   });
@@ -292,8 +292,9 @@ function showTeamPreview(){
   var tl = allUsers.find(function(u){return u.user_id===tlId;});
   if(!tl){document.getElementById('teamPreview').style.display='none';return;}
   var members = allUsers.filter(function(u){
-    return !['HoD','TL','CC Manager','Manager','QA Manager'].includes(u.role) &&
-           (u.team_leader===tl.full_name || u.reports_to===tl.full_name || u.team===tl.team);
+    var tlName = tl.full_name||tl.name;
+    return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role) &&
+           (u.team_leader===tlName || u.team===tl.team);
   });
   var list = document.getElementById('teamPreviewList');
   list.innerHTML = members.map(function(m){
@@ -303,7 +304,7 @@ function showTeamPreview(){
 }
 
 function updateDeptCount(){
-  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager'].includes(u.role);});
+  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);});
   document.getElementById('deptCount').textContent = agents.length + ' agents across all teams will be assigned this training';
 }
 
@@ -342,12 +343,12 @@ function buildDropdownItems(containerId, items, selectedArr, onToggle){
 }
 
 function populateMultiAgents(){
-  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager'].includes(u.role);});
+  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);});
   buildDropdownItems('agentsDDItems', agents, selectedAgents, 'toggleAgent');
 }
 
 function populateTrainers(){
-  var trainers = allUsers.slice().sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+  var trainers = allUsers.filter(function(u){return ['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);});
   buildDropdownItems('trainersDDItems', trainers, selectedTrainers, 'toggleTrainer');
 }
 
@@ -445,7 +446,7 @@ async function submitTraining(){
     if(u) targetAgents=[{user_id:u.user_id,name:u.full_name}];
   } else if(currentTargetType==='multiple'){
     if(!selectedAgents.length){showMsg('Please select at least one agent','error');return;}
-    targetAgents=selectedAgents;
+    targetAgents=selectedAgents.map(function(a){return {user_id:a.user_id,name:a.name||a.full_name};});
   } else if(currentTargetType==='team'){
     var tlId=document.getElementById('fTeamTL').value;
     if(!tlId){showMsg('Please select a team leader','error');return;}
@@ -453,7 +454,7 @@ async function submitTraining(){
     targetAgents=allUsers.filter(function(u){return (u.team===tl.team||u.reports_to===tl.full_name)&&['Agent','QA Agent'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name};});
     if(!targetAgents.length){showMsg('No agents found for this team','error');return;}
   } else if(currentTargetType==='department'){
-    targetAgents=allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name};});
+    targetAgents=allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name||u.name};});
   }
 
   var btn=document.querySelector('button.btn-primary');
