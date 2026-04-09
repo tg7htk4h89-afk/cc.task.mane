@@ -291,15 +291,16 @@ function showTeamPreview(){
   var tlId = document.getElementById('fTeamTL').value;
   var tl = allUsers.find(function(u){return u.user_id===tlId;});
   if(!tl){document.getElementById('teamPreview').style.display='none';return;}
-  var tlName = tl.full_name || tl.name;
+  var tlName = (tl.full_name || tl.name || '').trim();
   var members = allUsers.filter(function(u){
-    return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role) &&
-           (u.team_leader===tlName || u.reports_to===tlName);
+    if(['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role)) return false;
+    // Match by TL user_id (most reliable) OR by name string
+    return u.team_leader_id === tlId || (u.team_leader||'').trim() === tlName;
   });
   var list = document.getElementById('teamPreviewList');
-  list.innerHTML = members.map(function(m){
-    return '<span style="display:inline-flex;padding:3px 8px;background:#E8F1FB;color:#1365A0;border-radius:5px;font-size:11px;font-weight:600">'+(m.full_name||m.name)+'</span>';
-  }).join('') || '<span style="font-size:12px;color:var(--t3)">No agents found under this TL</span>';
+  list.innerHTML = members.length
+    ? members.map(function(m){return '<span style="display:inline-flex;padding:3px 8px;background:#E8F1FB;color:#1365A0;border-radius:5px;font-size:11px;font-weight:600">'+(m.full_name||m.name)+'</span>';}).join('')
+    : '<span style="font-size:12px;color:var(--t3)">No agents found under this TL</span>';
   document.getElementById('teamPreview').style.display = '';
 }
 
@@ -451,10 +452,10 @@ async function submitTraining(){
     var tlId=document.getElementById('fTeamTL').value;
     if(!tlId){showMsg('Please select a team leader','error');return;}
     var tl=allUsers.find(function(u){return u.user_id===tlId;});
+    var tlName = (tl.full_name||tl.name||'').trim();
     targetAgents=allUsers.filter(function(u){
-      var tlName = tl.full_name||tl.name;
-      return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role) &&
-             (u.team_leader===tlName || u.reports_to===tlName);
+      if(['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role)) return false;
+      return u.team_leader_id === tlId || (u.team_leader||'').trim() === tlName;
     }).map(function(u){return {user_id:u.user_id,name:u.full_name||u.name};});
     if(!targetAgents.length){showMsg('No agents found for this team','error');return;}
   } else if(currentTargetType==='department'){
