@@ -736,7 +736,7 @@ input, select, textarea { font-family: var(--font); }
     <div class="kpi-card kpi-blue"><div class="kpi-icon blue"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="kpi-value" id="k1">—</div><div class="kpi-label">Total Tasks</div><div class="kpi-delta neutral" id="k1s">—</div></div>
     <div class="kpi-card kpi-red"><div class="kpi-icon red"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="kpi-value red" id="k2">—</div><div class="kpi-label">Overdue</div><div class="kpi-delta dn" id="k2s">—</div></div>
     <div class="kpi-card kpi-green"><div class="kpi-icon green"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg></div><div class="kpi-value" id="k3">—</div><div class="kpi-label">Handovers Today</div><div class="kpi-delta" id="k3s">—</div></div>
-    <div class="kpi-card kpi-amber"><div class="kpi-icon amber"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div><div class="kpi-value" id="k4">—</div><div class="kpi-label">Sales Today</div><div class="kpi-delta up" id="k4s">—</div></div>
+    <div class="kpi-card kpi-amber"><div class="kpi-icon amber"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div><div class="kpi-value" id="k4">—</div><div class="kpi-label">Sales Achievement</div><div class="kpi-delta up" id="k4s">—</div></div>
     <div class="kpi-card kpi-purple"><div class="kpi-icon purple"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><div class="kpi-value" id="k5">—</div><div class="kpi-label">Active Training</div><div class="kpi-delta dn" id="k5s">—</div></div>
   </div>
   <div class="bottom-grid">
@@ -751,7 +751,7 @@ input, select, textarea { font-family: var(--font); }
 </main>
 <script>
 
-var GAS_URL='https://script.google.com/macros/s/AKfycbzIyJQpN8qD90XlNgxAXx5kMYZBVme--JY98WNAbiB0na30ixXTGE6sDQkN01_LnODXLQ/exec';
+var GAS_URL='https://script.google.com/macros/s/AKfycbzgCYbHCXZ4pZJ-hGcexuE5ei_i9u3cvx0FUZ6oBwzzZKHgqO5YE7HIFc5bu9d2xUhWfw/exec';
 var SES_KEY='kib_ops_session';
 var API={
   _s:function(){try{return JSON.parse(localStorage.getItem(SES_KEY));}catch(e){return null;}},
@@ -819,8 +819,11 @@ async function loadDash(){
     document.getElementById('k2s').textContent=d.tasks.overdue+' need attention';
     document.getElementById('k3').textContent=d.handovers.submitted+'/'+(d.handovers.submitted+d.handovers.missing);
     var h3=document.getElementById('k3s');h3.className='kpi-delta '+(d.handovers.missing>0?'dn':'up');h3.textContent=d.handovers.missing>0?d.handovers.missing+' missing':'All submitted';
-    document.getElementById('k4').textContent='KWD '+Number(d.sales.today_amount||0).toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0});
-    document.getElementById('k4s').textContent=d.sales.achievement_pct+'% of target';
+    var ach=d.sales.avg_achievement_pct||0;
+    document.getElementById('k4').textContent=ach+'%';
+    var k4s=document.getElementById('k4s');
+    k4s.textContent='Avg daily target | TD: KWD '+(d.sales.transfer_today||0).toLocaleString();
+    k4s.className='kpi-delta '+(ach>=90?'up':ach>=70?'':'dn');
     document.getElementById('k5').textContent=d.training.active;
     var h5=document.getElementById('k5s');h5.className='kpi-delta '+(d.training.delayed>0?'dn':'up');h5.textContent=d.training.delayed>0?d.training.delayed+' delayed':'All on track';
 
