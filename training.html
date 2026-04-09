@@ -811,22 +811,37 @@ async function loadT(){
     document.getElementById('tA').textContent=act.length;
     document.getElementById('tD').textContent=del.length;
     document.getElementById('tC').textContent=comp.length;
-    document.getElementById('tP').textContent=(act.length?Math.round(act.reduce(function(s,t){return s+Number(t.progress_percentage||0)},0)/act.length):0)+'%';
+    document.getElementById('tP').textContent=(act.length?Math.round(act.reduce(function(s,t){return s+Number(t.completion_pct||t.progress_percentage||0)},0)/act.length):0)+'%';
     if(!plans.length){UTILS.empty('tGrid','No training plans');return;}
     document.getElementById('tGrid').innerHTML=plans.map(function(p){
-      var pct=Number(p.progress_percentage||0);
-      var del=p.status==='Delayed'||p.trend_status==='AtRisk';
-      return '<div class="trn-card '+(del?'delayed':'')+'">'
-        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:8px"><div style="font-weight:700;font-size:13px;color:var(--t1)">'+UTILS.esc(p.subject)+'</div><span class="trend-chip '+(TR[p.trend_status||'OnTrack']||'trend-ontrack')+'">'+(p.trend_status||'OnTrack')+'</span></div>'
-        +'<div style="font-size:11px;color:var(--t3);margin-bottom:10px">'+UTILS.esc(p.employee_name)+' · '+p.category+'</div>'
+      var pct=Number(p.completion_pct||p.progress_percentage||0);
+      var del=p.status==='Delayed';
+      var statusColor={'Assigned':'#F4A523','InProgress':'#1877C5','Completed':'#0EA472','Delayed':'#E5383B'};
+      var col=statusColor[p.status]||'#8A9BB0';
+      var typeBadge={'individual':'1 agent','multiple_agents':'Multi','team':'Team','department':'Dept'};
+      return '<div class="trn-card '+(del?'delayed':'')+'" style="cursor:pointer" onclick="openCard(\''+p.training_id+'\')">'
+'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;gap:8px">'
+'
+        +'<div style="font-weight:700;font-size:13px;color:var(--t1)">'+UTILS.esc(p.title||p.subject||'(No title)')+'</div>'
+'
+        +'<span style="font-size:10px;font-weight:700;color:'+col+';background:'+col+'18;padding:2px 7px;border-radius:4px;white-space:nowrap">'+p.status+'</span></div>'
+'
+        +'<div style="font-size:11px;color:var(--t3);margin-bottom:10px">'+(p.category||'')+' · '+(typeBadge[p.target_type]||p.target_type||'')+(p.trainer_names?' · '+p.trainer_names:'')+'</div>'
+'
         +'<div class="progress-wrap" style="margin-bottom:8px"><div class="progress-bar"><div class="progress-fill '+(del?'danger':pct>=100?'success':'')+'" style="width:'+pct+'%"></div></div><span class="progress-label">'+pct+'%</span></div>'
-        +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)"><span>Due: '+UTILS.fd(p.target_completion_date)+'</span><span>'+(p.completed_quantity||0)+'/'+p.target_quantity+'</span></div>'
-        +(AUTH.canDo('training.create')?'<button onclick="logP(\''+p.training_id+'\');" class="btn btn-secondary btn-sm" style="margin-top:10px;width:100%">Log Progress</button>':'')
+'
+        +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)">'
+'
+        +'<span>Due: '+(p.deadline||'—')+'</span>'
+'
+        +'<span>'+(p.completed_agents||0)+'/'+(p.total_agents||'?')+' agents</span></div>'
+'
         +'</div>';
     }).join('');
   }catch(ex){UTILS.empty('tGrid','Could not load training',ex.message);}
 }
-function logP(id){var qty=prompt('Quantity completed today:');if(!qty||isNaN(qty))return;var notes=prompt('Session notes (optional):')||'';API.post('training_progress',{training_id:id,qty_completed_today:qty,session_notes:notes}).then(function(){UTILS.toast('Progress logged','success');loadT();}).catch(function(ex){UTILS.toast('Error: '+ex.message,'error');});}
+function openCard(id){window.location.href='/cc.task.mane/training.html?view='+id;} function logP(id){openCard(id);}
 document.getElementById('tSt').addEventListener('change',loadT);
 loadT();
 
