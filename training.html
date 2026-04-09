@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -774,10 +774,10 @@ var AUTH={
 };
 var UTILS={
   esc:function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');},
-  fdt:function(iso){if(!iso)return'—';try{var d=new Date(iso);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}catch(e){return String(iso).slice(0,16);}},
-  fd:function(iso){if(!iso)return'—';try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch(e){return String(iso).slice(0,10);}},
+  fdt:function(iso){if(!iso)return'-';try{var d=new Date(iso);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}catch(e){return String(iso).slice(0,16);}},
+  fd:function(iso){if(!iso)return'-';try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch(e){return String(iso).slice(0,10);}},
   today:function(){return new Date(Date.now()+3*3600000).toISOString().slice(0,10);},
-  tr:function(iso){if(!iso)return{label:'—',overdue:false,diffMs:0};var diff=new Date(iso)-Date.now(),abs=Math.abs(diff);var label=abs<3600000?Math.floor(abs/60000)+'m':abs<86400000?Math.floor(abs/3600000)+'h':Math.floor(abs/86400000)+'d';return{label:diff<0?label+' over':label+' left',overdue:diff<0,diffMs:diff};},
+  tr:function(iso){if(!iso)return{label:'-',overdue:false,diffMs:0};var diff=new Date(iso)-Date.now(),abs=Math.abs(diff);var label=abs<3600000?Math.floor(abs/60000)+'m':abs<86400000?Math.floor(abs/3600000)+'h':Math.floor(abs/86400000)+'d';return{label:diff<0?label+' over':label+' left',overdue:diff<0,diffMs:diff};},
   ini:function(n){return String(n||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();},
   _avc:[['#dbeafe','#1d4ed8'],['#ede9fe','#6d28d9'],['#dcfce7','#15803d'],['#ffedd5','#c2410c'],['#fce7f3','#be185d'],['#ccfbf1','#0f766e']],
   avc:function(n){var h=0,s=String(n||'');for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))&0xffff;return this._avc[h%this._avc.length];},
@@ -827,7 +827,7 @@ async function loadT(){
       card += '<div style="font-size:11px;color:var(--t3);margin-bottom:10px">'+(p.category||'')+(p.target_type?' - '+(typeBadge[p.target_type]||p.target_type):'')+(p.trainer_names?' - '+p.trainer_names:'')+'</div>';
       card += '<div class="progress-wrap" style="margin-bottom:8px"><div class="progress-bar"><div class="progress-fill '+(del?'danger':pct>=100?'success':'')+'" style="width:'+pct+'%"></div></div><span class="progress-label">'+pct+'%</span></div>';
       card += '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)">';
-      card += '<span>Due: '+(p.deadline||'-')+'</span>';
+      card += '<span>Due: '+(p.deadline||'N/A')+'</span>';
       card += '<span>'+(p.completed_agents||0)+'/'+(p.total_agents||'?')+' agents</span></div>';
       card += '</div>';
       return card;
@@ -869,7 +869,7 @@ function renderCard(d) {
   html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px">';
   html += '<div>';
   html += '<div style="font-size:18px;font-weight:800;color:var(--t1);margin-bottom:4px">'+UTILS.esc(d.title)+'</div>';
-  html += '<div style="font-size:12px;color:var(--t3)">'+d.category+' &middot; '+d.target_type+' &middot; Created by '+d.created_by_name+'</div>';
+  html += '<div style="font-size:12px;color:var(--t3)">'+d.category+' - '+d.target_type+' - Created by '+d.created_by_name+'</div>';
   html += '</div>';
   html += '<span style="font-size:11px;font-weight:700;color:'+col+';background:'+col+'18;padding:4px 12px;border-radius:6px;white-space:nowrap;flex-shrink:0">'+d.status+'</span>';
   html += '</div>';
@@ -877,7 +877,7 @@ function renderCard(d) {
   // Info row
   html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">';
   html += '<div style="background:var(--bg2);border-radius:8px;padding:10px 14px"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:4px">Deadline</div><div style="font-size:13px;font-weight:600;color:var(--t1)">'+(d.deadline||'Not set')+'</div></div>';
-  html += '<div style="background:var(--bg2);border-radius:8px;padding:10px 14px"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:4px">Trainer(s)</div><div style="font-size:13px;font-weight:600;color:var(--t1)">'+(d.trainer_names||'—')+'</div></div>';
+  html += '<div style="background:var(--bg2);border-radius:8px;padding:10px 14px"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:4px">Trainer(s)</div><div style="font-size:13px;font-weight:600;color:var(--t1)">'+(d.trainer_names||'-')+'</div></div>';
   html += '<div style="background:var(--bg2);border-radius:8px;padding:10px 14px"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:4px">Progress</div>';
   html += '<div style="font-size:13px;font-weight:700;color:'+(pct>=100?'var(--green)':'var(--blue)')+'">'+d.completed_agents+'/'+d.total_agents+' ('+pct+'%)</div></div>';
   html += '</div>';
