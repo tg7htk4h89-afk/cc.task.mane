@@ -899,197 +899,204 @@ function renderCard(d) {
   var dlDate = dlClean ? new Date(dlClean[0]) : (d.deadline ? new Date(d.deadline) : null);
   var isOverdue = dlDate && dlDate < new Date() && d.status !== 'Completed';
 
-  // ══ HEADER BAND ═══════════════════════════════════════════════
-  html += '<div style="background:linear-gradient(135deg,#0F2744 0%,#1A4A7A 100%);padding:18px 22px 0;flex-shrink:0">';
+  // ══ HEADER ════════════════════════════════════════════════════
+  html += '<div style="background:linear-gradient(160deg,#0D1F3C 0%,#1E3A6E 60%,#1A4A7A 100%);padding:22px 24px 0;flex-shrink:0">';
 
-  // Top row: title left, ring right
-  html += '<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:12px">';
-  // Left: title + meta + status
+  // Status + meta row
+  html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">';
+  html += '<span style="font-size:10px;font-weight:700;color:'+col+';background:'+colBg+';padding:3px 12px;border-radius:20px;letter-spacing:.3px">'+d.status+'</span>';
+  html += '<span style="font-size:11px;color:rgba(255,255,255,.35)">'+UTILS.esc(d.category)+' · '+UTILS.esc(d.target_type)+'</span>';
+  html += '</div>';
+
+  // Title + ring row
+  html += '<div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:16px">';
   html += '<div style="flex:1;min-width:0">';
-  html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">';
-  html += '<span style="font-size:10px;font-weight:700;color:'+col+';background:'+colBg+';padding:2px 10px;border-radius:20px">'+d.status+'</span>';
-  html += '<span style="font-size:10px;color:rgba(255,255,255,.4)">'+UTILS.esc(d.category)+' · '+UTILS.esc(d.target_type)+'</span>';
+  html += '<div style="font-size:22px;font-weight:800;color:#fff;line-height:1.15;margin-bottom:5px">'+UTILS.esc(d.title)+'</div>';
+  html += '<div style="font-size:11px;color:rgba(255,255,255,.4)">Created by '+UTILS.esc(d.created_by_name)+'</div>';
   html += '</div>';
-  html += '<div style="font-size:19px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:4px">'+UTILS.esc(d.title)+'</div>';
-  html += '<div style="font-size:11px;color:rgba(255,255,255,.45)">By '+UTILS.esc(d.created_by_name)+'</div>';
-  html += '</div>';
-  // Right: progress ring
-  html += '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px">';
-  html += '<svg width=64 height=64 viewBox="0 0 70 70">';
-  html += '<circle cx=35 cy=35 r='+r+' fill=none stroke=rgba(255,255,255,0.1) stroke-width=7/>';
-  html += '<circle cx=35 cy=35 r='+r+' fill=none stroke="'+ringColor+'" stroke-width=7 stroke-linecap=round stroke-dasharray="'+dash+' '+circ+'" transform="rotate(-90 35 35)"/>';
-  html += '<text x=35 y=38 text-anchor=middle font-size=12 font-weight=800 fill=#fff font-family=inherit>'+pct+'%</text>';
+  // Ring
+  html += '<div style="flex-shrink:0;text-align:center">';
+  html += '<svg width="68" height="68" viewBox="0 0 68 68" style="display:block">';
+  html += '<circle cx="34" cy="34" r="28" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>';
+  html += '<circle cx="34" cy="34" r="28" fill="none" stroke="'+ringColor+'" stroke-width="8" stroke-linecap="round" stroke-dasharray="'+dash+' '+circ+'" transform="rotate(-90 34 34)"/>';
+  html += '<text x="34" y="37" text-anchor="middle" font-size="13" font-weight="800" fill="white" font-family="inherit">'+pct+'%</text>';
   html += '</svg>';
-  html += '<div style="font-size=9px;color:rgba(255,255,255,.4);font-size:9px">'+d.completed_agents+'/'+totalAgents+'</div>';
+  html += '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px">'+d.completed_agents+'/'+totalAgents+'</div>';
   html += '</div></div>';
 
-  // ── Stats bar ──────────────────────────────────────────────────
-  html += '<div style="display:flex;gap:0;border-top:1px solid rgba(255,255,255,.08)">';
+  // Stats strip
+  html += '<div style="display:flex;background:rgba(0,0,0,.15);border-radius:10px 10px 0 0;overflow:hidden;margin:0 -24px">';
   // Deadline
-  html += '<div style="flex:1;padding:10px 0;border-right:1px solid rgba(255,255,255,.08)">';
-  html += '<div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Deadline</div>';
+  html += '<div style="flex:1;padding:10px 16px;border-right:1px solid rgba(255,255,255,.06)">';
+  html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">📅 Deadline</div>';
   html += '<div style="font-size:12px;font-weight:700;color:'+(isOverdue?'#FCA5A5':'rgba(255,255,255,.9)')+'">'+(isOverdue?'⚠ ':'')+fmtDl(d.deadline)+'</div>';
   html += '</div>';
   // Trainers
-  html += '<div style="flex:2;padding:10px 12px;border-right:1px solid rgba(255,255,255,.08)">';
-  html += '<div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Trainer(s)</div>';
-  html += '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(d.trainer_names||'—')+'</div>';
+  html += '<div style="flex:2;padding:10px 16px;border-right:1px solid rgba(255,255,255,.06)">';
+  html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">👤 Trainer(s)</div>';
+  html += '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.trainer_names||'—')+'</div>';
   html += '</div>';
-  // Progress text
-  html += '<div style="flex:1;padding:10px 0 10px 12px">';
-  html += '<div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Progress</div>';
-  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9)">'+d.completed_agents+'/'+totalAgents+'</div>';
+  // Progress
+  html += '<div style="flex:1;padding:10px 16px">';
+  html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">✅ Progress</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9)">'+d.completed_agents+' / '+totalAgents+'</div>';
   html += '</div>';
-  // ── TAB BAR ───────────────────────────────────────────────────
-  html += '<div style="display:flex;gap:0;border-top:1px solid rgba(255,255,255,.1)">';
-  var tabs = [
-    {id:'tab-checklist', label:'Checklist', badge: d.completed_agents+'/'+totalAgents},
-    {id:'tab-comments',  label:'Comments',  badge: comments.length > 0 ? String(comments.length) : ''},
-    {id:'tab-extension', label:'Extension', badge: pendingExt ? '!' : ''}
+  html += '</div>';
+
+  // Tab bar
+  html += '<div style="display:flex;background:rgba(0,0,0,.2);margin:0 -24px">';
+  var tabs=[
+    {id:'tab-checklist',label:'Checklist',badge:d.completed_agents+'/'+totalAgents},
+    {id:'tab-comments', label:'Comments', badge:comments.length>0?String(comments.length):''},
+    {id:'tab-extension',label:'Extension',badge:pendingExt?'!':''}
   ];
-  tabs.forEach(function(t, i) {
-    html += '<button id="'+t.id+'" onclick="switchTab(\''+t.id+'\')" style="flex:1;background:none;border:none;padding:10px 6px 8px;font-size:12px;font-weight:600;color:'+(i===0?'#fff':'rgba(255,255,255,.45)')+';cursor:pointer;border-bottom:'+(i===0?'2px solid #60A5FA':'2px solid transparent')+';font-family:inherit;transition:all .2s;white-space:nowrap">'+t.label+(t.badge?'<span style="margin-left:5px;background:'+(t.badge==='!'?'#EF4444':'rgba(255,255,255,.2)')+';color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px">'+t.badge+'</span>':'')+'</button>';
+  tabs.forEach(function(t,i){
+    var active = i===0;
+    html += '<button id="'+t.id+'" onclick="switchTab(\''+t.id+'\')" style="flex:1;background:none;border:none;border-bottom:'+(active?'2px solid #60A5FA':'2px solid transparent')+';padding:11px 6px 9px;font-size:12px;font-weight:'+(active?'700':'500')+';color:'+(active?'#fff':'rgba(255,255,255,.45)')+';cursor:pointer;font-family:inherit;letter-spacing:.2px;white-space:nowrap;transition:all .2s">';
+    html += t.label;
+    if(t.badge) html += ' <span style="background:'+(t.badge==='!'?'#EF4444':'rgba(255,255,255,.18)')+';color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:3px">'+t.badge+'</span>';
+    html += '</button>';
   });
   html += '</div>';
-  html += '</div>'; // end header band
+  html += '</div>'; // end header
 
-  // ══ TAB PANELS ════════════════════════════════════════════════
-  html += '<div style="padding:18px 22px 22px">';
+  // ══ PANELS ════════════════════════════════════════════════════
+  html += '<div style="padding:20px 22px 24px;min-height:200px">';
 
-  // ── CHECKLIST PANEL ───────────────────────────────────────────
+  // ── CHECKLIST ─────────────────────────────────────────────────
   html += '<div id="panel-checklist">';
   if (d.description) {
-    html += '<div style="background:#F0F6FE;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--t2);line-height:1.6;border-left:3px solid var(--blue)">'+UTILS.esc(d.description)+'</div>';
+    html += '<div style="background:#EFF6FF;border-left:3px solid #3B82F6;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#1E3A5F;line-height:1.6">'+UTILS.esc(d.description)+'</div>';
   }
   // Progress bar
-  html += '<div style="background:#E2E8F0;border-radius:4px;height:6px;margin-bottom:14px;overflow:hidden">';
-  html += '<div style="height:100%;border-radius:4px;background:'+(pct>=100?'#10B981':'#3B82F6')+';width:'+pct+'%;transition:width .5s"></div>';
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">';
+  html += '<div style="flex:1;background:#E2E8F0;border-radius:6px;height:8px;overflow:hidden">';
+  html += '<div style="height:100%;border-radius:6px;background:'+(pct>=100?'#10B981':pct>50?'#3B82F6':'#F59E0B')+';width:'+pct+'%;transition:width .5s"></div>';
+  html += '</div>';
+  html += '<span style="font-size:12px;font-weight:700;color:'+(pct>=100?'#059669':'var(--t2)')+'">'+pct+'%</span>';
   html += '</div>';
   // Search
-  if (totalAgents > 5) {
+  if(totalAgents>5){
     html += '<div style="position:relative;margin-bottom:10px">';
-    html += '<div style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none">🔍</div>';
-    html += '<input type="text" id="agentSearch" oninput="filterAgentRows(this.value)" placeholder="Search agents..." style="width:100%;padding:8px 12px 8px 32px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box">';
+    html += '<svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>';
+    html += '<input type="text" id="agentSearch" oninput="filterAgentRows(this.value)" placeholder="Search agents..." style="width:100%;padding:9px 12px 9px 36px;border:1px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;box-sizing:border-box;background:#F8FAFC;outline:none">';
     html += '</div>';
   }
-  // Agent list
-  html += '<div style="display:flex;flex-direction:column;gap:5px;max-height:calc(100vh - 380px);overflow-y:auto;min-height:120px" id="agentList">';
-  if (!d.logs || !d.logs.length) {
-    html += '<div style="color:var(--t3);font-size:13px;padding:24px;text-align:center">No agents assigned</div>';
+  // Agent rows
+  html += '<div style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto" id="agentList">';
+  if(!d.logs||!d.logs.length){
+    html += '<div style="text-align:center;padding:32px;color:#94A3B8;font-size:13px">No agents assigned</div>';
   } else {
-    d.logs.forEach(function(log) {
-      var done = log.status === 'Completed';
-      html += '<div id="row_'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name).toLowerCase()+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:'+(done?'#F0FDF4':'#F8FAFC')+';border:1px solid '+(done?'#BBF7D0':'#E2E8F0')+';border-radius:8px;transition:all .2s">';
-      // Avatar with initial
-      html += '<div style="width:32px;height:32px;border-radius:50%;background:'+(done?'#10B981':'#94A3B8')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:#fff">'+UTILS.esc(log.agent_name).charAt(0)+'</div>';
+    d.logs.forEach(function(log){
+      var done = log.status==='Completed';
+      var avatarColor = done ? '#10B981' : (log.agent_name.charCodeAt(0)%2===0?'#6366F1':'#8B5CF6');
+      html += '<div id="row_'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name).toLowerCase()+'" style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:'+(done?'linear-gradient(90deg,#F0FDF4,#ECFDF5)':'#F8FAFC')+';border:1.5px solid '+(done?'#A7F3D0':'#E2E8F0')+';border-radius:10px;transition:all .2s">';
+      html += '<div style="width:34px;height:34px;border-radius:50%;background:'+avatarColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#fff;box-shadow:0 2px 6px '+avatarColor+'44">'+UTILS.esc(log.agent_name).charAt(0).toUpperCase()+'</div>';
       html += '<div style="flex:1;min-width:0">';
-      html += '<div style="font-size:13px;font-weight:600;color:var(--t1)">'+UTILS.esc(log.agent_name)+'</div>';
-      if (done && log.marked_by_name) {
+      html += '<div style="font-size:13px;font-weight:600;color:#0F172A">'+UTILS.esc(log.agent_name)+'</div>';
+      if(done&&log.marked_by_name){
         html += '<div style="font-size:10px;color:#059669;font-weight:600;margin-top:1px">✓ by '+UTILS.esc(log.marked_by_name)+(log.marked_datetime?' · '+log.marked_datetime.slice(0,10):'')+'</div>';
       }
       html += '</div>';
-      if (canMark) {
-        if (!done) {
-          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,true)" style="background:#10B981;color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">✓ Done</button>';
+      if(canMark){
+        if(!done){
+          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,true)" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;box-shadow:0 2px 6px #10B98144">✓ Done</button>';
         } else {
-          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,false)" style="background:#fff;color:#94A3B8;border:1px solid #E2E8F0;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;flex-shrink:0">↩</button>';
+          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,false)" style="background:#fff;color:#94A3B8;border:1.5px solid #E2E8F0;border-radius:8px;padding:6px 12px;font-size:11px;cursor:pointer;flex-shrink:0">↩ Undo</button>';
         }
       } else {
-        html += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;'+(done?'background:#D1FAE5;color:#065F46':'background:#FEF3C7;color:#92400E')+'">'+(done?'Done':'Pending')+'</span>';
+        html += '<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;'+(done?'background:#D1FAE5;color:#065F46':'background:#FEF3C7;color:#92400E')+'">'+(done?'Done':'Pending')+'</span>';
       }
       html += '</div>';
     });
   }
   html += '</div>';
-  html += '<div id="markError" style="display:none;margin-top:8px;padding:10px 14px;background:#FEE2E2;border-radius:8px;font-size:12px;color:#991B1B"></div>';
-  html += '</div>'; // end checklist panel
+  html += '<div id="markError" style="display:none;margin-top:10px;padding:10px 14px;background:#FEE2E2;border-radius:8px;font-size:12px;color:#991B1B;border:1px solid #FECACA"></div>';
+  html += '</div>';
 
-  // ── COMMENTS PANEL ────────────────────────────────────────────
+  // ── COMMENTS ──────────────────────────────────────────────────
   html += '<div id="panel-comments" style="display:none">';
-  if (comments.length === 0) {
-    html += '<div style="text-align:center;padding:28px 0 16px">';
-    html += '<div style="font-size:32px;margin-bottom:8px">💬</div>';
-    html += '<div style="font-size:13px;color:var(--t3)">No comments yet — be the first</div>';
+  if(comments.length===0){
+    html += '<div style="text-align:center;padding:36px 0 20px">';
+    html += '<div style="width:52px;height:52px;border-radius:50%;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px">💬</div>';
+    html += '<div style="font-size:13px;font-weight:600;color:#64748B">No comments yet</div>';
+    html += '<div style="font-size:12px;color:#94A3B8;margin-top:2px">Be the first to add one</div>';
     html += '</div>';
   } else {
-    html += '<div style="display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 420px);overflow-y:auto;min-height:80px;margin-bottom:14px">';
-    comments.forEach(function(c) {
-      var isMgr = ['HoD','CC Manager','Manager','CC Manager'].includes(c.author_role);
-      var avatarBg = isMgr ? '#1A4A7A' : '#64748B';
+    html += '<div style="display:flex;flex-direction:column;gap:12px;max-height:280px;overflow-y:auto;margin-bottom:16px;padding-right:4px">';
+    comments.forEach(function(c){
+      var isMgr=['HoD','CC Manager','Manager'].includes(c.author_role);
+      var colors=['#6366F1','#8B5CF6','#EC4899','#F59E0B','#10B981','#3B82F6'];
+      var ac=colors[c.author_name.charCodeAt(0)%colors.length];
       html += '<div style="display:flex;gap:10px">';
-      html += '<div style="width:34px;height:34px;border-radius:50%;background:'+avatarBg+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:#fff">'+UTILS.esc(c.author_name).charAt(0)+'</div>';
-      html += '<div style="flex:1;background:var(--bg2);border-radius:0 10px 10px 10px;padding:10px 14px;border:1px solid var(--border)">';
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">';
-      html += '<span style="font-size:12px;font-weight:700;color:var(--t1)">'+UTILS.esc(c.author_name)+'</span>';
-      html += '<span style="font-size:10px;color:var(--t3)">'+UTILS.fdt(c.created_datetime)+'</span>';
+      html += '<div style="width:36px;height:36px;border-radius:50%;background:'+ac+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#fff;box-shadow:0 2px 8px '+ac+'44">'+UTILS.esc(c.author_name).charAt(0)+'</div>';
+      html += '<div style="flex:1;min-width:0">';
+      html += '<div style="background:'+(isMgr?'#EFF6FF':'#F8FAFC')+';border:1px solid '+(isMgr?'#BFDBFE':'#E2E8F0')+';border-radius:4px 14px 14px 14px;padding:11px 14px">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+      html += '<span style="font-size:12px;font-weight:700;color:#0F172A">'+UTILS.esc(c.author_name)+(isMgr?' <span style="font-size:9px;background:#BFDBFE;color:#1E40AF;padding:1px 6px;border-radius:10px;font-weight:700">Manager</span>':'')+'</span>';
+      html += '<span style="font-size:10px;color:#94A3B8;white-space:nowrap">'+UTILS.fdt(c.created_datetime)+'</span>';
       html += '</div>';
-      html += '<div style="font-size:13px;color:var(--t2);line-height:1.5;white-space:pre-wrap">'+UTILS.esc(c.comment_text)+'</div>';
-      html += '</div></div>';
+      html += '<div style="font-size:13px;color:#334155;line-height:1.55;white-space:pre-wrap">'+UTILS.esc(c.comment_text)+'</div>';
+      html += '</div></div></div>';
     });
     html += '</div>';
   }
-  // Comment composer
-  html += '<div style="display:flex;gap:10px;align-items:flex-end;padding-top:10px;border-top:1px solid var(--border)">';
-  html += '<div style="width:34px;height:34px;border-radius:50%;background:#1A4A7A;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:#fff">'+UTILS.esc(S.display_name||S.full_name||'?').charAt(0)+'</div>';
-  html += '<textarea id="commentInput" rows="2" placeholder="Write a comment..." style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;min-width:0"></textarea>';
-  html += '<button onclick="submitComment()" style="background:#1A4A7A;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">Send</button>';
+  // Composer
+  html += '<div style="display:flex;gap:10px;align-items:flex-end;padding-top:14px;border-top:1px solid #F1F5F9">';
+  var myInitial = UTILS.esc(S.display_name||S.full_name||'?').charAt(0);
+  var myColors=['#6366F1','#8B5CF6','#EC4899','#F59E0B','#10B981','#3B82F6'];
+  var myColor=myColors[(S.full_name||'A').charCodeAt(0)%myColors.length];
+  html += '<div style="width:36px;height:36px;border-radius:50%;background:'+myColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#fff">'+myInitial+'</div>';
+  html += '<div style="flex:1;min-width:0;position:relative">';
+  html += '<textarea id="commentInput" rows="2" placeholder="Write a comment..." style="width:100%;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:12px;font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;background:#F8FAFC;outline:none;transition:border-color .2s" onfocus="this.style.borderColor=\'#3B82F6\';this.style.background=\'#fff\'" onblur="this.style.borderColor=\'#E2E8F0\';this.style.background=\'#F8FAFC\'"></textarea>';
   html += '</div>';
-  html += '</div>'; // end comments panel
+  html += '<button onclick="submitComment()" style="background:linear-gradient(135deg,#1E3A6E,#1A4A7A);color:#fff;border:none;border-radius:12px;padding:11px 20px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px #1A4A7A44">Send</button>';
+  html += '</div>';
+  html += '</div>';
 
-  // ── EXTENSION PANEL ───────────────────────────────────────────
+  // ── EXTENSION ─────────────────────────────────────────────────
   html += '<div id="panel-extension" style="display:none">';
-
-  if (pendingExt && isManager) {
-    html += '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:16px;margin-bottom:12px">';
-    html += '<div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:10px">⏳ Pending request from '+UTILS.esc(pendingExt.requested_by_name)+'</div>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">';
-    html += '<div style="background:#fff;border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:2px">Current</div><div style="font-size:14px;font-weight:700;color:var(--t1)">'+fmtDl(pendingExt.current_deadline)+'</div></div>';
-    html += '<div style="background:#EFF6FF;border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:2px">Requested</div><div style="font-size:14px;font-weight:700;color:#1877C5">'+fmtDl(pendingExt.requested_deadline)+'</div></div>';
+  if(pendingExt&&isManager){
+    html += '<div style="background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1.5px solid #FDE68A;border-radius:14px;padding:18px;margin-bottom:14px">';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:18px">⏳</span><span style="font-size:13px;font-weight:700;color:#92400E">Pending from '+UTILS.esc(pendingExt.requested_by_name)+'</span></div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">';
+    html += '<div style="background:#fff;border-radius:10px;padding:12px"><div style="font-size:10px;color:#92400E;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Current</div><div style="font-size:16px;font-weight:800;color:#0F172A">'+fmtDl(pendingExt.current_deadline)+'</div></div>';
+    html += '<div style="background:#EFF6FF;border-radius:10px;padding:12px;border:1px solid #BFDBFE"><div style="font-size:10px;color:#1E40AF;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Requested</div><div style="font-size:16px;font-weight:800;color:#1E40AF">'+fmtDl(pendingExt.requested_deadline)+'</div></div>';
     html += '</div>';
-    html += '<div style="background:#fff;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;color:var(--t2)"><b>Reason:</b> '+UTILS.esc(pendingExt.reason)+'</div>';
-    html += '<input type="text" id="reviewNotes" placeholder="Add review note (optional)..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;margin-bottom:10px">';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
-    html += '<button data-extid="'+pendingExt.ext_id+'" data-dec="Approved" onclick="handleExtReview(this)" style="background:#10B981;color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer">✅ Approve</button>';
-    html += '<button data-extid="'+pendingExt.ext_id+'" data-dec="Rejected" onclick="handleExtReview(this)" style="background:#EF4444;color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer">❌ Reject</button>';
+    html += '<div style="background:#fff;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:#334155;line-height:1.5"><span style="font-weight:700;color:#92400E">Reason:</span> '+UTILS.esc(pendingExt.reason)+'</div>';
+    html += '<input type="text" id="reviewNotes" placeholder="Add a review note (optional)..." style="width:100%;padding:10px 14px;border:1.5px solid #FDE68A;border-radius:10px;font-size:12px;font-family:inherit;box-sizing:border-box;margin-bottom:12px;background:#fff;outline:none">';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+    html += '<button data-extid="'+pendingExt.ext_id+'" data-dec="Approved" onclick="handleExtReview(this)" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px #10B98133">✅ Approve</button>';
+    html += '<button data-extid="'+pendingExt.ext_id+'" data-dec="Rejected" onclick="handleExtReview(this)" style="background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px #EF444433">❌ Reject</button>';
     html += '</div></div>';
   }
-
-  if (latestExt && latestExt.status !== 'Pending') {
-    var xBg = latestExt.status==='Approved'?'#ECFDF5':'#FEF2F2';
-    var xBd = latestExt.status==='Approved'?'#A7F3D0':'#FECACA';
-    var xCl = latestExt.status==='Approved'?'#065F46':'#991B1B';
-    html += '<div style="background:'+xBg+';border:1px solid '+xBd+';border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:'+xCl+'">';
-    html += (latestExt.status==='Approved'?'✅':'❌')+' Last request by <b>'+UTILS.esc(latestExt.requested_by_name)+'</b> — <b>'+latestExt.status+'</b>';
-    if (latestExt.reviewed_by_name) html += ' by '+UTILS.esc(latestExt.reviewed_by_name);
-    if (latestExt.review_notes) html += '<br><span style="opacity:.8">Note: '+UTILS.esc(latestExt.review_notes)+'</span>';
+  if(latestExt&&latestExt.status!=='Pending'){
+    var xOk=latestExt.status==='Approved';
+    html += '<div style="background:'+(xOk?'#ECFDF5':'#FEF2F2')+';border:1.5px solid '+(xOk?'#A7F3D0':'#FECACA')+';border-radius:12px;padding:14px;margin-bottom:14px">';
+    html += '<div style="font-size:13px;font-weight:600;color:'+(xOk?'#065F46':'#991B1B')+'">'+(xOk?'✅':'❌')+' Request by <b>'+UTILS.esc(latestExt.requested_by_name)+'</b> was <b>'+latestExt.status+'</b>'+(latestExt.reviewed_by_name?' by '+UTILS.esc(latestExt.reviewed_by_name):'')+'</div>';
+    if(latestExt.review_notes) html += '<div style="font-size:12px;color:#64748B;margin-top:6px">Note: '+UTILS.esc(latestExt.review_notes)+'</div>';
     html += '</div>';
   }
-
-  if (pendingExt && !isManager) {
-    html += '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px;margin-bottom:12px;font-size:13px;color:#1E40AF">⏳ Your extension request to <b>'+fmtDl(pendingExt.requested_deadline)+'</b> is pending manager approval.</div>';
+  if(pendingExt&&!isManager){
+    html += '<div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:12px;padding:16px;margin-bottom:14px;font-size:13px;color:#1E40AF">⏳ Your extension request to <b>'+fmtDl(pendingExt.requested_deadline)+'</b> is pending manager approval.</div>';
   }
-
   // Extension form
-  html += '<div id="extFormWrap" style="display:none;background:#F8FAFC;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px">';
-  html += '<div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:12px">'+(isManager?'📅 Update Deadline':'📅 Request Extension')+'</div>';
-  html += '<div style="background:#fff;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--t3)">Current deadline: <b style="color:var(--t1)">'+fmtDl(d.deadline)+'</b></div>';
-  html += '<label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">New Deadline *</label>';
-  html += '<input type="date" id="extNewDate" min="'+UTILS.today()+'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;margin-bottom:10px">';
-  html += '<label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">'+(isManager?'Reason':'Reason *')+'</label>';
-  html += '<textarea id="extReason" rows="3" placeholder="'+(isManager?'Reason for updating...':'Why is the extension needed?')+'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;margin-bottom:10px"></textarea>';
-  html += '<div style="display:flex;gap:8px">';
-  html += '<button onclick="submitExtension()" style="background:#1A4A7A;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">'+(isManager?'Apply':'Submit Request')+'</button>';
-  html += '<button onclick="toggleExtForm(false)" style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer">Cancel</button>';
+  html += '<div id="extFormWrap" style="display:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:14px;padding:18px;margin-bottom:12px">';
+  html += '<div style="font-size:14px;font-weight:700;color:#0F172A;margin-bottom:14px">'+(isManager?'📅 Update Deadline':'📅 Request Deadline Extension')+'</div>';
+  html += '<div style="background:#EFF6FF;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#334155">Current deadline: <b style="color:#0F172A;font-size:14px">'+fmtDl(d.deadline)+'</b></div>';
+  html += '<label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">New Deadline *</label>';
+  html += '<input type="date" id="extNewDate" min="'+UTILS.today()+'" style="width:100%;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;box-sizing:border-box;margin-bottom:14px;background:#fff;outline:none">';
+  html += '<label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">'+(isManager?'Reason':'Reason *')+'</label>';
+  html += '<textarea id="extReason" rows="3" placeholder="'+(isManager?'Reason for updating...':'Explain why an extension is needed...')+'" style="width:100%;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;margin-bottom:14px;background:#fff;outline:none"></textarea>';
+  html += '<div style="display:flex;gap:10px">';
+  html += '<button onclick="submitExtension()" style="background:linear-gradient(135deg,#1E3A6E,#1A4A7A);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer">'+(isManager?'Apply':'Submit Request')+'</button>';
+  html += '<button onclick="toggleExtForm(false)" style="background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;padding:10px 18px;font-size:13px;cursor:pointer;color:#64748B">Cancel</button>';
   html += '</div></div>';
-
-  if (canShowExtBtn) {
-    html += '<button id="extOpenBtn" onclick="toggleExtForm(true)" style="width:100%;background:#fff;border:2px dashed #CBD5E1;border-radius:10px;padding:12px;font-size:13px;font-weight:600;color:#64748B;cursor:pointer">📅 '+(isManager?'Extend Deadline':'Request Deadline Extension')+'</button>';
-  } else if (!pendingExt && !canShowExtBtn) {
-    html += '<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px">No extension actions available</div>';
+  if(canShowExtBtn){
+    html += '<button id="extOpenBtn" onclick="toggleExtForm(true)" style="width:100%;background:#fff;border:2px dashed #CBD5E1;border-radius:12px;padding:14px;font-size:13px;font-weight:600;color:#64748B;cursor:pointer;transition:all .2s" onmouseover="this.style.background=\'#F8FAFC\'" onmouseout="this.style.background=\'#fff\'">📅 '+(isManager?'Extend Deadline':'Request Deadline Extension')+'</button>';
   }
-
   html += '</div>'; // end extension panel
-  html += '</div>'; // end tab panels wrapper
+  html += '</div>'; // end panels
 
   document.getElementById('cardBody').innerHTML = html;
 }
