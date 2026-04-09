@@ -857,9 +857,9 @@ function closeCard() {
 }
 
 function renderCard(d) {
-  var isTrainer = d.trainers && d.trainers.some(function(t){ return t.user_id === S.user_id; });
+  var isTrainer = d.trainers && d.trainers.some(function(t){ return t.user_id === S.user_id || t.name === S.full_name; });
   var isManager = ['HoD','CC Manager','Manager'].includes(S.role);
-  var canMark   = isTrainer || isManager;
+  var canMark   = isManager || isTrainer || ['TL','QA Manager'].includes(S.role);
   var statusCol = {'Assigned':'#F4A523','InProgress':'#1877C5','Completed':'#0EA472','Delayed':'#E5383B'};
   var col = statusCol[d.status] || '#8A9BB0';
 
@@ -911,7 +911,7 @@ function renderCard(d) {
       // Agent name
       html += '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--t1)">'+UTILS.esc(log.agent_name)+'</div>';
       if (done && log.marked_by_name) {
-        html += '<div style="font-size:10px;color:var(--t3)">Marked by '+log.marked_by_name+(log.marked_datetime?' on '+log.marked_datetime.slice(0,10):'')+'</div>';
+        html += '<div style="font-size:11px;color:var(--green);font-weight:600;margin-top:2px">✓ Marked by '+UTILS.esc(log.marked_by_name)+(log.marked_datetime?' · '+log.marked_datetime.slice(0,10):'')+'</div>';
       }
       html += '</div>';
       // Status badge
