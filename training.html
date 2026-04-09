@@ -856,6 +856,23 @@ function closeCard() {
   loadT();
 }
 
+// Format deadline — handles both YYYY-MM-DD and ugly full datetime strings
+function fmtDl(s) {
+  if (!s || s === 'Not set') return 'Not set';
+  try {
+    // Extract YYYY-MM-DD from any string
+    var m = String(s).match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (m) {
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return m[3] + ' ' + months[parseInt(m[2])-1] + ' ' + m[1];
+    }
+    // Fallback: parse as Date
+    var d = new Date(s);
+    if (!isNaN(d)) return d.getDate() + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] + ' ' + d.getFullYear();
+    return s;
+  } catch(e) { return s; }
+}
+
 function renderCard(d) {
   var isTrainer = d.trainers && d.trainers.some(function(t){ return t.user_id === S.user_id || t.name === S.full_name; });
   var isManager = ['HoD','CC Manager','Manager'].includes(S.role);
@@ -878,7 +895,9 @@ function renderCard(d) {
   var ringColor = pct >= 100 ? '#10B981' : pct > 0 ? '#3B82F6' : '#E2E8F0';
 
   var html = '';
-  var isOverdue = d.deadline && new Date(d.deadline) < new Date() && d.status !== 'Completed';
+  var dlClean = d.deadline ? String(d.deadline).match(/\d{4}-\d{2}-\d{2}/) : null;
+  var dlDate = dlClean ? new Date(dlClean[0]) : (d.deadline ? new Date(d.deadline) : null);
+  var isOverdue = dlDate && dlDate < new Date() && d.status !== 'Completed';
 
   // ══ HEADER BAND ═══════════════════════════════════════════════
   html += '<div style="background:linear-gradient(135deg,#0F2744 0%,#1A4A7A 100%);padding:18px 22px 0;flex-shrink:0">';
@@ -909,7 +928,7 @@ function renderCard(d) {
   // Deadline
   html += '<div style="flex:1;padding:10px 0;border-right:1px solid rgba(255,255,255,.08)">';
   html += '<div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Deadline</div>';
-  html += '<div style="font-size:12px;font-weight:700;color:'+(isOverdue?'#FCA5A5':'rgba(255,255,255,.9)')+'">'+(isOverdue?'⚠ ':'')+(d.deadline||'Not set')+'</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:'+(isOverdue?'#FCA5A5':'rgba(255,255,255,.9)')+'">'+(isOverdue?'⚠ ':'')+fmtDl(d.deadline)+'</div>';
   html += '</div>';
   // Trainers
   html += '<div style="flex:2;padding:10px 12px;border-right:1px solid rgba(255,255,255,.08)">';
@@ -1024,8 +1043,8 @@ function renderCard(d) {
     html += '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:16px;margin-bottom:12px">';
     html += '<div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:10px">⏳ Pending request from '+UTILS.esc(pendingExt.requested_by_name)+'</div>';
     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">';
-    html += '<div style="background:#fff;border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:2px">Current</div><div style="font-size:14px;font-weight:700;color:var(--t1)">'+(pendingExt.current_deadline||'Not set')+'</div></div>';
-    html += '<div style="background:#EFF6FF;border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:2px">Requested</div><div style="font-size:14px;font-weight:700;color:#1877C5">'+pendingExt.requested_deadline+'</div></div>';
+    html += '<div style="background:#fff;border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:2px">Current</div><div style="font-size:14px;font-weight:700;color:var(--t1)">'+fmtDl(pendingExt.current_deadline)+'</div></div>';
+    html += '<div style="background:#EFF6FF;border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:2px">Requested</div><div style="font-size:14px;font-weight:700;color:#1877C5">'+fmtDl(pendingExt.requested_deadline)+'</div></div>';
     html += '</div>';
     html += '<div style="background:#fff;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;color:var(--t2)"><b>Reason:</b> '+UTILS.esc(pendingExt.reason)+'</div>';
     html += '<input type="text" id="reviewNotes" placeholder="Add review note (optional)..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;margin-bottom:10px">';
@@ -1047,13 +1066,13 @@ function renderCard(d) {
   }
 
   if (pendingExt && !isManager) {
-    html += '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px;margin-bottom:12px;font-size:13px;color:#1E40AF">⏳ Your extension request to <b>'+pendingExt.requested_deadline+'</b> is pending manager approval.</div>';
+    html += '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px;margin-bottom:12px;font-size:13px;color:#1E40AF">⏳ Your extension request to <b>'+fmtDl(pendingExt.requested_deadline)+'</b> is pending manager approval.</div>';
   }
 
   // Extension form
   html += '<div id="extFormWrap" style="display:none;background:#F8FAFC;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px">';
   html += '<div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:12px">'+(isManager?'📅 Update Deadline':'📅 Request Extension')+'</div>';
-  html += '<div style="background:#fff;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--t3)">Current deadline: <b style="color:var(--t1)">'+(d.deadline||'Not set')+'</b></div>';
+  html += '<div style="background:#fff;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--t3)">Current deadline: <b style="color:var(--t1)">'+fmtDl(d.deadline)+'</b></div>';
   html += '<label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">New Deadline *</label>';
   html += '<input type="date" id="extNewDate" min="'+UTILS.today()+'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;margin-bottom:10px">';
   html += '<label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">'+(isManager?'Reason':'Reason *')+'</label>';
