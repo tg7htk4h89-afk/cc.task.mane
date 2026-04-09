@@ -901,27 +901,30 @@ function renderCard(d) {
   } else {
     d.logs.forEach(function(log) {
       var done = log.status === 'Completed';
-      html += '<div id="row_'+log.agent_user_id+'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:'+(done?'#DCFCE7':'var(--bg2)')+';border:1px solid '+(done?'#86EFAC':'var(--border)')+';border-radius:8px">';
-      // Checkbox
-      if (canMark) {
-        html += '<input type="checkbox" '+(done?'checked':'')+' onchange="markAgent(\"'+log.agent_user_id+'\",\"'+log.agent_name+'\",this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">';
-      } else {
-        html += '<div style="width:16px;height:16px;border-radius:4px;background:'+(done?'var(--green)':'var(--border)')+';display:flex;align-items:center;justify-content:center">'+(done?'<svg width=10 height=10 fill=none stroke=#fff stroke-width=2 viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':'')+'</div>';
-      }
-      // Agent name
-      html += '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--t1)">'+UTILS.esc(log.agent_name)+'</div>';
+      html += '<div id="row_'+log.agent_user_id+'" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:'+(done?'#DCFCE7':'var(--bg2)')+';border:1px solid '+(done?'#86EFAC':'var(--border)')+';border-radius:8px">';
+      html += '<div style="width:22px;height:22px;border-radius:50%;background:'+(done?'#0EA472':'var(--border)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">';
+      if (done) html += '<svg width=12 height=12 fill=none stroke=#fff stroke-width=2.5 viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+      html += '</div>';
+      html += '<div style="flex:1;min-width:0">';
+      html += '<div style="font-size:13px;font-weight:600;color:var(--t1)">'+UTILS.esc(log.agent_name)+'</div>';
       if (done && log.marked_by_name) {
-        html += '<div style="font-size:11px;color:var(--green);font-weight:600;margin-top:2px">✓ Marked by '+UTILS.esc(log.marked_by_name)+(log.marked_datetime?' · '+log.marked_datetime.slice(0,10):'')+'</div>';
+        html += '<div style="font-size:11px;color:#166534;font-weight:600;margin-top:1px">✓ Marked by '+UTILS.esc(log.marked_by_name)+(log.marked_datetime?' · '+log.marked_datetime.slice(0,10):'')+'</div>';
       }
       html += '</div>';
-      // Status badge
-      html += '<span style="font-size:10px;font-weight:700;color:'+(done?'#166534':'#854D0E')+';background:'+(done?'#DCFCE7':'#FEF9C3')+';padding:2px 8px;border-radius:4px">'+(done?'Completed':'Pending')+'</span>';
+      if (canMark) {
+        if (!done) {
+          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,true)" style="background:#0EA472;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✓ Mark Done</button>';
+        } else {
+          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,false)" style="background:var(--bg);color:var(--t3);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-size:12px;cursor:pointer;flex-shrink:0">↩ Undo</button>';
+        }
+      } else {
+        html += '<span style="font-size:10px;font-weight:700;color:'+(done?'#166534':'#854D0E')+';background:'+(done?'#DCFCE7':'#FEF9C3')+';padding:3px 10px;border-radius:4px">'+(done?'Completed':'Pending')+'</span>';
+      }
       html += '</div>';
     });
   }
-  html += '</div>';  // close agentList
+  html += '</div>';
 
-  // Inline error display for mark failures
   html += '<div id="markError" style="display:none;margin-top:8px;padding:10px 14px;background:#FEE2E2;border-radius:8px;font-size:12px;color:#991B1B;border:1px solid #FECACA"></div>';
 
   // ── Deadline Extension Section ──────────────────────────────────
