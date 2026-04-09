@@ -1,4 +1,220 @@
-<!DOCTYPE html>
+function renderCard(d) {
+  var isTrainer = d.trainers && d.trainers.some(function(t){ return t.user_id === S.user_id || t.name === S.full_name; });
+  var isManager = ['HoD','CC Manager','Manager'].includes(S.role);
+  var canMark   = isManager || isTrainer || ['TL','QA Manager'].includes(S.role);
+  var statusCol = {'Assigned':'#F59E0B','InProgress':'#3B82F6','Completed':'#10B981','Delayed':'#EF4444'};
+  var statusBg  = {'Assigned':'#FFFBEB','InProgress':'#EFF6FF','Completed':'#ECFDF5','Delayed':'#FEF2F2'};
+  var col  = statusCol[d.status] || '#94A3B8';
+  var colBg= statusBg[d.status] || '#F8FAFC';
+  var pct  = d.completion_pct || 0;
+  var totalAgents = d.logs ? d.logs.length : 0;
+  var comments = d.comments || [];
+  var exts = d.extensions || [];
+  var pendingExt = exts.find(function(x){ return x.status==='Pending'; });
+  var latestExt  = exts[0] || null;
+  var canShowExtBtn = !pendingExt && (isManager || isTrainer || ['HoD','CC Manager','Manager','TL','QA Manager'].includes(S.role));
+
+  // ── Progress ring SVG ─────────────────────────────────────────
+  var r = 28; var circ = 2 * Math.PI * r;
+  var dash = pct / 100 * circ;
+  var ringColor = pct >= 100 ? '#10B981' : pct > 0 ? '#3B82F6' : '#E2E8F0';
+
+  var html = '';
+
+  // ══ HEADER BAND ═══════════════════════════════════════════════
+  html += '<div style="background:linear-gradient(135deg,#0F2744 0%,#1A4A7A 100%);border-radius:16px 16px 0 0;padding:20px 24px 0;margin:-1px -1px 0;">';
+
+  // Title row
+  html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px">';
+  html += '<div style="flex:1;min-width:0">';
+  html += '<div style="font-size:20px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:4px">'+UTILS.esc(d.title)+'</div>';
+  html += '<div style="font-size:11px;color:rgba(255,255,255,0.55);display:flex;align-items:center;gap:6px;flex-wrap:wrap">';
+  html += '<span>'+UTILS.esc(d.category)+'</span><span style="opacity:.4">•</span>';
+  html += '<span>'+UTILS.esc(d.target_type)+'</span><span style="opacity:.4">•</span>';
+  html += '<span>By '+UTILS.esc(d.created_by_name)+'</span>';
+  html += '</div></div>';
+  // Status pill + ring
+  html += '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">';
+  html += '<span style="font-size:10px;font-weight:700;color:'+col+';background:'+colBg+';padding:3px 12px;border-radius:20px">'+d.status+'</span>';
+  html += '<svg width=70 height=70 viewBox="0 0 70 70">';
+  html += '<circle cx=35 cy=35 r='+r+' fill=none stroke=#1E3A5F stroke-width=7/>';
+  html += '<circle cx=35 cy=35 r='+r+' fill=none stroke="'+ringColor+'" stroke-width=7 stroke-linecap=round stroke-dasharray="'+dash+' '+circ+'" transform="rotate(-90 35 35)" style="transition:stroke-dasharray .5s"/>';
+  html += '<text x=35 y=39 text-anchor=middle font-size=13 font-weight=800 fill=#fff font-family=inherit>'+pct+'%</text>';
+  html += '</svg></div></div>';
+
+  // ── Info chips row ─────────────────────────────────────────────
+  html += '<div style="display:flex;gap:20px;flex-wrap:wrap;padding-bottom:14px">';
+  // Deadline chip
+  var isOverdue = d.deadline && new Date(d.deadline) < new Date() && d.status !== 'Completed';
+  html += '<div style="display:flex;align-items:center;gap:6px">';
+  html += '<span style="font-size:16px">'+(isOverdue?'🔴':'📅')+'</span>';
+  html += '<div><div style="font-size:9px;color:rgba(255,255,255,.45);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Deadline</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:'+(isOverdue?'#FCA5A5':'#fff')+'">'+(d.deadline||'Not set')+'</div></div></div>';
+  // Trainers chip
+  html += '<div style="display:flex;align-items:center;gap:6px">';
+  html += '<span style="font-size:16px">👤</span>';
+  html += '<div><div style="font-size:9px;color:rgba(255,255,255,.45);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Trainer(s)</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:#fff">'+(d.trainer_names||'—')+'</div></div></div>';
+  // Progress chip
+  html += '<div style="display:flex;align-items:center;gap:6px">';
+  html += '<span style="font-size:16px">✅</span>';
+  html += '<div><div style="font-size:9px;color:rgba(255,255,255,.45);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Progress</div>';
+  html += '<div style="font-size:12px;font-weight:700;color:#fff">'+d.completed_agents+' / '+totalAgents+' agents</div></div></div>';
+  html += '</div>';
+
+  // ── TAB BAR ───────────────────────────────────────────────────
+  html += '<div style="display:flex;gap:0;border-top:1px solid rgba(255,255,255,.1)">';
+  var tabs = [
+    {id:'tab-checklist', label:'Checklist', badge: d.completed_agents+'/'+totalAgents},
+    {id:'tab-comments',  label:'Comments',  badge: comments.length > 0 ? String(comments.length) : ''},
+    {id:'tab-extension', label:'Extension', badge: pendingExt ? '!' : ''}
+  ];
+  tabs.forEach(function(t, i) {
+    html += '<button id="'+t.id+'" onclick="switchTab(\''+t.id+'\')" style="flex:1;background:none;border:none;padding:10px 6px 8px;font-size:12px;font-weight:600;color:'+(i===0?'#fff':'rgba(255,255,255,.45)')+';cursor:pointer;border-bottom:'+(i===0?'2px solid #60A5FA':'2px solid transparent')+';font-family:inherit;transition:all .2s;white-space:nowrap">'+t.label+(t.badge?'<span style="margin-left:5px;background:'+(t.badge==='!'?'#EF4444':'rgba(255,255,255,.2)')+';color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px">'+t.badge+'</span>':'')+'</button>';
+  });
+  html += '</div>';
+  html += '</div>'; // end header band
+
+  // ══ TAB PANELS ════════════════════════════════════════════════
+  html += '<div style="padding:20px 24px 24px">';
+
+  // ── CHECKLIST PANEL ───────────────────────────────────────────
+  html += '<div id="panel-checklist">';
+  if (d.description) {
+    html += '<div style="background:#F0F6FE;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--t2);line-height:1.6;border-left:3px solid var(--blue)">'+UTILS.esc(d.description)+'</div>';
+  }
+  // Progress bar
+  html += '<div style="background:#E2E8F0;border-radius:4px;height:6px;margin-bottom:14px;overflow:hidden">';
+  html += '<div style="height:100%;border-radius:4px;background:'+(pct>=100?'#10B981':'#3B82F6')+';width:'+pct+'%;transition:width .5s"></div>';
+  html += '</div>';
+  // Search
+  if (totalAgents > 5) {
+    html += '<div style="position:relative;margin-bottom:10px">';
+    html += '<div style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none">🔍</div>';
+    html += '<input type="text" id="agentSearch" oninput="filterAgentRows(this.value)" placeholder="Search agents..." style="width:100%;padding:8px 12px 8px 32px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box">';
+    html += '</div>';
+  }
+  // Agent list
+  html += '<div style="display:flex;flex-direction:column;gap:5px;max-height:260px;overflow-y:auto" id="agentList">';
+  if (!d.logs || !d.logs.length) {
+    html += '<div style="color:var(--t3);font-size:13px;padding:24px;text-align:center">No agents assigned</div>';
+  } else {
+    d.logs.forEach(function(log) {
+      var done = log.status === 'Completed';
+      html += '<div id="row_'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name).toLowerCase()+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:'+(done?'#F0FDF4':'#F8FAFC')+';border:1px solid '+(done?'#BBF7D0':'#E2E8F0')+';border-radius:8px;transition:all .2s">';
+      // Avatar with initial
+      html += '<div style="width:32px;height:32px;border-radius:50%;background:'+(done?'#10B981':'#94A3B8')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:#fff">'+UTILS.esc(log.agent_name).charAt(0)+'</div>';
+      html += '<div style="flex:1;min-width:0">';
+      html += '<div style="font-size:13px;font-weight:600;color:var(--t1)">'+UTILS.esc(log.agent_name)+'</div>';
+      if (done && log.marked_by_name) {
+        html += '<div style="font-size:10px;color:#059669;font-weight:600;margin-top:1px">✓ by '+UTILS.esc(log.marked_by_name)+(log.marked_datetime?' · '+log.marked_datetime.slice(0,10):'')+'</div>';
+      }
+      html += '</div>';
+      if (canMark) {
+        if (!done) {
+          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,true)" style="background:#10B981;color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">✓ Done</button>';
+        } else {
+          html += '<button data-uid="'+log.agent_user_id+'" data-name="'+UTILS.esc(log.agent_name)+'" onclick="markAgent(this.dataset.uid,this.dataset.name,false)" style="background:#fff;color:#94A3B8;border:1px solid #E2E8F0;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;flex-shrink:0">↩</button>';
+        }
+      } else {
+        html += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;'+(done?'background:#D1FAE5;color:#065F46':'background:#FEF3C7;color:#92400E')+'">'+(done?'Done':'Pending')+'</span>';
+      }
+      html += '</div>';
+    });
+  }
+  html += '</div>';
+  html += '<div id="markError" style="display:none;margin-top:8px;padding:10px 14px;background:#FEE2E2;border-radius:8px;font-size:12px;color:#991B1B"></div>';
+  html += '</div>'; // end checklist panel
+
+  // ── COMMENTS PANEL ────────────────────────────────────────────
+  html += '<div id="panel-comments" style="display:none">';
+  if (comments.length === 0) {
+    html += '<div style="text-align:center;padding:28px 0 16px">';
+    html += '<div style="font-size:32px;margin-bottom:8px">💬</div>';
+    html += '<div style="font-size:13px;color:var(--t3)">No comments yet — be the first</div>';
+    html += '</div>';
+  } else {
+    html += '<div style="display:flex;flex-direction:column;gap:10px;max-height:240px;overflow-y:auto;margin-bottom:14px">';
+    comments.forEach(function(c) {
+      var isMgr = ['HoD','CC Manager','Manager','CC Manager'].includes(c.author_role);
+      var avatarBg = isMgr ? '#1A4A7A' : '#64748B';
+      html += '<div style="display:flex;gap:10px">';
+      html += '<div style="width:34px;height:34px;border-radius:50%;background:'+avatarBg+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:#fff">'+UTILS.esc(c.author_name).charAt(0)+'</div>';
+      html += '<div style="flex:1;background:var(--bg2);border-radius:0 10px 10px 10px;padding:10px 14px;border:1px solid var(--border)">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">';
+      html += '<span style="font-size:12px;font-weight:700;color:var(--t1)">'+UTILS.esc(c.author_name)+'</span>';
+      html += '<span style="font-size:10px;color:var(--t3)">'+UTILS.fdt(c.created_datetime)+'</span>';
+      html += '</div>';
+      html += '<div style="font-size:13px;color:var(--t2);line-height:1.5;white-space:pre-wrap">'+UTILS.esc(c.comment_text)+'</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+  // Comment composer
+  html += '<div style="display:flex;gap:10px;align-items:flex-end;padding-top:10px;border-top:1px solid var(--border)">';
+  html += '<div style="width:34px;height:34px;border-radius:50%;background:#1A4A7A;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:#fff">'+UTILS.esc(S.display_name||S.full_name||'?').charAt(0)+'</div>';
+  html += '<textarea id="commentInput" rows="2" placeholder="Write a comment..." style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;min-width:0"></textarea>';
+  html += '<button onclick="submitComment()" style="background:#1A4A7A;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">Send</button>';
+  html += '</div>';
+  html += '</div>'; // end comments panel
+
+  // ── EXTENSION PANEL ───────────────────────────────────────────
+  html += '<div id="panel-extension" style="display:none">';
+
+  if (pendingExt && isManager) {
+    html += '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:16px;margin-bottom:12px">';
+    html += '<div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:10px">⏳ Pending request from '+UTILS.esc(pendingExt.requested_by_name)+'</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">';
+    html += '<div style="background:#fff;border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:2px">Current</div><div style="font-size:14px;font-weight:700;color:var(--t1)">'+(pendingExt.current_deadline||'Not set')+'</div></div>';
+    html += '<div style="background:#EFF6FF;border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:2px">Requested</div><div style="font-size:14px;font-weight:700;color:#1877C5">'+pendingExt.requested_deadline+'</div></div>';
+    html += '</div>';
+    html += '<div style="background:#fff;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;color:var(--t2)"><b>Reason:</b> '+UTILS.esc(pendingExt.reason)+'</div>';
+    html += '<input type="text" id="reviewNotes" placeholder="Add review note (optional)..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;box-sizing:border-box;margin-bottom:10px">';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+    html += '<button data-extid="'+pendingExt.ext_id+'" data-dec="Approved" onclick="handleExtReview(this)" style="background:#10B981;color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer">✅ Approve</button>';
+    html += '<button data-extid="'+pendingExt.ext_id+'" data-dec="Rejected" onclick="handleExtReview(this)" style="background:#EF4444;color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer">❌ Reject</button>';
+    html += '</div></div>';
+  }
+
+  if (latestExt && latestExt.status !== 'Pending') {
+    var xBg = latestExt.status==='Approved'?'#ECFDF5':'#FEF2F2';
+    var xBd = latestExt.status==='Approved'?'#A7F3D0':'#FECACA';
+    var xCl = latestExt.status==='Approved'?'#065F46':'#991B1B';
+    html += '<div style="background:'+xBg+';border:1px solid '+xBd+';border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:'+xCl+'">';
+    html += (latestExt.status==='Approved'?'✅':'❌')+' Last request by <b>'+UTILS.esc(latestExt.requested_by_name)+'</b> — <b>'+latestExt.status+'</b>';
+    if (latestExt.reviewed_by_name) html += ' by '+UTILS.esc(latestExt.reviewed_by_name);
+    if (latestExt.review_notes) html += '<br><span style="opacity:.8">Note: '+UTILS.esc(latestExt.review_notes)+'</span>';
+    html += '</div>';
+  }
+
+  if (pendingExt && !isManager) {
+    html += '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px;margin-bottom:12px;font-size:13px;color:#1E40AF">⏳ Your extension request to <b>'+pendingExt.requested_deadline+'</b> is pending manager approval.</div>';
+  }
+
+  // Extension form
+  html += '<div id="extFormWrap" style="display:none;background:#F8FAFC;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px">';
+  html += '<div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:12px">'+(isManager?'📅 Update Deadline':'📅 Request Extension')+'</div>';
+  html += '<div style="background:#fff;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--t3)">Current deadline: <b style="color:var(--t1)">'+(d.deadline||'Not set')+'</b></div>';
+  html += '<label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">New Deadline *</label>';
+  html += '<input type="date" id="extNewDate" min="'+UTILS.today()+'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;margin-bottom:10px">';
+  html += '<label style="font-size:11px;font-weight:600;color:var(--t3);display:block;margin-bottom:4px">'+(isManager?'Reason':'Reason *')+'</label>';
+  html += '<textarea id="extReason" rows="3" placeholder="'+(isManager?'Reason for updating...':'Why is the extension needed?')+'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;margin-bottom:10px"></textarea>';
+  html += '<div style="display:flex;gap:8px">';
+  html += '<button onclick="submitExtension()" style="background:#1A4A7A;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">'+(isManager?'Apply':'Submit Request')+'</button>';
+  html += '<button onclick="toggleExtForm(false)" style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer">Cancel</button>';
+  html += '</div></div>';
+
+  if (canShowExtBtn) {
+    html += '<button id="extOpenBtn" onclick="toggleExtForm(true)" style="width:100%;background:#fff;border:2px dashed #CBD5E1;border-radius:10px;padding:12px;font-size:13px;font-weight:600;color:#64748B;cursor:pointer">📅 '+(isManager?'Extend Deadline':'Request Deadline Extension')+'</button>';
+  } else if (!pendingExt && !canShowExtBtn) {
+    html += '<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px">No extension actions available</div>';
+  }
+
+  html += '</div>'; // end extension panel
+  html += '</div>'; // end tab panels wrapper
+
+  document.getElementById('cardBody').innerHTML = html;
+}<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1076,6 +1292,20 @@ async function markAgent(agentId, agentName, checked) {
 
 function logP(id){openCard(id);}
 
+function switchTab(activeId) {
+  var panels = {'tab-checklist':'panel-checklist','tab-comments':'panel-comments','tab-extension':'panel-extension'};
+  Object.keys(panels).forEach(function(tabId) {
+    var tab   = document.getElementById(tabId);
+    var panel = document.getElementById(panels[tabId]);
+    var isActive = tabId === activeId;
+    if (tab) {
+      tab.style.color       = isActive ? '#fff' : 'rgba(255,255,255,.45)';
+      tab.style.borderBottom= isActive ? '2px solid #60A5FA' : '2px solid transparent';
+    }
+    if (panel) panel.style.display = isActive ? '' : 'none';
+  });
+}
+
 function filterAgentRows(query) {
   var q = (query || '').toLowerCase().trim();
   var rows = document.querySelectorAll('#agentList [data-name]');
@@ -1183,10 +1413,10 @@ loadT();
 </script>
 
 <!-- Training Card Modal -->
-<div id="cardModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:300;overflow-y:auto;padding:40px 20px">
-  <div style="background:#fff;border-radius:20px;max-width:720px;margin:0 auto;padding:28px;position:relative">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
-      <button onclick="closeCard()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Close</button>
+<div id="cardModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:300;overflow-y:auto;padding:30px 16px">
+  <div style="background:#fff;border-radius:20px;max-width:680px;margin:0 auto;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,.3);position:relative">
+    <div style="display:flex;justify-content:flex-end;position:absolute;top:14px;right:16px;z-index:10">
+      <button onclick="closeCard()" style="background:rgba(255,255,255,.15);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;color:#fff;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)">✕</button>
     </div>
     <div id="cardBody"></div>
   </div>
