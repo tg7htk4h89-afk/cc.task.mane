@@ -834,10 +834,137 @@ async function loadT(){
     }).join('');
   }catch(ex){UTILS.empty('tGrid','Could not load training',ex.message);}
 }
-function openCard(id){window.location.href='/cc.task.mane/training.html?view='+id;} function logP(id){openCard(id);}
+
+var currentTraining = null;
+
+async function openCard(id) {
+  document.getElementById('cardModal').style.display = 'flex';
+  document.getElementById('cardBody').innerHTML = '<div style="padding:32px;text-align:center;color:var(--t3)">Loading...</div>';
+  try {
+    var d = await API.get('training_detail', {training_id: id});
+    currentTraining = d;
+    renderCard(d);
+  } catch(ex) {
+    document.getElementById('cardBody').innerHTML = '<div style="color:var(--red);padding:16px">Error: '+ex.message+'</div>';
+  }
+}
+
+function closeCard() {
+  document.getElementById('cardModal').style.display = 'none';
+  currentTraining = null;
+  loadT();
+}
+
+function renderCard(d) {
+  var isTrainer = d.trainers && d.trainers.some(function(t){ return t.user_id === S.user_id; });
+  var isManager = ['HoD','CC Manager','Manager'].includes(S.role);
+  var canMark   = isTrainer || isManager;
+  var statusCol = {'Assigned':'#F4A523','InProgress':'#1877C5','Completed':'#0EA472','Delayed':'#E5383B'};
+  var col = statusCol[d.status] || '#8A9BB0';
+
+  var pct = d.completion_pct || 0;
+
+  var html = '';
+  // Header
+  html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px">';
+  html += '<div>';
+  html += '<div style="font-size:18px;font-weight:800;color:var(--t1);margin-bottom:4px">'+UTILS.esc(d.title)+'</div>';
+  html += '<div style="font-size:12px;color:var(--t3)">'+d.category+' &middot; '+d.target_type+' &middot; Created by '+d.created_by_name+'</div>';
+  html += '</div>';
+  html += '<span style="font-size:11px;font-weight:700;color:'+col+';background:'+col+'18;padding:4px 12px;border-radius:6px;white-space:nowrap;flex-shrink:0">'+d.status+'</span>';
+  html += '</div>';
+
+  // Info row
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">';
+  html += '<div style="background:var(--bg2);border-radius:8px;padding:10px 14px"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:4px">Deadline</div><div style="font-size:13px;font-weight:600;color:var(--t1)">'+(d.deadline||'Not set')+'</div></div>';
+  html += '<div style="background:var(--bg2);border-radius:8px;padding:10px 14px"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:4px">Trainer(s)</div><div style="font-size:13px;font-weight:600;color:var(--t1)">'+(d.trainer_names||'—')+'</div></div>';
+  html += '<div style="background:var(--bg2);border-radius:8px;padding:10px 14px"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:4px">Progress</div>';
+  html += '<div style="font-size:13px;font-weight:700;color:'+(pct>=100?'var(--green)':'var(--blue)')+'">'+d.completed_agents+'/'+d.total_agents+' ('+pct+'%)</div></div>';
+  html += '</div>';
+
+  // Progress bar
+  html += '<div style="background:var(--border);border-radius:4px;height:8px;margin-bottom:16px;overflow:hidden">';
+  html += '<div style="height:100%;border-radius:4px;background:'+(pct>=100?'var(--green)':'var(--blue)')+';width:'+pct+'%;transition:width .4s"></div>';
+  html += '</div>';
+
+  if (d.description) {
+    html += '<div style="background:#F0F6FE;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--t2);line-height:1.6">'+UTILS.esc(d.description)+'</div>';
+  }
+
+  // Agent checklist
+  html += '<div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Agent Checklist</div>';
+  html += '<div style="display:flex;flex-direction:column;gap:6px" id="agentList">';
+
+  if (!d.logs || !d.logs.length) {
+    html += '<div style="color:var(--t3);font-size:13px;padding:16px;text-align:center">No agents assigned</div>';
+  } else {
+    d.logs.forEach(function(log) {
+      var done = log.status === 'Completed';
+      html += '<div id="row_'+log.agent_user_id+'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:'+(done?'#DCFCE7':'var(--bg2)')+';border:1px solid '+(done?'#86EFAC':'var(--border)')+';border-radius:8px">';
+      // Checkbox
+      if (canMark) {
+        html += '<input type="checkbox" '+(done?'checked':'')+' onchange="markAgent(''+log.agent_user_id+'',''+UTILS.esc(log.agent_name)+'',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)">';
+      } else {
+        html += '<div style="width:16px;height:16px;border-radius:4px;background:'+(done?'var(--green)':'var(--border)')+';display:flex;align-items:center;justify-content:center">'+(done?'<svg width=10 height=10 fill=none stroke=#fff stroke-width=2 viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':'')+'</div>';
+      }
+      // Agent name
+      html += '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--t1)">'+UTILS.esc(log.agent_name)+'</div>';
+      if (done && log.marked_by_name) {
+        html += '<div style="font-size:10px;color:var(--t3)">Marked by '+log.marked_by_name+(log.marked_datetime?' on '+log.marked_datetime.slice(0,10):'')+'</div>';
+      }
+      html += '</div>';
+      // Status badge
+      html += '<span style="font-size:10px;font-weight:700;color:'+(done?'#166534':'#854D0E')+';background:'+(done?'#DCFCE7':'#FEF9C3')+';padding:2px 8px;border-radius:4px">'+(done?'Completed':'Pending')+'</span>';
+      html += '</div>';
+    });
+  }
+  html += '</div>';
+
+  document.getElementById('cardBody').innerHTML = html;
+}
+
+async function markAgent(agentId, agentName, checked) {
+  if (!currentTraining) return;
+  var status = checked ? 'Completed' : 'Pending';
+  var row = document.getElementById('row_'+agentId);
+  if (row) {
+    row.style.opacity = '0.6';
+    row.style.pointerEvents = 'none';
+  }
+  try {
+    var d = await API.post('training_mark', {
+      training_id:  currentTraining.training_id,
+      agent_user_id: agentId,
+      status:       status
+    });
+    // Refresh the card
+    currentTraining.completion_pct = d.completion_pct;
+    currentTraining.completed_agents = d.completed;
+    var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
+    currentTraining = fresh;
+    renderCard(fresh);
+    if (d.completion_pct === 100) UTILS.toast('Training completed!', 'success');
+  } catch(ex) {
+    UTILS.toast('Error: '+ex.message, 'error');
+    if (row) { row.style.opacity=''; row.style.pointerEvents=''; }
+  }
+}
+
+function logP(id){openCard(id);}
+
 document.getElementById('tSt').addEventListener('change',loadT);
 loadT();
 
 </script>
+
+<!-- Training Card Modal -->
+<div id="cardModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:300;overflow-y:auto;padding:40px 20px">
+  <div style="background:#fff;border-radius:20px;max-width:720px;margin:0 auto;padding:28px;position:relative">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+      <button onclick="closeCard()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Close</button>
+    </div>
+    <div id="cardBody"></div>
+  </div>
+</div>
 </body>
 </html>
