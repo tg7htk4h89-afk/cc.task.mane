@@ -186,6 +186,7 @@ document.getElementById('sidebarToggle').addEventListener('click',function(){doc
 document.getElementById('addInput').addEventListener('focus',function(){document.getElementById('addBottom').style.display='flex';document.getElementById('addDate').min=UTILS.today();});
 async function loadBell(){try{var d=await API.get('notif_list',{limit:'5',unread_only:'true'});var nb=document.getElementById('notifBadge');if(nb){if(d.unread_count>0){nb.textContent=d.unread_count;nb.classList.remove('hidden');}else nb.classList.add('hidden');}}catch(e){}}
 var allTodos=[],curF='pending';
+function handleToggle(el){var id=el.dataset.tid;var isDone=el.dataset.done==='true';toggleDone(id,isDone);}
 async function loadTodos(){try{var d=await API.get('ptodo_list',{});allTodos=d.todos||[];render();}catch(ex){document.getElementById('todoList').innerHTML='<div style="padding:32px;text-align:center;color:#EF4444">'+UTILS.esc(ex.message)+'</div>';}}
 function isOverdue(dt){return dt&&dt<UTILS.today();}
 function isToday(dt){return dt&&dt===UTILS.today();}
@@ -233,9 +234,9 @@ function card(t){
   var dp='';
   if(t.due_date){var dl=ov?'date-overdue':td?'date-today':'date-ok';var ic=ov?'🔴':td?'⏰':'📅';dp='<div style="margin-top:5px"><span class="todo-date '+dl+'">'+ic+' '+t.due_date+'</span></div>';}
   return '<div class="'+cls+'" id="item_'+t.todo_id+'" style="animation:fadeIn .2s ease">'
-    +'<div class="chk'+(done?' chk-done':'')+'" onclick="toggleDone(''+t.todo_id+'','+done+')">'+(done?'<svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':'')+'</div>'
+    +'<div class="chk'+(done?' chk-done':'')+'" data-tid="'+t.todo_id+'" data-done="'+done+'" onclick="handleToggle(this)">'+(done?'<svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':'')+'</div>'
     +'<div class="todo-body"><div class="todo-title'+(done?' done-txt':'')+'">'+UTILS.esc(t.title)+'</div>'+(t.note?'<div class="todo-note">'+UTILS.esc(t.note)+'</div>':'')+dp+'</div>'
-    +'<div class="todo-actions"><button class="act-btn" onclick="startEdit(''+t.todo_id+'')">✏️</button><button class="act-btn act-del" onclick="deleteTodo(''+t.todo_id+'')">🗑</button></div>'
+    +'<div class="todo-actions"><button class="act-btn" data-tid="'+t.todo_id+'" onclick="startEdit(this.dataset.tid)">✏️</button><button class="act-btn act-del" data-tid="'+t.todo_id+'" onclick="deleteTodo(this.dataset.tid)">🗑</button></div>'
     +'</div>';
 }
 async function addTodo(){
@@ -267,7 +268,7 @@ function startEdit(id){
   el.innerHTML='<div class="chk" style="margin-top:4px"></div><div class="todo-body" style="display:flex;flex-direction:column;gap:8px">'
     +'<input class="edit-input" id="et_'+id+'" value="'+UTILS.esc(t.title)+'" placeholder="Task title">'
     +'<div style="display:flex;gap:8px;align-items:center"><input class="edit-date" id="ed_'+id+'" type="date" value="'+(t.due_date||'')+'"><input class="edit-input" id="en_'+id+'" value="'+UTILS.esc(t.note||'')+'" placeholder="Note..." style="font-size:12px;font-weight:500"></div>'
-    +'<div style="display:flex;gap:8px"><button onclick="saveEdit(''+id+'')" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Save</button>'
+    +'<div style="display:flex;gap:8px"><button data-sid="'+id+'" onclick="saveEdit(this.dataset.sid)" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Save</button>'
     +'<button onclick="render()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit">Cancel</button></div></div>';
   document.getElementById('et_'+id).focus();
 }
