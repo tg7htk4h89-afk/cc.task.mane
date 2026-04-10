@@ -700,6 +700,52 @@ input, select, textarea { font-family: var(--font); }
 
 
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── UNIVERSAL MOBILE ─────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); transition: transform .25s ease; }
+  .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,.35); }
+  .sidebar-toggle { display: flex !important; align-items: center; justify-content: center; }
+  .main-content { margin-left: 0 !important; }
+  .top-bar { padding: 0 14px; gap: 8px; }
+  .page-content { padding: 14px !important; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .page-title { font-size: 18px; }
+  .breadcrumb { font-size: 13px; }
+  .search-bar { display: none; }
+  .form-row, .form-row-3 { grid-template-columns: 1fr !important; }
+  .form-card { padding: 16px; }
+  .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+  .kanban-board { grid-template-columns: 1fr !important; }
+  .kanban-col { min-width: 0 !important; }
+  .kanban-wrap { overflow-x: unset; }
+  .stats-row, .bottom-grid, .chart-grid { grid-template-columns: 1fr !important; }
+  .btn { padding: 8px 14px; font-size: 12px; }
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .modal-inner, [style*="max-width:660px"], [style*="max-width: 660px"] { max-width: 100% !important; margin: 8px !important; border-radius: 14px !important; }
+  #taskModal { padding: 8px !important; }
+  .filter-bar, .filter-row { gap: 6px; flex-wrap: wrap; }
+  .filter-btn, .f-btn { font-size: 11px; padding: 5px 11px; }
+  .add-bottom { flex-wrap: wrap; }
+  .todo-actions { opacity: 1 !important; }
+  .stats-strip { flex-wrap: wrap; gap: 8px; }
+  .rec-btn { padding: 10px 6px !important; font-size: 12px !important; }
+  .sidebar-overlay { display: block; }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr !important; }
+  .page-content { padding: 10px !important; }
+  .form-card { padding: 14px; }
+  .top-bar { height: 50px; }
+  .stats-strip { gap: 6px; }
+  .stat-pill { font-size: 11px; padding: 5px 10px; }
+}
+.sidebar-overlay { display: none; }
+@media (max-width: 768px) {
+  #sidebarOverlay { display: none; }
+  .sidebar.open ~ #sidebarOverlay, #sidebarOverlay.visible { display: block !important; }
+}
+
 </style>
 </head>
 <body>
@@ -792,7 +838,7 @@ var UTILS={
   empty:function(id,title,sub){var el=document.getElementById(id);if(!el)return;el.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;padding:40px 20px;color:#8A9BB0;text-align:center;gap:8px"><svg width="36" height="36" fill="none" stroke="#B8C5D4" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg><div style="font-size:13px;font-weight:600;color:#4A5568">'+(title||'No data')+'</div>'+(sub?'<div style="font-size:11px">'+sub+'</div>':'')+'</div>';},
   loader:function(id){var el=document.getElementById(id);if(!el)return;el.innerHTML='<div style="padding:20px;display:flex;flex-direction:column;gap:10px"><div style="height:44px;background:linear-gradient(90deg,#F0F4F9 25%,#E4EAF3 50%,#F0F4F9 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;border-radius:8px"></div><div style="height:44px;background:linear-gradient(90deg,#F0F4F9 25%,#E4EAF3 50%,#F0F4F9 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;border-radius:8px"></div></div>';},
   setUser:function(s){if(!s)return;var i=document.getElementById('avatarInitials'),n=document.getElementById('sidebarName'),r=document.getElementById('sidebarRole');if(i)i.textContent=this.ini(s.full_name);if(n)n.textContent=s.display_name||s.full_name.split(' ')[0];if(r)r.textContent=s.role;document.querySelectorAll('[data-roles]').forEach(function(el){var roles=el.getAttribute('data-roles').split(',').map(function(r){return r.trim();});if(roles.indexOf(s.role)===-1)el.style.display='none';});},
-  sidebar:function(){var btn=document.getElementById('sidebarToggle'),sb=document.getElementById('sidebar');if(btn&&sb)btn.addEventListener('click',function(){sb.classList.toggle('open');});}
+  sidebar:function(){var btn=document.getElementById('sidebarToggle'),sb=document.getElementById('sidebar'),ov=document.getElementById('sidebarOverlay');if(btn&&sb){btn.addEventListener('click',function(){sb.classList.toggle('open');if(ov)ov.style.display=sb.classList.contains('open')?'block':'none';});}}
 };
 
 

@@ -98,6 +98,52 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--t1)
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main-content{margin-left:0}.sidebar-toggle{display:flex;}}
+
+/* ── UNIVERSAL MOBILE ─────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); transition: transform .25s ease; }
+  .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,.35); }
+  .sidebar-toggle { display: flex !important; align-items: center; justify-content: center; }
+  .main-content { margin-left: 0 !important; }
+  .top-bar { padding: 0 14px; gap: 8px; }
+  .page-content { padding: 14px !important; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .page-title { font-size: 18px; }
+  .breadcrumb { font-size: 13px; }
+  .search-bar { display: none; }
+  .form-row, .form-row-3 { grid-template-columns: 1fr !important; }
+  .form-card { padding: 16px; }
+  .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+  .kanban-board { grid-template-columns: 1fr !important; }
+  .kanban-col { min-width: 0 !important; }
+  .kanban-wrap { overflow-x: unset; }
+  .stats-row, .bottom-grid, .chart-grid { grid-template-columns: 1fr !important; }
+  .btn { padding: 8px 14px; font-size: 12px; }
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .modal-inner, [style*="max-width:660px"], [style*="max-width: 660px"] { max-width: 100% !important; margin: 8px !important; border-radius: 14px !important; }
+  #taskModal { padding: 8px !important; }
+  .filter-bar, .filter-row { gap: 6px; flex-wrap: wrap; }
+  .filter-btn, .f-btn { font-size: 11px; padding: 5px 11px; }
+  .add-bottom { flex-wrap: wrap; }
+  .todo-actions { opacity: 1 !important; }
+  .stats-strip { flex-wrap: wrap; gap: 8px; }
+  .rec-btn { padding: 10px 6px !important; font-size: 12px !important; }
+  .sidebar-overlay { display: block; }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr !important; }
+  .page-content { padding: 10px !important; }
+  .form-card { padding: 14px; }
+  .top-bar { height: 50px; }
+  .stats-strip { gap: 6px; }
+  .stat-pill { font-size: 11px; padding: 5px 10px; }
+}
+.sidebar-overlay { display: none; }
+@media (max-width: 768px) {
+  #sidebarOverlay { display: none; }
+  .sidebar.open ~ #sidebarOverlay, #sidebarOverlay.visible { display: block !important; }
+}
+
 </style>
 </head>
 <body>
@@ -138,7 +184,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--t1)
         <div class="add-circle"></div>
         <input id="addInput" type="text" placeholder="What do you need to do?" autocomplete="off" onkeydown="if(event.key==='Enter')addTodo()">
       </div>
-      <div class="add-bottom" id="addBottom" style="display:none">
+      <div class="add-bottom" id="addBottom">
         <label>📅</label>
         <input id="addDate" type="date">
         <input id="addNote" type="text" placeholder="Add a note...">
@@ -185,8 +231,8 @@ AUTH.requireAuth();
 var S=AUTH.getSession()||{};
 UTILS.setUser(S);
 document.getElementById('pageTitle').textContent=(S.display_name||S.full_name||'My')+String.fromCharCode(8217)+'s To-Do';
-document.getElementById('sidebarToggle').addEventListener('click',function(){document.getElementById('sidebar').classList.toggle('open');});
-document.getElementById('addInput').addEventListener('focus',function(){document.getElementById('addBottom').style.display='flex';document.getElementById('addDate').min=UTILS.today();});
+var _sb=document.getElementById('sidebar'),_ov=document.getElementById('sidebarOverlay');document.getElementById('sidebarToggle').addEventListener('click',function(){_sb.classList.toggle('open');if(_ov)_ov.style.display=_sb.classList.contains('open')?'block':'none';});
+document.getElementById('addDate').min=UTILS.today();
 async function loadBell(){try{var d=await API.get('notif_list',{limit:'5',unread_only:'true'});var nb=document.getElementById('notifBadge');if(nb){if(d.unread_count>0){nb.textContent=d.unread_count;nb.classList.remove('hidden');}else nb.classList.add('hidden');}}catch(e){}}
 var allTodos=[],curF='pending';
 function handleToggle(el){var id=el.dataset.tid;var isDone=el.dataset.done==='true';toggleDone(id,isDone);}
