@@ -928,12 +928,15 @@ function renderTD(d){
     html += '<div style="background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#92400E">⏱ SLA: <b>'+UTILS.esc(t.sla_value+' '+t.sla_unit)+'</b></div>';
   }
   // Actions
+  if(t.status==='Cancelled'){
+    html += '<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:10px"><div style="font-size:20px">🚫</div><div><div style="font-size:13px;font-weight:700;color:#991B1B">Task Cancelled</div><div style="font-size:12px;color:#EF4444;margin-top:2px">This task has been cancelled and is no longer active</div></div></div>';
+  }
   if(canAct){
     html += '<div style="display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #F1F5F9;padding-top:18px">';
     if(t.status==='New'||t.status==='Assigned') html += '<button onclick="updTD(\'InProgress\')" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px #3B82F633">▶ Start</button>';
     html += '<button onclick="updTD(\'Completed\')" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px #10B98133">✓ Complete</button>';
     if(isM) html += '<button onclick="updTD(\'Escalated\')" style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer">⚡ Escalate</button>';
-    if(isM) html += '<button onclick="updTD(\'Cancelled\')" style="background:#fff;border:1.5px solid #E2E8F0;color:#94A3B8;border-radius:10px;padding:11px 18px;font-size:13px;cursor:pointer">✕ Cancel</button>';
+    if(isM) html += '<button onclick="if(confirm(\'Cancel this task? This cannot be undone.\'))updTD(\'Cancelled\')" style="background:#FEF2F2;border:1.5px solid #FECACA;color:#EF4444;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;cursor:pointer">✕ Cancel Task</button>';
     html += '</div>';
   }
   html += '</div>';
