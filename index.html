@@ -748,6 +748,7 @@ input, select, textarea { font-family: var(--font); }
 </style>
 </head>
 <body>
+<div id="sidebarOverlay"></div>
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <div class="sidebar-logomark">KIB</div>
@@ -850,7 +851,7 @@ UTILS.sidebar();
 async function loadBell(){
   try{var d=await API.get('notif_list',{limit:'5',unread_only:'true'});var nb=document.getElementById('notifBadge');if(nb){if(d.unread_count>0){nb.textContent=d.unread_count;nb.classList.remove('hidden');}else{nb.classList.add('hidden');}}}catch(e){}
 }
-loadBell();setInterval(loadBell,60000);
+loadBell();if(window._interval_index)clearInterval(window._interval_index);window._interval_index=setInterval(loadBell,60000);
 
 var hr=new Date().getHours();
 document.getElementById('dsub').textContent='Good '+(hr<12?'morning':hr<17?'afternoon':'evening')+', '+(AUTH.getSession().display_name||AUTH.getSession().full_name.split(' ')[0]);

@@ -748,6 +748,7 @@ input, select, textarea { font-family: var(--font); }
 </style>
 </head>
 <body>
+<div id="sidebarOverlay"></div>
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <div class="sidebar-logomark">KIB</div>
@@ -847,6 +848,10 @@ var UTILS={
 };
 
 
+
+async function loadBell(){
+  try{var d=await API.get('notif_list',{limit:'5',unread_only:'true'});var nb=document.getElementById('notifBadge');if(nb){if(d.unread_count>0){nb.textContent=d.unread_count;nb.classList.remove('hidden');}else nb.classList.add('hidden');}}catch(e){}
+}
 AUTH.requireAuth();
 if(!AUTH.hasRole('HoD'))location.href='/cc.task.mane/index.html';
 UTILS.setUser(AUTH.getSession());UTILS.sidebar();
@@ -860,6 +865,7 @@ async function saveW(){
   try{await API.post('settings_update',{weight_task_completion:Number(document.getElementById('w1').value),weight_sla_compliance:Number(document.getElementById('w2').value),weight_handover_quality:Number(document.getElementById('w3').value),weight_training_progress:Number(document.getElementById('w4').value),weight_sales_achievement:Number(document.getElementById('w5').value)});UTILS.toast('Saved','success');}catch(ex){UTILS.toast('Error: '+ex.message,'error');}
 }
 
+loadBell();
 </script>
 </body>
 </html>

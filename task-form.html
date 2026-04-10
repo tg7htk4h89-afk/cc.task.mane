@@ -751,6 +751,7 @@ input, select, textarea { font-family: var(--font); }
 </style>
 </head>
 <body>
+<div id="sidebarOverlay"></div>
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <div class="sidebar-logomark">KIB</div>
@@ -871,6 +872,38 @@ input, select, textarea { font-family: var(--font); }
 </div>
 </main>
 <script>
+var GAS_URL='https://script.google.com/macros/s/AKfycbzgCYbHCXZ4pZJ-hGcexuE5ei_i9u3cvx0FUZ6oBwzzZKHgqO5YE7HIFc5bu9d2xUhWfw/exec';
+var SES_KEY='kib_ops_session';
+var API={
+  _t:function(){var s=AUTH.getSession();return s?s.session_token:null;},
+  get:async function(action,params){var url=new URL(GAS_URL);url.searchParams.set('action',action);var t=this._t();if(t)url.searchParams.set('session_token',t);Object.keys(params||{}).forEach(function(k){if(params[k]!=null&&params[k]!=='')url.searchParams.set(k,params[k]);});var r=await fetch(url.toString(),{redirect:'follow'});var d=await r.json();if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:'API error');return d.data;},
+  post:async function(action,body){var p=Object.assign({},body||{},{action:action});var t=this._t();if(t)p.session_token=t;var r=await fetch(GAS_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(p)});var txt=await r.text();var d;try{d=JSON.parse(txt);}catch(e){throw new Error('Invalid response');}if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:'API error');return d.data;}
+};
+var AUTH={
+  getSession:function(){try{var s=JSON.parse(localStorage.getItem(SES_KEY));return s&&new Date(s.expires_at)>new Date()?s:null;}catch(e){return null;}},
+  requireAuth:function(){if(!this.getSession())window.location.href='/cc.task.mane/login.html';},
+  logout:function(){localStorage.removeItem(SES_KEY);window.location.href='/cc.task.mane/login.html';},
+  getUserId:function(){var s=this.getSession();return s?s.user_id:null;},
+  canDo:function(a){var s=this.getSession();if(!s)return false;var m={'tasks.create':['HoD','Manager','CC Manager']};return m[a]?m[a].indexOf(s.role)!==-1:true;}
+};
+var UTILS={
+  esc:function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');},
+  ini:function(n){return String(n||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();},
+  today:function(){return new Date(Date.now()+3*3600000).toISOString().slice(0,10);},
+  toast:function(msg,type){var c={success:'#0EA472',error:'#E5383B',warning:'#F4A523',info:'#1877C5'};var t=document.createElement('div');t.style.cssText='position:fixed;bottom:20px;right:20px;background:#0D1B3E;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;border-left:3px solid '+(c[type]||c.info)+';box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:9999;max-width:340px;font-family:inherit';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},3500);},
+  setUser:function(s){if(!s)return;var i=document.getElementById('avatarInitials'),n=document.getElementById('sidebarName'),r=document.getElementById('sidebarRole');if(i)i.textContent=this.ini(s.full_name);if(n)n.textContent=s.display_name||s.full_name.split(' ')[0];if(r)r.textContent=s.role;document.querySelectorAll('[data-roles]').forEach(function(el){if(el.getAttribute('data-roles').split(',').map(function(x){return x.trim();}).indexOf(s.role)===-1)el.style.display='none';});}
+};
+
+async function loadBell(){
+  try{var d=await API.get('notif_list',{limit:'5',unread_only:'true'});var nb=document.getElementById('notifBadge');if(nb){if(d.unread_count>0){nb.textContent=d.unread_count;nb.classList.remove('hidden');}else nb.classList.add('hidden');}}catch(e){}
+}
+AUTH.requireAuth();
+UTILS.setUser(AUTH.getSession());
+// Sidebar toggle
+var _sb=document.getElementById('sidebar'),_ov=document.getElementById('sidebarOverlay');
+if(document.getElementById('sidebarToggle'))document.getElementById('sidebarToggle').addEventListener('click',function(){_sb.classList.toggle('open');if(_ov)_ov.style.display=_sb.classList.contains('open')?'block':'none';});
+if(_ov)_ov.addEventListener('click',function(){_sb.classList.remove('open');_ov.style.display='none';});
+
 
 function switchFTab(btn){
   var panels={'ftab-details':'fpanel-details','ftab-assignees':'fpanel-assignees','ftab-subtasks':'fpanel-subtasks','ftab-recurring':'fpanel-recurring'};
@@ -1031,5 +1064,6 @@ async function subT(){
   }catch(ex){ UTILS.toast('Error: '+ex.message,'error'); }
 }
 
+loadBell();
 </script>
 </body>>
