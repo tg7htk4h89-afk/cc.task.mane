@@ -746,6 +746,26 @@ input, select, textarea { font-family: var(--font); }
   .sidebar.open ~ #sidebarOverlay, #sidebarOverlay.visible { display: block !important; }
 }
 
+
+.form-label{display:block;font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.form-input{width:100%;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;background:#F8FAFC;outline:none;box-sizing:border-box;color:#0F172A;transition:border-color .2s}
+.form-input:focus{border-color:#1877C5;background:#fff}
+.form-group{margin-bottom:14px}
+@keyframes ntmSpin{to{transform:rotate(360deg)}}
+
+/* Kanban mobile fix - horizontal scroll better than stacking */
+@media (max-width: 768px) {
+  .kanban-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch; padding-bottom: 16px; }
+  .kanban-board { display: flex !important; gap: 10px !important; min-width: max-content !important; width: max-content !important; }
+  .kanban-col { min-width: 260px !important; width: 260px !important; flex-shrink: 0 !important; }
+}
+
+
+/* Tasks KPI 2-col on small screens */
+@media (max-width: 480px) {
+  .tasks-kpi { grid-template-columns: 1fr 1fr !important; }
+}
+
 </style>
 </head>
 <body>
@@ -756,7 +776,7 @@ input, select, textarea { font-family: var(--font); }
     <div class="sidebar-title">CC Task Manager</div>
     <div class="sidebar-sub">Kuwait International Bank</div>
   </div>
-  <div class="sidebar-nav"><div class='nav-section'>Main</div><a href="/cc.task.mane/index.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</a><a href="/cc.task.mane/tasks.html" class="nav-item active"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Tasks</a><a href="/cc.task.mane/todo.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>My To-Do</a><a href="/cc.task.mane/handover.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Handover</a><a href="/cc.task.mane/training.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Training</a><a href="/cc.task.mane/sales.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>Sales</a><div class='nav-section'>System</div><a href="/cc.task.mane/notifications.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</a><a href="/cc.task.mane/settings.html" class="nav-item" data-roles="HoD"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Settings</a></div>
+  <div class="sidebar-nav"><div class='nav-section'>Main</div><a href="/cc.task.mane/index.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</a><a href="/cc.task.mane/tasks.html" class="nav-item active"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Tasks</a><a href="/cc.task.mane/tasks-archive.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>Task Archive</a><a href="/cc.task.mane/todo.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>My To-Do</a><a href="/cc.task.mane/handover.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Handover</a><a href="/cc.task.mane/training.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Training</a><a href="/cc.task.mane/sales.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>Sales</a><div class='nav-section'>System</div><a href="/cc.task.mane/notifications.html" class="nav-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</a><a href="/cc.task.mane/settings.html" class="nav-item" data-roles="HoD"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Settings</a></div>
   <div class="sidebar-footer">
     <div class="user-chip">
       <div class="user-avatar" id="avatarInitials">?</div>
@@ -781,10 +801,10 @@ input, select, textarea { font-family: var(--font); }
         <button class="btn btn-secondary" id="fm" onclick="sf('mine',this)">Mine</button>
         <button class="btn btn-secondary" id="fo" onclick="sf('overdue',this)">Overdue</button>
       </div>
-      <a href="/cc.task.mane/task-form.html" class="btn btn-primary" id="btnNew" style="display:none"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Task</a>
+      <button class="btn btn-primary" id="btnNew" style="display:none" onclick="openNewTaskModal()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Task</button>
     </div>
   </div>
-  <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:16px">
+  <div class="kpi-grid tasks-kpi" style="margin-bottom:16px">
     <div class="kpi-card" style="padding:12px 14px"><div class="kpi-value" id="kT" style="font-size:20px">—</div><div class="kpi-label">Total</div></div>
     <div class="kpi-card" style="padding:12px 14px"><div class="kpi-value" id="kO" style="font-size:20px">—</div><div class="kpi-label">Open</div></div>
     <div class="kpi-card kpi-red" style="padding:12px 14px"><div class="kpi-value red" id="kX" style="font-size:20px">—</div><div class="kpi-label">Overdue</div></div>
@@ -890,7 +910,7 @@ function renderBoard(tasks){
     var mine=tasks.filter(function(t){return col.s.includes(t.status)});
     var show=col.id==='done'?mine.slice(0,4):mine;
     var cards=show.length?show.map(kcard).join(''):'<div class="k-empty">No '+col.label.toLowerCase()+' tasks</div>';
-    var plus=AUTH.canDo('tasks.create')?'<button class="k-plus-btn" onclick="location.href=\'/cc.task.mane/task-form.html\'">+</button>':'';
+    var plus=AUTH.canDo('tasks.create')?'<button class="k-plus-btn" onclick="openNewTaskModal()">+</button>':'';
     return '<div class="kanban-col kcol-'+col.id+'"><div class="kanban-col-header"><span class="kcol-title"><div class="kcol-dot" style="background:'+col.c+'"></div>'+col.label+'</span><span class="kcol-count">'+mine.length+'</span></div>'+cards+plus+'</div>';
   }).join('');
 }
@@ -1325,12 +1345,223 @@ async function reviewTaskExt(btn) {
   } catch(ex) { UTILS.toast('Error: '+ex.message, 'error'); }
 }
 
+
+// ══ NEW TASK MODAL ═══════════════════════════════════════════════
+var ntmAllUsers=[], ntmAssignees=[], ntmSubtasks=[], ntmRecurring='';
+
+function openNewTaskModal(){
+  var m=document.getElementById('newTaskModal');
+  m.style.display='flex';
+  // Reset form
+  ['nTitle','nDesc','nDue','nSV'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['nCat','nPri','nSU'].forEach(function(id){var el=document.getElementById(id);if(el)el.selectedIndex=0;});
+  ntmAssignees=[];ntmSubtasks=[];ntmRecurring='';
+  var rt=document.getElementById('nRecurringToggle');if(rt)rt.checked=false;
+  var rp=document.getElementById('nRecurringPanel');if(rp)rp.style.display='none';
+  document.querySelectorAll('.nrec-btn').forEach(function(b){b.style.background='#fff';b.style.color='#64748B';b.style.borderColor='#E2E8F0';});
+  var rpr=document.getElementById('nRecurringPreview');if(rpr)rpr.style.display='none';
+  // Reset to details tab
+  switchNTabById('ntab-details');
+  // Set min date
+  var due=document.getElementById('nDue');if(due)due.min=UTILS.today();
+  // Load/render
+  renderNAssigneeList('');
+  renderNSubtasks();
+  renderNSelectedPills();
+}
+
+function closeNewTaskModal(){
+  document.getElementById('newTaskModal').style.display='none';
+}
+
+// Tab switching
+function switchNTab(btn){
+  var panels={'ntab-details':'npanel-details','ntab-assignees':'npanel-assignees','ntab-subtasks':'npanel-subtasks','ntab-recurring':'npanel-recurring'};
+  Object.keys(panels).forEach(function(tid){
+    var t=document.getElementById(tid),p=document.getElementById(panels[tid]);
+    var active=tid===btn.dataset.tab;
+    if(t){t.style.color=active?'#fff':'rgba(255,255,255,.45)';t.style.borderBottom=active?'2px solid #60A5FA':'2px solid transparent';t.style.fontWeight=active?'700':'500';}
+    if(p)p.style.display=active?'':'none';
+  });
+}
+function switchNTabById(id){switchNTab(document.getElementById(id));}
+
+// Load users once
+(async function(){
+  try{
+    var d=await API.get('users_list',{});
+    ntmAllUsers=(d.users||[]).filter(function(u){return u.active_status!=='inactive';}).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+  }catch(e){console.error('users_list',e);}
+})();
+
+// Assignee list
+function renderNAssigneeList(query){
+  var list=document.getElementById('nAssigneeList');
+  if(!list)return;
+  if(ntmAllUsers.length===0){
+    list.innerHTML='<div style="padding:16px;text-align:center;color:#94A3B8;font-size:13px"><div style="width:20px;height:20px;border:2px solid #E2E8F0;border-top-color:#1A4A7A;border-radius:50%;animation:ntmSpin .8s linear infinite;margin:0 auto 8px"></div>Loading staff...</div>';
+    // Retry
+    if(!ntmAllUsers.length){setTimeout(function(){renderNAssigneeList(query);},600);}
+    return;
+  }
+  var q=(query||'').toLowerCase();
+  var filtered=q?ntmAllUsers.filter(function(u){return(u.full_name||'').toLowerCase().includes(q)||(u.role||'').toLowerCase().includes(q);}):ntmAllUsers;
+  if(filtered.length===0){list.innerHTML='<div style="padding:12px;text-align:center;color:#94A3B8;font-size:13px">No staff found</div>';return;}
+  var html='';
+  filtered.forEach(function(u){
+    var sel=ntmAssignees.some(function(a){return a.user_id===u.user_id;});
+    var ac=UTILS.avc(u.full_name);
+    html+='<div class="nrow" data-uid="'+u.user_id+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;background:'+(sel?'#EFF6FF':'#fff')+';border:1.5px solid '+(sel?'#BFDBFE':'transparent')+';transition:all .15s;margin-bottom:2px">';
+    html+='<div style="width:34px;height:34px;border-radius:50%;background:'+ac+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0">'+UTILS.ini(u.full_name)+'</div>';
+    html+='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0F172A">'+UTILS.esc(u.full_name)+'</div><div style="font-size:11px;color:#94A3B8">'+UTILS.esc(u.role||'')+'</div></div>';
+    if(sel)html+='<div style="width:22px;height:22px;border-radius:50%;background:#3B82F6;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>';
+    html+='</div>';
+  });
+  list.innerHTML=html;
+  list.onclick=function(e){
+    var row=e.target.closest('.nrow');if(!row)return;
+    var uid=row.dataset.uid;
+    var user=ntmAllUsers.find(function(u){return u.user_id===uid;});if(!user)return;
+    var idx=ntmAssignees.findIndex(function(a){return a.user_id===uid;});
+    if(idx>-1)ntmAssignees.splice(idx,1);else ntmAssignees.push({user_id:user.user_id,name:user.full_name,role:user.role});
+    renderNAssigneeList(document.getElementById('nAssigneeSearch').value);
+    renderNSelectedPills();
+  };
+}
+function filterNAssignees(q){renderNAssigneeList(q);}
+
+function renderNSelectedPills(){
+  var wrap=document.getElementById('nSelectedAssignees');
+  var count=document.getElementById('nAssigneeCount');
+  var badge=document.getElementById('ntabAssigneeBadge');
+  if(!wrap)return;
+  if(ntmAssignees.length===0){
+    wrap.innerHTML='<div style="color:#CBD5E1;font-size:13px;padding:4px">None selected — pick from list above</div>';
+    if(count)count.textContent='0 assignees';
+    if(badge)badge.style.display='none';
+    return;
+  }
+  var html='';
+  ntmAssignees.forEach(function(a){
+    var ac=UTILS.avc(a.name);
+    html+='<div class="npill" data-uid="'+a.user_id+'" style="display:inline-flex;align-items:center;gap:5px;background:#EFF6FF;border:1.5px solid #BFDBFE;color:#1E40AF;border-radius:20px;padding:5px 10px 5px 5px;font-size:12px;font-weight:600">';
+    html+='<div style="width:22px;height:22px;border-radius:50%;background:'+ac+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff">'+UTILS.ini(a.name)+'</div>';
+    html+=UTILS.esc(a.name.split(' ')[0]);
+    html+='<span class="npill-rm" style="cursor:pointer;opacity:.5;font-size:15px;line-height:1;margin-left:3px">×</span>';
+    html+='</div>';
+  });
+  wrap.innerHTML=html;
+  if(count)count.textContent=ntmAssignees.length+' assignee'+(ntmAssignees.length!==1?'s':'');
+  if(badge){badge.textContent=ntmAssignees.length;badge.style.display='inline';}
+  wrap.onclick=function(e){
+    var btn=e.target.closest('.npill-rm');if(!btn)return;
+    var pill=btn.closest('.npill');if(!pill)return;
+    ntmAssignees=ntmAssignees.filter(function(a){return a.user_id!==pill.dataset.uid;});
+    renderNAssigneeList(document.getElementById('nAssigneeSearch').value);
+    renderNSelectedPills();
+  };
+}
+
+// Sub-tasks
+function addNSubtask(){
+  var inp=document.getElementById('nSubtaskInput');
+  var val=(inp.value||'').trim();if(!val)return;
+  ntmSubtasks.push({title:val});inp.value='';inp.focus();
+  renderNSubtasks();
+}
+
+function renderNSubtasks(){
+  var list=document.getElementById('nSubtaskList');
+  var badge=document.getElementById('ntabSubBadge');
+  if(!list)return;
+  if(badge){badge.textContent=ntmSubtasks.length;badge.style.display=ntmSubtasks.length?'inline':'none';}
+  if(ntmSubtasks.length===0){
+    list.innerHTML='<div style="text-align:center;padding:20px;color:#CBD5E1;font-size:13px">No sub-tasks yet — add one below</div>';
+    return;
+  }
+  var html='';
+  ntmSubtasks.forEach(function(st,i){
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px">';
+    html+='<div style="width:22px;height:22px;border-radius:50%;background:#E2E8F0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#64748B;flex-shrink:0">'+(i+1)+'</div>';
+    html+='<div style="flex:1;font-size:13px;font-weight:600;color:#0F172A">'+UTILS.esc(st.title)+'</div>';
+    html+='<button class="nrm-sub" data-idx="'+i+'" style="background:#FEF2F2;border:none;border-radius:6px;width:24px;height:24px;cursor:pointer;color:#EF4444;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1">×</button>';
+    html+='</div>';
+  });
+  list.innerHTML=html;
+  list.onclick=function(e){
+    var btn=e.target.closest('.nrm-sub');if(!btn)return;
+    var idx=parseInt(btn.dataset.idx);
+    if(!isNaN(idx)){ntmSubtasks.splice(idx,1);renderNSubtasks();}
+  };
+}
+
+// Recurring
+function toggleNRecurring(on){
+  document.getElementById('nRecurringPanel').style.display=on?'':'none';
+  if(!on){ntmRecurring='';document.querySelectorAll('.nrec-btn').forEach(function(b){b.style.background='#fff';b.style.color='#64748B';b.style.borderColor='#E2E8F0';});}
+}
+function setNRecurring(btn){
+  ntmRecurring=btn.dataset.r;
+  document.querySelectorAll('.nrec-btn').forEach(function(b){
+    var active=b.dataset.r===ntmRecurring;
+    b.style.background=active?'linear-gradient(135deg,#1E3A6E,#1A4A7A)':'#fff';
+    b.style.color=active?'#fff':'#64748B';
+    b.style.borderColor=active?'#1A4A7A':'#E2E8F0';
+  });
+  var labels={daily:'Every day',weekly:'Every week',monthly:'Every month'};
+  var prev=document.getElementById('nRecurringPreview');
+  prev.textContent='↺ '+(labels[ntmRecurring]||'')+' — a new task will be created automatically';
+  prev.style.display='';
+}
+
+// Submit
+async function submitNewTask(){
+  var title=(document.getElementById('nTitle').value||'').trim();
+  var cat=document.getElementById('nCat').value;
+  var pri=document.getElementById('nPri').value;
+  var due=document.getElementById('nDue').value;
+  var sv=document.getElementById('nSV').value;
+  var su=document.getElementById('nSU').value;
+  if(!title){UTILS.toast('Please enter a task title','error');switchNTabById('ntab-details');return;}
+  if(!cat){UTILS.toast('Please select a category','error');switchNTabById('ntab-details');return;}
+  if(!pri){UTILS.toast('Please select a priority','error');switchNTabById('ntab-details');return;}
+  if(!sv){UTILS.toast('Please enter an SLA value','error');switchNTabById('ntab-details');return;}
+  if(ntmAssignees.length===0){UTILS.toast('Please select at least one assignee','error');switchNTabById('ntab-assignees');return;}
+  if(document.getElementById('nRecurringToggle').checked&&!ntmRecurring){UTILS.toast('Please select a recurring frequency','error');switchNTabById('ntab-recurring');return;}
+  var btn=document.getElementById('nSubmitBtn');
+  if(btn){btn.disabled=true;btn.textContent='Creating...';}
+  try{
+    var d=await API.post('tasks_create',{
+      title:title,description:document.getElementById('nDesc').value,
+      category:cat,priority:pri,due_date:due||'',sla_value:sv,sla_unit:su,
+      assignees_json:JSON.stringify(ntmAssignees),
+      subtasks_json:JSON.stringify(ntmSubtasks),
+      recurring_flag:document.getElementById('nRecurringToggle').checked?'TRUE':'FALSE',
+      recurring_type:ntmRecurring||''
+    });
+    UTILS.toast('Task created: '+d.task_id,'success');
+    closeNewTaskModal();
+    loadT();
+// Auto-open new task modal if navigated from dashboard
+if(window.location.hash==='#new'&&AUTH.canDo('tasks.create')){setTimeout(openNewTaskModal,600);}
+  }catch(ex){UTILS.toast('Error: '+ex.message,'error');}
+  if(btn){btn.disabled=false;btn.textContent='✓ Create Task';}
+}
+
+// Close on backdrop click
+document.addEventListener('DOMContentLoaded',function(){
+  var m=document.getElementById('newTaskModal');
+  if(m)m.addEventListener('click',function(e){if(e.target===this)closeNewTaskModal();});
+});
+
 // Close modal on backdrop click — deferred so element exists
 document.addEventListener('DOMContentLoaded', function(){
   var m = document.getElementById('taskModal');
   if(m) m.addEventListener('click', function(e){ if(e.target===this) closeTaskModal(); });
 });
 loadT();
+// Auto-open new task modal if navigated from dashboard
+if(window.location.hash==='#new'&&AUTH.canDo('tasks.create')){setTimeout(openNewTaskModal,600);}
 
 </script>
 
@@ -1342,6 +1573,99 @@ loadT();
   </div>
 </div>
 
+
+
+<!-- ══ NEW TASK MODAL ═══════════════════════════════════════════ -->
+<div id="newTaskModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;padding:16px;align-items:center;justify-content:center;overflow-y:auto">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:680px;margin:auto;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.4);position:relative">
+    <!-- Header band -->
+    <div id="ntmHeader" style="background:linear-gradient(160deg,#0D1F3C 0%,#1E3A6E 60%,#1A4A7A 100%);padding:22px 26px 0;flex-shrink:0">
+      <button onclick="closeNewTaskModal()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.15);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:15px;color:#fff;display:flex;align-items:center;justify-content:center">✕</button>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:10px;font-weight:700;background:#EEF2FF;color:#4F46E5;padding:3px 12px;border-radius:20px">New Task</span>
+      </div>
+      <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:4px">Create New Task</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:18px">Fill in the details to assign a task to your team</div>
+      <!-- Tab bar -->
+      <div style="display:flex;background:rgba(0,0,0,.2);margin:0 -26px">
+        <button id="ntab-details"   data-tab="ntab-details"   onclick="switchNTab(this)" style="flex:1;background:none;border:none;border-bottom:2px solid #60A5FA;padding:11px 6px 9px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;white-space:nowrap">📋 Details</button>
+        <button id="ntab-assignees" data-tab="ntab-assignees" onclick="switchNTab(this)" style="flex:1;background:none;border:none;border-bottom:2px solid transparent;padding:11px 6px 9px;font-size:12px;font-weight:500;color:rgba(255,255,255,.45);cursor:pointer;font-family:inherit;white-space:nowrap">👥 Assignees <span id="ntabAssigneeBadge" style="display:none;background:rgba(255,255,255,.2);font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:2px">0</span></button>
+        <button id="ntab-subtasks"  data-tab="ntab-subtasks"  onclick="switchNTab(this)" style="flex:1;background:none;border:none;border-bottom:2px solid transparent;padding:11px 6px 9px;font-size:12px;font-weight:500;color:rgba(255,255,255,.45);cursor:pointer;font-family:inherit;white-space:nowrap">✅ Sub-tasks <span id="ntabSubBadge" style="display:none;background:rgba(255,255,255,.2);font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:2px">0</span></button>
+        <button id="ntab-recurring" data-tab="ntab-recurring" onclick="switchNTab(this)" style="flex:1;background:none;border:none;border-bottom:2px solid transparent;padding:11px 6px 9px;font-size:12px;font-weight:500;color:rgba(255,255,255,.45);cursor:pointer;font-family:inherit;white-space:nowrap">↺ Recurring</button>
+      </div>
+    </div>
+    <!-- Panels -->
+    <div style="padding:22px 26px;overflow-y:auto;max-height:calc(100vh - 260px)">
+
+      <!-- DETAILS -->
+      <div id="npanel-details">
+        <div class="form-group"><label class="form-label">Task Title <span class="req">*</span></label><input type="text" id="nTitle" placeholder="Enter task title..." class="form-input"></div>
+        <div class="form-group"><label class="form-label">Description</label><textarea id="nDesc" placeholder="Details, context, or instructions..." class="form-input" style="min-height:70px;resize:vertical"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Category <span class="req">*</span></label><select id="nCat" class="form-input"><option value="">Select...</option><option>Managerial</option><option>Operational</option><option>QA</option><option>BackOffice</option><option>TeamLeadership</option><option>Compliance</option><option>FollowUp</option><option>Escalation</option><option>Handover</option><option>Training</option><option>Sales</option><option>General</option></select></div>
+          <div class="form-group"><label class="form-label">Priority <span class="req">*</span></label><select id="nPri" class="form-input"><option value="">Select...</option><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Deadline</label><input type="date" id="nDue" class="form-input"></div>
+          <div class="form-group"><label class="form-label">SLA <span class="req">*</span></label><div style="display:flex;gap:8px"><input type="number" id="nSV" placeholder="e.g. 4" min="1" class="form-input" style="flex:1"><select id="nSU" class="form-input" style="width:110px"><option value="hours">Hours</option><option value="days">Days</option></select></div></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;padding-top:8px">
+          <button onclick="switchNTabById('ntab-assignees')" style="background:linear-gradient(135deg,#1E3A6E,#1A4A7A);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer">Next: Assignees →</button>
+        </div>
+      </div>
+
+      <!-- ASSIGNEES -->
+      <div id="npanel-assignees" style="display:none">
+        <div style="position:relative;margin-bottom:10px">
+          <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4;pointer-events:none" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="nAssigneeSearch" placeholder="Search by name or role..." oninput="filterNAssignees(this.value)" style="width:100%;padding:9px 12px 9px 36px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;box-sizing:border-box;background:#F8FAFC;outline:none">
+        </div>
+        <div id="nAssigneeList" style="display:flex;flex-direction:column;gap:2px;max-height:220px;overflow-y:auto;border:1.5px solid #E2E8F0;border-radius:10px;padding:8px;background:#F8FAFC;margin-bottom:12px"></div>
+        <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Selected: <span id="nAssigneeCount" style="color:#1A4A7A;font-weight:800">0 assignees</span></div>
+        <div id="nSelectedAssignees" style="display:flex;flex-wrap:wrap;gap:6px;min-height:36px;padding:8px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;margin-bottom:16px"></div>
+        <div style="display:flex;justify-content:space-between">
+          <button onclick="switchNTabById('ntab-details')" style="background:#fff;border:1.5px solid #E2E8F0;color:#64748B;border-radius:10px;padding:10px 20px;font-size:13px;cursor:pointer">← Back</button>
+          <button onclick="switchNTabById('ntab-subtasks')" style="background:linear-gradient(135deg,#1E3A6E,#1A4A7A);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer">Next: Sub-tasks →</button>
+        </div>
+      </div>
+
+      <!-- SUB-TASKS -->
+      <div id="npanel-subtasks" style="display:none">
+        <div style="font-size:13px;color:#64748B;margin-bottom:14px">Break this task into smaller steps. Each sub-task can be marked done individually.</div>
+        <div id="nSubtaskList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"></div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="nSubtaskInput" placeholder="Type a sub-task and press Enter..." style="flex:1;padding:10px 14px;border:1.5px solid #E2E8F0;border-radius:10px;font-size:13px;font-family:inherit;background:#F8FAFC;outline:none" onkeydown="if(event.key==='Enter'){event.preventDefault();addNSubtask();}">
+          <button onclick="addNSubtask()" style="background:#10B981;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer">+ Add</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:16px">
+          <button onclick="switchNTabById('ntab-assignees')" style="background:#fff;border:1.5px solid #E2E8F0;color:#64748B;border-radius:10px;padding:10px 20px;font-size:13px;cursor:pointer">← Back</button>
+          <button onclick="switchNTabById('ntab-recurring')" style="background:linear-gradient(135deg,#1E3A6E,#1A4A7A);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer">Next: Recurring →</button>
+        </div>
+      </div>
+
+      <!-- RECURRING -->
+      <div id="npanel-recurring" style="display:none">
+        <div style="background:#EFF6FF;border-left:3px solid #3B82F6;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#1E3A5F">If enabled, a new copy of this task will be created automatically on the chosen schedule.</div>
+        <label style="display:flex;align-items:center;gap:12px;padding:14px 18px;border:1.5px solid #E2E8F0;border-radius:12px;cursor:pointer;margin-bottom:14px">
+          <input type="checkbox" id="nRecurringToggle" onchange="toggleNRecurring(this.checked)" style="width:18px;height:18px;cursor:pointer;accent-color:#1A4A7A">
+          <div><div style="font-size:14px;font-weight:700;color:#0F172A">Enable Recurring</div><div style="font-size:12px;color:#64748B;margin-top:2px">Auto-create this task on a schedule</div></div>
+        </label>
+        <div id="nRecurringPanel" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+            <button data-r="daily"   onclick="setNRecurring(this)" class="nrec-btn" style="padding:14px 8px;border:1.5px solid #E2E8F0;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:#64748B;transition:all .2s;font-family:inherit;text-align:center"><div style="font-size:22px;margin-bottom:4px">📅</div>Daily</button>
+            <button data-r="weekly"  onclick="setNRecurring(this)" class="nrec-btn" style="padding:14px 8px;border:1.5px solid #E2E8F0;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:#64748B;transition:all .2s;font-family:inherit;text-align:center"><div style="font-size:22px;margin-bottom:4px">📆</div>Weekly</button>
+            <button data-r="monthly" onclick="setNRecurring(this)" class="nrec-btn" style="padding:14px 8px;border:1.5px solid #E2E8F0;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:#64748B;transition:all .2s;font-family:inherit;text-align:center"><div style="font-size:22px;margin-bottom:4px">🗓</div>Monthly</button>
+          </div>
+          <div id="nRecurringPreview" style="display:none;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:12px 16px;font-size:13px;color:#065F46;font-weight:600"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:20px;padding-top:20px;border-top:1px solid #F1F5F9">
+          <button onclick="switchNTabById('ntab-subtasks')" style="background:#fff;border:1.5px solid #E2E8F0;color:#64748B;border-radius:10px;padding:10px 20px;font-size:13px;cursor:pointer">← Back</button>
+          <button id="nSubmitBtn" onclick="submitNewTask()" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:10px;padding:11px 32px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 2px 12px #10B98144">✓ Create Task</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
