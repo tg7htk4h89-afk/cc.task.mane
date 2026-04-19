@@ -47,10 +47,10 @@ input[type=password]::placeholder{letter-spacing:0;font-size:14px;text-align:lef
   <div class="foot">Forgot your PIN? Contact your manager.</div>
 </div>
 <script>
-var GAS='https://script.google.com/macros/s/AKfycbzgCYbHCXZ4pZJ-hGcexuE5ei_i9u3cvx0FUZ6oBwzzZKHgqO5YE7HIFc5bu9d2xUhWfw/exec';
+var GAS='https://n8n.kib-cc-wfm.com/webhook/kib/login';
 var KEY='kib_ops_session';
 try{var s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&new Date(s.expires_at)>new Date())location.href='/cc.task.mane/index.html';}catch(e){}
-fetch(GAS+'?action=users_list',{redirect:'follow'}).then(function(r){return r.json();}).then(function(data){
+fetch('https://n8n.kib-cc-wfm.com/webhook/kib/users-list',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(function(r){return r.json();}).then(function(data){
   var users=(data&&data.data&&data.data.users)?data.data.users:[];
   users.sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
   var sel=document.getElementById('sel');sel.innerHTML='<option value="">— Select your name —</option>';
@@ -66,7 +66,7 @@ document.getElementById('frm').addEventListener('submit',function(e){
   var err=document.getElementById('err'),btn=document.getElementById('btn');
   if(!uid||pin.length!==4){err.textContent='Select your name and enter your 4-digit PIN.';err.style.display='block';return;}
   btn.disabled=true;btn.textContent='Signing in...';err.style.display='none';
-  fetch(GAS,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'login',user_id:uid,pin:pin})})
+  fetch(GAS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:uid,pin:pin})})
   .then(function(r){return r.json();})
   .then(function(data){
     if(data.success&&data.data){localStorage.setItem(KEY,JSON.stringify(data.data));location.href='/cc.task.mane/index.html';}
