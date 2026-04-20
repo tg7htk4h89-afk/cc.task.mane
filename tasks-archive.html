@@ -258,12 +258,22 @@ td.bold{font-weight:600;color:var(--t1);}
 </div>
 
 <script>
-var GAS_URL='https://script.google.com/macros/s/AKfycbzgCYbHCXZ4pZJ-hGcexuE5ei_i9u3cvx0FUZ6oBwzzZKHgqO5YE7HIFc5bu9d2xUhWfw/exec';
+var API_BASE='https://n8n.kib-cc-wfm.com/webhook';
 var SES_KEY='kib_ops_session';
-
 var API={
   _t:function(){var s=AUTH.getSession();return s?s.session_token:null;},
-  get:async function(a,p){var u=new URL(GAS_URL);u.searchParams.set('action',a);var t=this._t();if(t)u.searchParams.set('session_token',t);Object.keys(p||{}).forEach(function(k){if(p[k]!=null&&p[k]!=='')u.searchParams.set(k,p[k]);});var r=await fetch(u.toString(),{redirect:'follow'});var d=await r.json();if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:'API error');return d.data;}
+  post:async function(action,body){
+    var path=action.replace(/_/g,'-');
+    var url=API_BASE+'/kib/'+path;
+    var p=Object.assign({},body||{});
+    var t=this._t();if(t)p.session_token=t;
+    var r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
+    var txt=await r.text();var d;
+    try{d=JSON.parse(txt);}catch(e){throw new Error('Invalid response from server');}
+    if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:d.message||'API error');
+    return d.data;
+  },
+  get:async function(action,params){return this.post(action,params||{});}
 };
 var AUTH={
   getSession:function(){try{var s=JSON.parse(localStorage.getItem(SES_KEY));return s&&new Date(s.expires_at)>new Date()?s:null;}catch(e){return null;}},
@@ -282,6 +292,140 @@ var UTILS={
 };
 
 AUTH.requireAuth();
+
+// ═══════════════════════════════════════════════════════════════════
+// ── LOCAL CACHE (stale-while-revalidate) ───────────────────────────
+// Stores API responses in sessionStorage.
+// First load: returns cache instantly (if <5min old), fetches fresh in BG.
+// After 5min: fetches fresh, shows old while waiting.
+// Auto-refreshes in background (2-5min depending on page).
+// ═══════════════════════════════════════════════════════════════════
+var CACHE = {
+  _TTL: 600000,        // 5 min max age before forced refresh
+  _BG:  120000,        // 2min background refresh interval (per-page varies)
+  _pfx: 'kib_cache_',  // storage key prefix
+  _timers: {},
+
+  // Build a cache key from action + params
+  _key: function(action, params) {
+    var p = Object.keys(params||{}).sort().map(function(k){return k+'='+params[k];}).join('&');
+    return this._pfx + action + (p ? '_' + p : '');
+  },
+
+  // Save data to sessionStorage with timestamp
+  set: function(action, params, data) {
+    try {
+      var key = this._key(action, params);
+      sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data: data }));
+    } catch(e) {} // ignore storage errors (private mode etc)
+  },
+
+  // Get cached data. Returns {data, stale} or null
+  get: function(action, params) {
+    try {
+      var key = this._key(action, params);
+      var raw = sessionStorage.getItem(key);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      return { data: obj.data, stale: (Date.now() - obj.ts) > this._TTL };
+    } catch(e) { return null; }
+  },
+
+  // Clear a specific action from cache (use after mutations)
+  bust: function(action) {
+    try {
+      for (var i = sessionStorage.length - 1; i >= 0; i--) {
+        var k = sessionStorage.key(i);
+        if (k && k.indexOf(this._pfx + action) === 0) {
+          sessionStorage.removeItem(k);
+        }
+      }
+    } catch(e) {}
+  },
+
+  // Bust all task-related caches (after create/update/cancel)
+  bustTasks: function() {
+    this.bust('tasks_list');
+    this.bust('tasks_detail');
+    this.bust('dashboard');
+  },
+
+  // Bust all training caches
+  bustTraining: function() {
+    this.bust('training_list');
+    this.bust('training_detail');
+    this.bust('dashboard');
+  },
+
+  // Clear everything
+  clear: function() {
+    try {
+      var keys = [];
+      for (var i = 0; i < sessionStorage.length; i++) {
+        var k = sessionStorage.key(i);
+        if (k && k.indexOf(this._pfx) === 0) keys.push(k);
+      }
+      keys.forEach(function(k){ sessionStorage.removeItem(k); });
+    } catch(e) {}
+  }
+};
+
+// Extend API.get to use cache automatically
+var _origAPIGet = API.get.bind(API);
+API.get = async function(action, params) {
+  // Actions that should NOT be cached (always fresh)
+  var noCache = ['login','notif_list','notif_read','notif_read_all'];
+  if (noCache.indexOf(action) !== -1) {
+    return _origAPIGet(action, params);
+  }
+
+  var cached = CACHE.get(action, params);
+
+  if (cached && !cached.stale) {
+    // Fresh cache — return immediately, refresh in background silently
+    _origAPIGet(action, params).then(function(fresh) {
+      CACHE.set(action, params, fresh);
+    }).catch(function(){});
+    return cached.data;
+  }
+
+  if (cached && cached.stale) {
+    // Stale cache — return old data immediately so UI shows instantly
+    // Then fetch fresh and update (next load will be fast)
+    _origAPIGet(action, params).then(function(fresh) {
+      CACHE.set(action, params, fresh);
+    }).catch(function(){});
+    return cached.data;
+  }
+
+  // No cache at all — fetch fresh and cache it
+  var fresh = await _origAPIGet(action, params);
+  CACHE.set(action, params, fresh);
+  return fresh;
+};
+
+// Extend API.post to bust relevant caches after mutations
+var _origAPIPost = API.post.bind(API);
+API.post = async function(action, body) {
+  var result = await _origAPIPost(action, body);
+  // Bust caches based on action
+  var taskActions = ['tasks_create','tasks_update','subtask_mark','task_delegate',
+                     'task_ext_request','task_ext_review'];
+  var trainActions = ['training_create','training_mark','training_comment',
+                      'training_ext_request','training_ext_review'];
+  var handoverActions = ['handover_create','handover_update'];
+  var salesActions = ['sales_entry','sales_mtd_update'];
+  var todoActions = ['ptodo_add','ptodo_update','ptodo_delete'];
+
+  if (taskActions.indexOf(action) !== -1)    CACHE.bustTasks();
+  if (trainActions.indexOf(action) !== -1)   CACHE.bustTraining();
+  if (handoverActions.indexOf(action) !== -1){ CACHE.bust('handover_dashboard'); CACHE.bust('handover_list'); CACHE.bust('dashboard'); }
+  if (salesActions.indexOf(action) !== -1)   { CACHE.bust('sales_dashboard'); CACHE.bust('dashboard'); }
+  if (todoActions.indexOf(action) !== -1)    { CACHE.bust('ptodo_list'); }
+
+  return result;
+};
+
 UTILS.setUser(AUTH.getSession());
 
 // Sidebar
@@ -430,6 +574,15 @@ function openTask(id){
 
 loadArchive();
 loadBell();
+
+// Background data refresh every 30s (uses cache — no visible loading)
+(function() {
+  var _bgKey = '_bg_tasks_archive';
+  if(window[_bgKey]) clearInterval(window[_bgKey]);
+  window[_bgKey] = setInterval(function(){
+    loadArchive();
+  }, 300000);
+})();
 </script>
 </body>
 </html>
