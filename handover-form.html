@@ -437,6 +437,16 @@ API.post = async function(action, body) {
   return result;
 };
 
+
+var UTILS = {
+  esc: function(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); },
+  ini: function(n){ return String(n||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase(); },
+  avc: function(n){ var c=['#6366F1','#8B5CF6','#EC4899','#F59E0B','#10B981','#3B82F6']; var h=0,s=String(n||'A'); for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))&0xffff; return c[h%c.length]; },
+  today: function(){ return new Date(Date.now()+3*3600000).toISOString().slice(0,10); },
+  toast: function(msg,type){ var c={success:'#0EA472',error:'#E5383B',warning:'#F4A523',info:'#1877C5'}; var t=document.createElement('div'); t.style.cssText='position:fixed;bottom:20px;right:20px;background:#0D1B3E;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;border-left:3px solid '+(c[type]||c.info)+';box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:9999;max-width:340px;font-family:inherit'; t.textContent=msg; document.body.appendChild(t); setTimeout(function(){t.remove();},3500); },
+  setUser: function(s){ if(!s)return; var i=document.getElementById('avatarInitials'),n=document.getElementById('sidebarName'),r=document.getElementById('sidebarRole'); if(i)i.textContent=this.ini(s.full_name); if(n)n.textContent=s.display_name||s.full_name.split(' ')[0]; if(r)r.textContent=s.role; document.querySelectorAll('[data-roles]').forEach(function(el){ if(el.getAttribute('data-roles').split(',').map(function(x){return x.trim();}).indexOf(s.role)===-1)el.style.display='none'; }); }
+};
+
 UTILS.setUser(AUTH.getSession());
 if(!AUTH.canDo('handover.create')) location.href='/cc.task.mane/handover.html';
 
