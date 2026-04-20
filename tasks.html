@@ -1191,9 +1191,23 @@ function kcard(t){
   var pf=t.status==='Completed'?'pg':t.is_overdue==='TRUE'?'pd':pct>70?'pw':'';
   var tl2=t.status==='Completed'?'<span class="k-time kt-ok">Done ✓</span>':tr.overdue?'<span class="k-time kt-danger">'+tr.label+'</span>':tr.diffMs<7200000?'<span class="k-time kt-warn">'+tr.label+'</span>':'<span class="k-time kt-ok">'+tr.label+'</span>';
   var delegateBadge = t.delegated_flag==='TRUE' ? '<span class="k-tag" style="background:#FEF3C7;color:#92400E;font-size:9px">🔀 from '+UTILS.esc(t.delegated_from_name||'')+'</span>' : '';
+  // Build assignee avatars
+  var assigneesList = [];
+  try { assigneesList = JSON.parse(t.assignees_json || '[]'); } catch(e) {}
+  if (!assigneesList.length && t.assigned_to_name) assigneesList = [{ name: t.assigned_to_name }];
+  var maxShow = 3;
+  var avatarsHtml = '<div style="display:flex;align-items:center;gap:-4px;flex-direction:row-reverse;justify-content:flex-end">';
+  var extra = assigneesList.length > maxShow ? assigneesList.length - maxShow : 0;
+  if (extra) avatarsHtml += '<div class="k-avatar" style="background:#64748B;color:#fff;font-size:9px;width:22px;height:22px;margin-left:-6px">+'+extra+'</div>';
+  assigneesList.slice(0, maxShow).reverse().forEach(function(a) {
+    var ac = UTILS.avc(a.name || a.full_name || '');
+    avatarsHtml += '<div class="k-avatar" style="background:'+ac[0]+';color:'+ac[1]+';width:22px;height:22px;font-size:9px;margin-left:-6px;border:2px solid #fff">'+UTILS.ini(a.name || a.full_name || '')+'</div>';
+  });
+  avatarsHtml += '</div>';
+
   return '<button class="k-card'+(ov?' is-overdue':'')+(t.status==='Completed'?' is-done':'')+'" onclick="openTaskModal(\''+t.task_id+'\')">'
     +'<div class="k-card-id">'+t.task_id+'</div>'
-    +'<div class="k-card-top"><div class="k-card-title">'+UTILS.esc(t.title)+'</div><div class="k-avatar" style="background:'+c[0]+';color:'+c[1]+'">'+UTILS.ini(t.assigned_to_name)+'</div></div>'
+    +'<div class="k-card-top"><div class="k-card-title">'+UTILS.esc(t.title)+'</div>'+avatarsHtml+'</div>'
     +'<div class="k-card-tags"><span class="k-tag '+tl+'">'+t.category+'</span>'+(t.recurring_flag==='TRUE'?'<span class="k-tag ktag-r">↺</span>':'')+delegateBadge+'</div>'
     +'<div class="k-card-footer"><div class="k-priority '+pd+'"></div><div class="k-progress"><div class="k-prog-fill '+pf+'" style="width:'+pct+'%"></div></div>'+tl2+'</div></button>';
 }
@@ -1365,7 +1379,14 @@ function renderTaskModal(d) {
   html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">';
   html += '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px">';
   html += '<div style="font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Assigned To</div>';
-  html += '<div style="display:flex;align-items:center;gap:8px">'+avatar(t.assigned_to_name,28)+'<span style="font-weight:600;font-size:13px;color:#0F172A">'+UTILS.esc(t.assigned_to_name||'—')+'</span></div>';
+  var modalAssignees = [];
+  try { modalAssignees = JSON.parse(t.assignees_json || '[]'); } catch(e) {}
+  if (!modalAssignees.length && t.assigned_to_name) modalAssignees = [{ name: t.assigned_to_name }];
+  var assigneesHtml = modalAssignees.map(function(a) {
+    var n = a.name || a.full_name || '';
+    return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'+avatar(n,24)+'<span style="font-size:12px;color:#0F172A;font-weight:600">'+UTILS.esc(n)+'</span>'+(a.role?'<span style="font-size:10px;color:#64748B">('+UTILS.esc(a.role)+')</span>':'')+'</div>';
+  }).join('');
+  html += '<div>'+assigneesHtml+'</div>';
   html += '</div>';
   html += '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px">';
   html += '<div style="font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Assigned By</div>';
