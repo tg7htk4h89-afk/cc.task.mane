@@ -1018,7 +1018,7 @@ var UTILS={
   today:function(){return new Date(Date.now()+3*3600000).toISOString().slice(0,10);},
   tr:function(iso){if(!iso)return{label:'—',overdue:false,diffMs:0};var diff=new Date(iso)-Date.now(),abs=Math.abs(diff);var label=abs<3600000?Math.floor(abs/60000)+'m':abs<86400000?Math.floor(abs/3600000)+'h':Math.floor(abs/86400000)+'d';return{label:diff<0?label+' over':label+' left',overdue:diff<0,diffMs:diff};},
   ini:function(n){return String(n||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();},
-  _avc:[['#dbeafe','#1d4ed8'],['#ede9fe','#6d28d9'],['#dcfce7','#15803d'],['#ffedd5','#c2410c'],['#fce7f3','#be185d'],['#ccfbf1','#0f766e']],
+  _avc:[['#3B82F6','#fff'],['#8B5CF6','#fff'],['#10B981','#fff'],['#F59E0B','#fff'],['#EC4899','#fff'],['#0EA472','#fff'],['#EF4444','#fff'],['#6366F1','#fff'],['#14B8A6','#fff'],['#F97316','#fff']],
   avc:function(n){var h=0,s=String(n||'');for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))&0xffff;return this._avc[h%this._avc.length];},
   av:function(n,sz){sz=sz||28;var c=this.avc(n);return'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+c[0]+';color:'+c[1]+';display:flex;align-items:center;justify-content:center;font-size:'+Math.round(sz*.38)+'px;font-weight:700;flex-shrink:0">'+this.ini(n)+'</div>';},
   toast:function(msg,type){var c={success:'#0EA472',error:'#E5383B',warning:'#F4A523',info:'#1877C5'};var t=document.createElement('div');t.style.cssText='position:fixed;bottom:20px;right:20px;background:#0D1B3E;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;border-left:3px solid '+(c[type]||c.info)+';box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:9999;max-width:340px;font-family:inherit';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},3500);},
@@ -1269,7 +1269,12 @@ function closeTaskModal() {
 
 function renderTaskModal(d) {
   var t = d.task;
-  var comments = d.comments || [];
+  var comments = [];
+  try {
+    var _cd = d.task ? d.task.comments_data : null;
+    if (typeof _cd === 'string') comments = JSON.parse(_cd || '[]');
+    else if (Array.isArray(_cd)) comments = _cd;
+  } catch(e) { comments = []; }
   var activity = d.activity || [];
   var tr = UTILS.tr(t.due_datetime);
   var isA = t.assigned_to_user_id === AUTH.getUserId();
@@ -1338,9 +1343,24 @@ function renderTaskModal(d) {
   html += '</div>';
   // Tabs
   html += '<div style="display:flex;background:rgba(0,0,0,.2);margin:0 -24px">';
-  var subtasks   = d.subtasks   || [];
-  var extensions = d.extensions || [];
-  var assignees  = d.assignees  || [];
+  var subtasks = [];
+  try {
+    var _sd = d.task ? d.task.subtasks_data : null;
+    if (typeof _sd === 'string') subtasks = JSON.parse(_sd || '[]');
+    else if (Array.isArray(_sd)) subtasks = _sd;
+  } catch(e) { subtasks = []; }
+  var extensions = [];
+  try {
+    var _ed = d.task ? d.task.extensions_data : null;
+    if (typeof _ed === 'string') extensions = JSON.parse(_ed || '[]');
+    else if (Array.isArray(_ed)) extensions = _ed;
+  } catch(e) { extensions = []; }
+  var assignees = [];
+  try {
+    var _aj = d.task ? d.task.assignees_json : null;
+    if (typeof _aj === 'string') assignees = JSON.parse(_aj || '[]');
+    else if (Array.isArray(_aj)) assignees = _aj;
+  } catch(e) { assignees = []; }
   var pendingExt = extensions.find(function(x){ return x.status==='Pending'; });
   var canExtend  = !pendingExt && (isM || t.assigned_to_user_id === AUTH.getUserId());
   var tmTabs = [
@@ -1379,9 +1399,7 @@ function renderTaskModal(d) {
   html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">';
   html += '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px">';
   html += '<div style="font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Assigned To</div>';
-  var modalAssignees = [];
-  try { modalAssignees = JSON.parse(t.assignees_json || '[]'); } catch(e) {}
-  if (!modalAssignees.length && t.assigned_to_name) modalAssignees = [{ name: t.assigned_to_name }];
+  var modalAssignees = assignees.length ? assignees : (t.assigned_to_name ? [{ name: t.assigned_to_name, role: t.assigned_to_role }] : []);
   var assigneesHtml = modalAssignees.map(function(a) {
     var n = a.name || a.full_name || '';
     return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'+avatar(n,24)+'<span style="font-size:12px;color:#0F172A;font-weight:600">'+UTILS.esc(n)+'</span>'+(a.role?'<span style="font-size:10px;color:#64748B">('+UTILS.esc(a.role)+')</span>':'')+'</div>';
@@ -1846,7 +1864,7 @@ async function submitNewTask(){
   if(!title){UTILS.toast('Please enter a task title','error');switchNTabById('ntab-details');return;}
   if(!cat){UTILS.toast('Please select a category','error');switchNTabById('ntab-details');return;}
   if(!pri){UTILS.toast('Please select a priority','error');switchNTabById('ntab-details');return;}
-  if(!sv){UTILS.toast('Please enter an SLA value','error');switchNTabById('ntab-details');return;}
+  // SLA auto-defaults to 4 days
   if(ntmAssignees.length===0){UTILS.toast('Please select at least one assignee','error');switchNTabById('ntab-assignees');return;}
   if(document.getElementById('nRecurringToggle').checked&&!ntmRecurring){UTILS.toast('Please select a recurring frequency','error');switchNTabById('ntab-recurring');return;}
   var btn=document.getElementById('nSubmitBtn');
@@ -1937,7 +1955,7 @@ if(window.location.hash==='#new'&&AUTH.canDo('tasks.create')){setTimeout(openNew
         </div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">Deadline</label><input type="date" id="nDue" class="form-input"></div>
-          <div class="form-group"><label class="form-label">SLA <span class="req">*</span></label><div style="display:flex;gap:8px"><input type="number" id="nSV" placeholder="e.g. 4" min="1" class="form-input" style="flex:1"><select id="nSU" class="form-input" style="width:110px"><option value="hours">Hours</option><option value="days">Days</option></select></div></div>
+          <input type="hidden" id="nSV" value="4"><input type="hidden" id="nSU" value="days">
         </div>
         <div style="display:flex;justify-content:flex-end;padding-top:8px">
           <button onclick="switchNTabById('ntab-assignees')" style="background:linear-gradient(135deg,#1E3A6E,#1A4A7A);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer">Next: Assignees →</button>
