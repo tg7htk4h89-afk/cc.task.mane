@@ -1176,6 +1176,31 @@ var UTILS={
 
 AUTH.requireAuth();
 
+// ── SIDEBAR VISIBILITY BY DEPARTMENT ────────────────────
+(function(){
+  var s = AUTH.getSession();
+  if(!s) return;
+  var dept = s.department || '';
+  var isCC = ['Contact Center','Quality Assurance','Executive Management'].indexOf(dept) !== -1;
+  // Hide non-task pages for non-CC users
+  if(!isCC){
+    document.querySelectorAll('.nav-item').forEach(function(el){
+      var href = el.getAttribute('href') || '';
+      var allowed = ['tasks.html','todo.html','index.html','notifications.html','tasks-archive.html'];
+      var ok = allowed.some(function(p){return href.indexOf(p)!==-1;});
+      if(!ok) el.style.display='none';
+    });
+    // Also hide bottom nav items
+    document.querySelectorAll('.mbn-item').forEach(function(el){
+      var href = el.getAttribute('href') || '';
+      var allowed = ['tasks.html','todo.html','index.html','notifications.html'];
+      var ok = allowed.some(function(p){return href.indexOf(p)!==-1;});
+      if(!ok) el.style.display='none';
+    });
+  }
+})();
+// ── END SIDEBAR VISIBILITY ───────────────────────────────
+
 /* ── KIB HIERARCHY CONFIG ──────────────────────────────── */
 // ================================================================
 // KIB HIERARCHY CONFIG — Inject into all portal pages

@@ -1237,6 +1237,43 @@ async function loadBell(){
   try{var d=await API.get('notif_list',{limit:'5',unread_only:'true'});var nb=document.getElementById('notifBadge');if(nb){if(d.unread_count>0){nb.textContent=d.unread_count;nb.classList.remove('hidden');}else nb.classList.add('hidden');}}catch(e){}
 }
 AUTH.requireAuth();
+// ── PAGE ACCESS GUARD ────────────────────────────────────
+(function(){
+  var s = AUTH.getSession();
+  if(!s) return; // requireAuth handles redirect
+  var dept = s.department || '';
+  var allowed = ['Contact Center','Executive Management'];
+  var isCC = dept === 'Contact Center' || dept === 'Quality Assurance' || dept === 'Executive Management';
+  if(allowed.length > 0 && allowed.indexOf(dept) === -1 && !isCC){
+    window.location.href='/cc.task.mane/tasks.html';
+  }
+})();
+// ── END ACCESS GUARD ──────────────────────────────────
+
+// ── SIDEBAR VISIBILITY BY DEPARTMENT ────────────────────
+(function(){
+  var s = AUTH.getSession();
+  if(!s) return;
+  var dept = s.department || '';
+  var isCC = ['Contact Center','Quality Assurance','Executive Management'].indexOf(dept) !== -1;
+  // Hide non-task pages for non-CC users
+  if(!isCC){
+    document.querySelectorAll('.nav-item').forEach(function(el){
+      var href = el.getAttribute('href') || '';
+      var allowed = ['tasks.html','todo.html','index.html','notifications.html','tasks-archive.html'];
+      var ok = allowed.some(function(p){return href.indexOf(p)!==-1;});
+      if(!ok) el.style.display='none';
+    });
+    // Also hide bottom nav items
+    document.querySelectorAll('.mbn-item').forEach(function(el){
+      var href = el.getAttribute('href') || '';
+      var allowed = ['tasks.html','todo.html','index.html','notifications.html'];
+      var ok = allowed.some(function(p){return href.indexOf(p)!==-1;});
+      if(!ok) el.style.display='none';
+    });
+  }
+})();
+// ── END SIDEBAR VISIBILITY ───────────────────────────────
 
 /* ── KIB HIERARCHY CONFIG ──────────────────────────────── */
 // ================================================================
