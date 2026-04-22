@@ -1489,7 +1489,7 @@ async function loadBell(){
 }
 loadBell();if(window._interval_tasks)clearInterval(window._interval_tasks);window._interval_tasks=setInterval(loadBell,60000);
 
-if(AUTH.canDo('tasks.create')||KIB_HIERARCHY.canCreateTask(S?S.role:''))document.getElementById('btnNew').style.display='flex';
+if(AUTH.canDo('tasks.create')||KIB_HIERARCHY.canCreateTask((AUTH.getSession()||{}).role||''))document.getElementById('btnNew').style.display='flex';
 var COLS=[
   {id:'new',label:'New',s:['New'],c:'#7B61FF'},
   {id:'ip',label:'In Progress',s:['Assigned','InProgress','WaitingInput','UnderReview'],c:'#1877C5'},
@@ -2045,32 +2045,21 @@ function switchNTabById(id){switchNTab(document.getElementById(id));}
 
 // Load users once — deferred so KIB_HIERARCHY and S are ready
 function loadNtmUsers(){
+  var _sess = AUTH.getSession();
+  if(!_sess){setTimeout(loadNtmUsers,300);return;}
+  var myId = _sess.user_id;
   API.get('users_list',{}).then(function(d){
     var allUsers=(d.users||[]).filter(function(u){return u.active_status!=='inactive';});
-    var myId = S ? S.user_id : (AUTH.getSession()||{}).user_id;
-    var myRole = S ? S.role : (AUTH.getSession()||{}).role;
-    
-    // Use KIB_HIERARCHY if available, fallback to show all
-    var assignable = (window.KIB_HIERARCHY && myId) ? KIB_HIERARCHY.getAssignableUserIds(myId) : [];
-    
-    if(assignable.length > 0){
-      // Show only users this person can assign to
-      ntmAllUsers = allUsers.filter(function(u){
-        return assignable.indexOf(u.user_id) !== -1;
-      }).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+    if(!allUsers.length){ntmAllUsers=[];return;}
+    var assignable=(window.KIB_HIERARCHY&&myId)?KIB_HIERARCHY.getAssignableUserIds(myId):[];
+    if(assignable.length>0){
+      ntmAllUsers=allUsers.filter(function(u){return assignable.indexOf(u.user_id)!==-1;}).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
     } else {
-      // Fallback: show all users (for managers without hierarchy config)
-      ntmAllUsers = allUsers.filter(function(u){
-        return u.user_id !== myId; // exclude self from list, self is always assignable
-      }).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
-      // Put self first
-      var self = allUsers.find(function(u){return u.user_id===myId;});
-      if(self) ntmAllUsers.unshift(self);
+      ntmAllUsers=allUsers.sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
     }
-  }).catch(function(e){console.error('users_list',e);});
+  }).catch(function(e){console.error('users_list failed:',e);ntmAllUsers=[];});
 }
-// Run after page is ready
-setTimeout(loadNtmUsers, 200);
+setTimeout(loadNtmUsers,500);
 
 // Assignee list
 function renderNAssigneeList(query){
