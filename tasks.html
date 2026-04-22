@@ -2094,6 +2094,7 @@ function renderTaskModal(d) {
   var slaPerf = null;
   var slaPerfLabel = '';
   var slaPerfColor = 'rgba(255,255,255,.9)';
+  var slaDaysLabel = '';
   if(t.created_at && t.due_datetime) {
     var created = new Date(t.created_at);
     var due     = new Date(t.due_datetime);
@@ -2101,16 +2102,41 @@ function renderTaskModal(d) {
     if(slaTotalMs > 0) {
       if(t.status === 'Completed' && t.completed_at) {
         var completed = new Date(t.completed_at);
+        var diffMs = due - completed; // positive = early, negative = late
+        var diffDays = Math.round(Math.abs(diffMs) / 86400000);
+        var diffHours = Math.round(Math.abs(diffMs) / 3600000);
         var timeUsedMs = completed - created;
-        slaPerf = Math.round((slaTotalMs / timeUsedMs) * 100);
-        if(slaPerf >= 100){ slaPerfColor='#6EE7B7'; slaPerfLabel='On time'; }
-        else { slaPerfColor='#FCA5A5'; slaPerfLabel='Delayed'; }
+        if(timeUsedMs > 0) {
+          // Cap at 150% to avoid test-task inflation
+          var rawPerf = Math.round((slaTotalMs / timeUsedMs) * 100);
+          slaPerf = Math.min(rawPerf, 150);
+        }
+        if(diffMs >= 0) {
+          // Completed before deadline
+          slaPerfColor = '#6EE7B7';
+          slaDaysLabel = diffDays > 0 ? diffDays+'d early' : (diffHours > 0 ? diffHours+'h early' : 'On deadline');
+          slaPerfLabel = 'On time';
+        } else {
+          // Completed after deadline
+          slaPerf = Math.max(0, Math.round(((slaTotalMs + diffMs) / slaTotalMs) * 100));
+          slaPerfColor = '#FCA5A5';
+          slaDaysLabel = diffDays > 0 ? diffDays+'d late' : diffHours+'h late';
+          slaPerfLabel = 'Late';
+        }
       } else if(t.status !== 'Cancelled') {
         var now = new Date();
         var remaining = due - now;
-        slaPerf = Math.max(0, Math.round((remaining / slaTotalMs) * 100));
-        slaPerfColor = slaPerf > 30 ? '#6EE7B7' : slaPerf > 10 ? '#FCD34D' : '#FCA5A5';
-        slaPerfLabel = slaPerf + '% left';
+        var remDays = Math.ceil(Math.abs(remaining) / 86400000);
+        slaPerf = Math.max(0, Math.min(100, Math.round((remaining / slaTotalMs) * 100)));
+        if(remaining > 0) {
+          slaPerfColor = slaPerf > 30 ? '#6EE7B7' : slaPerf > 10 ? '#FCD34D' : '#FCA5A5';
+          slaDaysLabel = remDays+'d left';
+          slaPerfLabel = slaPerf > 30 ? 'On track' : slaPerf > 10 ? 'Due soon' : 'At risk';
+        } else {
+          slaPerfColor = '#FCA5A5';
+          slaDaysLabel = remDays+'d overdue';
+          slaPerfLabel = 'Overdue';
+        }
       }
     }
   }
@@ -2118,7 +2144,7 @@ function renderTaskModal(d) {
   html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">⚡ SLA</div>';
   if(slaPerf !== null) {
     html += '<div style="font-size:14px;font-weight:800;color:'+slaPerfColor+'">'+slaPerf+'%</div>';
-    html += '<div style="font-size:10px;color:rgba(255,255,255,.4)">'+slaPerfLabel+'</div>';
+    html += '<div style="font-size:10px;color:rgba(255,255,255,.5)">'+slaDaysLabel+'</div>';
   } else {
     html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9)">'+(t.sla_value||4)+' '+(t.sla_unit||'days')+'</div>';
   }
@@ -2212,7 +2238,7 @@ function renderTaskModal(d) {
     html += '<div style="margin-top:10px;background:'+slaCardBg+';border:1px solid '+slaCardBd+';border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px">';
     html += '<span style="font-size:14px">'+slaIcon+'</span>';
     html += '<div>';
-    html += '<div style="font-size:11px;font-weight:700;color:'+slaCardTx+'">SLA Performance: '+slaPerf+'%</div>';
+    html += '<div style="font-size:11px;font-weight:700;color:'+slaCardTx+'">'+(slaPerfLabel==='On time'||slaPerfLabel==='On track'?'✓ SLA '+slaPerfLabel:'⚠ SLA '+slaPerfLabel)+' — '+slaPerf+'%</div>';
     if(t.status==='Completed'){
       html += '<div style="font-size:10px;color:'+slaCardTx+';opacity:.7">'+(slaPerf>=100?'Completed before deadline ✓':'Completed after deadline'+(t.completed_at?' on '+UTILS.fdt(t.completed_at):''))+'</div>';
     } else {
