@@ -10,7 +10,65 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'IBM Plex Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 body{background:var(--bg3,#F0F4F9);color:var(--t1,#0A1628)}
-:root{--bg:#fff;--bg2:#F8FAFC;--bg3:#F0F4F9;--t1:#0A1628;--t2:#4A5568;--t3:#8A9BB0;--border:#E4EAF3;--blue:#1877C5;--green:#0EA472;--red:#E5383B;--amber:#F4A523;--sidebar:#0D1B3E;--sidebar-active:#1877C5}
+:root {
+  /* Brand — KIB */
+  --navy:        #060F24;
+  --navy-2:      #0D1B3E;
+  --navy-3:      #142556;
+  --blue:        #1877C5;
+  --blue-2:      #1565A8;
+  --blue-dim:    rgba(24,119,197,0.12);
+  --blue-light:  #E8F1FB;
+
+  /* Semantic */
+  --green:       #0EA472;
+  --green-dim:   #ECFDF5;
+  --red:         #E5383B;
+  --red-dim:     #FFF0F0;
+  --amber:       #F4A523;
+  --amber-dim:   #FFFBEB;
+  --purple:      #7B61FF;
+  --purple-dim:  #F5F3FF;
+  --teal:        #0891B2;
+  --teal-dim:    #F0F9FF;
+  --pink:        #EC4899;
+  --pink-dim:    #FFF0F9;
+  --orange:      #F97316;
+  --orange-dim:  #FFF7ED;
+
+  /* Surface — WFM-matching */
+  --bg:          #F4F6FB;
+  --card:        #FFFFFF;
+  --card-hover:  #FAFCFF;
+  --border:      #E4EAF3;
+  --border-2:    #D0D9E8;
+
+  /* Text */
+  --t1:          #0A1628;
+  --t2:          #4A5568;
+  --t3:          #8A9BB0;
+  --t4:          #B8C5D4;
+
+  /* Sidebar */
+  --sb:          var(--navy-2);
+  --sb-text:     rgba(255,255,255,0.5);
+  --sb-active-bg:rgba(24,119,197,0.22);
+  --sb-width:    220px;
+
+  /* Sizing */
+  --r-sm:        8px;
+  --r-md:        12px;
+  --r-lg:        16px;
+  --r-xl:        20px;
+
+  /* Shadows */
+  --sh-xs:  0 1px 3px rgba(6,15,36,.04);
+  --sh-sm:  0 2px 8px rgba(6,15,36,.06), 0 1px 3px rgba(6,15,36,.04);
+  --sh-md:  0 4px 16px rgba(6,15,36,.10);
+  --sh-lg:  0 12px 40px rgba(6,15,36,.15);
+
+  --ease: .2s cubic-bezier(.4,0,.2,1);
+}
 .app-layout{display:flex;min-height:100vh}
 .sidebar{width:220px;background:var(--sidebar);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
 .sidebar-header{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.08)}
@@ -81,36 +139,70 @@ body{background:var(--bg3,#F0F4F9);color:var(--t1,#0A1628)}
   .search-bar { display: none; }
   .form-row, .form-row-3 { grid-template-columns: 1fr !important; }
   .form-card { padding: 16px; }
-  .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
-  .kanban-board { grid-template-columns: 1fr !important; }
-  .kanban-col { min-width: 0 !important; }
-  .kanban-wrap { overflow-x: unset; }
-  .stats-row, .bottom-grid, .chart-grid { grid-template-columns: 1fr !important; }
-  .btn { padding: 8px 14px; font-size: 12px; }
-  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .modal-inner, [style*="max-width:660px"], [style*="max-width: 660px"] { max-width: 100% !important; margin: 8px !important; border-radius: 14px !important; }
-  #taskModal { padding: 8px !important; }
-  .filter-bar, .filter-row { gap: 6px; flex-wrap: wrap; }
-  .filter-btn, .f-btn { font-size: 11px; padding: 5px 11px; }
-  .add-bottom { flex-wrap: wrap; }
-  .todo-actions { opacity: 1 !important; }
-  .stats-strip { flex-wrap: wrap; gap: 8px; }
-  .rec-btn { padding: 10px 6px !important; font-size: 12px !important; }
-  .sidebar-overlay { display: block; }
+  
+/* ── KPI CARDS — WFM Style ─────────────────────────────── */
+.kpi-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; margin-bottom: 24px; }
+.kpi-card {
+  background: var(--card);
+  border-radius: var(--r-lg);
+  padding: 18px 18px 16px;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--sh-xs);
+  position: relative;
+  overflow: hidden;
+  transition: transform .15s, box-shadow .15s;
+  cursor: default;
 }
-@media (max-width: 480px) {
-  .kpi-grid { grid-template-columns: 1fr !important; }
-  .page-content { padding: 10px !important; }
-  .form-card { padding: 14px; }
-  .top-bar { height: 50px; }
-  .stats-strip { gap: 6px; }
-  .stat-pill { font-size: 11px; padding: 5px 10px; }
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--sh-sm); }
+.kpi-icon {
+  width: 38px; height: 38px; border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; margin-bottom: 12px;
 }
-.sidebar-overlay { display: none; }
-@media (max-width: 768px) {
-  #sidebarOverlay { display: none; }
-  .sidebar.open ~ #sidebarOverlay, #sidebarOverlay.visible { display: block !important; }
+.kpi-val, .kpi-value {
+  font-size: 28px; font-weight: 800; color: var(--t1);
+  line-height: 1; margin-bottom: 4px; letter-spacing: -1px;
 }
+.kpi-label, .kpi-lbl {
+  font-size: 11px; font-weight: 600; color: var(--t3);
+  text-transform: uppercase; letter-spacing: .6px;
+}
+.kpi-delta { font-size: 11px; font-weight: 600; margin-top: 4px; }
+.kpi-delta.up   { color: var(--green); }
+.kpi-delta.dn   { color: var(--red); }
+.kpi-delta.warn { color: var(--amber); }
+
+/* Colored KPI variants — matching WFM portal */
+.kpi-green  { background: var(--green-dim);  border-color: #A7F3D0; }
+.kpi-green  .kpi-val, .kpi-green  .kpi-value { color: var(--green); }
+.kpi-green  .kpi-icon { background: #A7F3D0; }
+
+.kpi-amber  { background: var(--amber-dim);  border-color: #FDE68A; }
+.kpi-amber  .kpi-val, .kpi-amber  .kpi-value { color: var(--amber); }
+.kpi-amber  .kpi-icon { background: #FDE68A; }
+
+.kpi-red    { background: var(--red-dim);    border-color: #FECACA; }
+.kpi-red    .kpi-val, .kpi-red    .kpi-value { color: var(--red); }
+.kpi-red    .kpi-icon { background: #FECACA; }
+
+.kpi-blue   { background: var(--blue-light); border-color: #BFDBFE; }
+.kpi-blue   .kpi-val, .kpi-blue   .kpi-value { color: var(--blue); }
+.kpi-blue   .kpi-icon { background: #BFDBFE; }
+
+.kpi-purple { background: var(--purple-dim); border-color: #DDD6FE; }
+.kpi-purple .kpi-val, .kpi-purple .kpi-value { color: var(--purple); }
+.kpi-purple .kpi-icon { background: #DDD6FE; }
+
+.kpi-teal   { background: var(--teal-dim);   border-color: #A5F3FC; }
+.kpi-teal   .kpi-val, .kpi-teal   .kpi-value { color: var(--teal); }
+.kpi-teal   .kpi-icon { background: #A5F3FC; }
+
+.kpi-orange { background: var(--orange-dim); border-color: #FED7AA; }
+.kpi-orange .kpi-val, .kpi-orange .kpi-value { color: var(--orange); }
+.kpi-orange .kpi-icon { background: #FED7AA; }
+
+/* Legacy color support */
+.kpi-blue::after, .kpi-red::after, .kpi-green::after, .kpi-amber::after, .kpi-purple::after { display: none; }
 
 
 /* ═══════════════════════════════════════════════════════
@@ -685,6 +777,26 @@ body {
   }
 }
 
+
+/* ── BOTTOM NAV — WFM Portal Style ──────────────────────── */
+.mobile-bottom-nav {
+  background: #0D1B3E;
+  border-top: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 -4px 20px rgba(6,15,36,.2);
+  padding: 6px 0 max(env(safe-area-inset-bottom), 8px);
+}
+.mbn-item {
+  color: rgba(255,255,255,.4);
+  border-radius: 10px;
+  transition: all .2s;
+}
+.mbn-item.active {
+  color: #fff;
+  background: rgba(24,119,197,.25);
+}
+.mbn-item svg { width: 22px; height: 22px; }
+.mbn-item span { font-size: 10px; font-weight: 600; }
+
 </style>
 </head>
 <body class="app-layout">
@@ -1245,128 +1357,73 @@ var KIB_CALENDAR = {
 // Auto-refreshes in background (2-5min depending on page).
 // ═══════════════════════════════════════════════════════════════════
 var CACHE = {
-  _TTL: 300000,        // 5 min max age before forced refresh
-  _BG:  120000,        // 2min background refresh interval (per-page varies)
-  _pfx: 'kib_cache_',  // storage key prefix
-  _timers: {},
-
-  // Build a cache key from action + params
+  _TTL: 30000,          // 30s TTL — short enough to feel fresh
+  _NO_CACHE: ['tasks_list','dashboard','notif_list','ptodo_list'],  // always live
+  _pfx: 'kib_cache_',
   _key: function(action, params) {
     var p = Object.keys(params||{}).sort().map(function(k){return k+'='+params[k];}).join('&');
     return this._pfx + action + (p ? '_' + p : '');
   },
-
-  // Save data to sessionStorage with timestamp
   set: function(action, params, data) {
+    if (this._NO_CACHE.indexOf(action) !== -1) return;
     try {
-      var key = this._key(action, params);
-      sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data: data }));
-    } catch(e) {} // ignore storage errors (private mode etc)
+      sessionStorage.setItem(this._key(action, params), JSON.stringify({ts: Date.now(), data: data}));
+    } catch(e) {}
   },
-
-  // Get cached data. Returns {data, stale} or null
   get: function(action, params) {
+    if (this._NO_CACHE.indexOf(action) !== -1) return null;
     try {
-      var key = this._key(action, params);
-      var raw = sessionStorage.getItem(key);
+      var raw = sessionStorage.getItem(this._key(action, params));
       if (!raw) return null;
       var obj = JSON.parse(raw);
-      return { data: obj.data, stale: (Date.now() - obj.ts) > this._TTL };
+      if ((Date.now() - obj.ts) > this._TTL) { sessionStorage.removeItem(this._key(action, params)); return null; }
+      return { data: obj.data, stale: false };
     } catch(e) { return null; }
   },
-
-  // Clear a specific action from cache (use after mutations)
   bust: function(action) {
     try {
       for (var i = sessionStorage.length - 1; i >= 0; i--) {
         var k = sessionStorage.key(i);
-        if (k && k.indexOf(this._pfx + action) === 0) {
-          sessionStorage.removeItem(k);
-        }
+        if (k && k.indexOf(this._pfx + action) === 0) sessionStorage.removeItem(k);
       }
     } catch(e) {}
   },
-
-  // Bust all task-related caches (after create/update/cancel)
-  bustTasks: function() {
-    this.bust('tasks_list');
-    this.bust('tasks_detail');
-    this.bust('dashboard');
-  },
-
-  // Bust all training caches
-  bustTraining: function() {
-    this.bust('training_list');
-    this.bust('training_detail');
-    this.bust('dashboard');
-  },
-
-  // Clear everything
+  bustTasks: function() { this.bust('tasks_list'); this.bust('tasks_detail'); this.bust('dashboard'); },
+  bustTraining: function() { this.bust('training_list'); this.bust('training_detail'); this.bust('dashboard'); },
   clear: function() {
     try {
       var keys = [];
-      for (var i = 0; i < sessionStorage.length; i++) {
-        var k = sessionStorage.key(i);
-        if (k && k.indexOf(this._pfx) === 0) keys.push(k);
-      }
+      for (var i = 0; i < sessionStorage.length; i++) { var k = sessionStorage.key(i); if (k && k.indexOf(this._pfx) === 0) keys.push(k); }
       keys.forEach(function(k){ sessionStorage.removeItem(k); });
     } catch(e) {}
   }
 };
 
-// Extend API.get to use cache automatically
+
+// API.get — short cache, no stale data
 var _origAPIGet = API.get.bind(API);
 API.get = async function(action, params) {
-  // Actions that should NOT be cached (always fresh)
-  var noCache = ['login','notif_list','notif_read','notif_read_all'];
-  if (noCache.indexOf(action) !== -1) {
-    return _origAPIGet(action, params);
-  }
-
   var cached = CACHE.get(action, params);
-
-  if (cached && !cached.stale) {
-    // Fresh cache — return immediately, refresh in background silently
-    _origAPIGet(action, params).then(function(fresh) {
-      CACHE.set(action, params, fresh);
-    }).catch(function(){});
-    return cached.data;
-  }
-
-  if (cached && cached.stale) {
-    // Stale cache — return old data immediately so UI shows instantly
-    // Then fetch fresh and update (next load will be fast)
-    _origAPIGet(action, params).then(function(fresh) {
-      CACHE.set(action, params, fresh);
-    }).catch(function(){});
-    return cached.data;
-  }
-
-  // No cache at all — fetch fresh and cache it
+  if (cached) return cached.data;
   var fresh = await _origAPIGet(action, params);
   CACHE.set(action, params, fresh);
   return fresh;
 };
 
-// Extend API.post to bust relevant caches after mutations
+// API.post — bust cache after every mutation
 var _origAPIPost = API.post.bind(API);
 API.post = async function(action, body) {
   var result = await _origAPIPost(action, body);
-  // Bust caches based on action
-  var taskActions = ['tasks_create','tasks_update','subtask_mark','task_delegate',
-                     'task_ext_request','task_ext_review'];
-  var trainActions = ['training_create','training_mark','training_comment',
-                      'training_ext_request','training_ext_review'];
+  var taskActions = ['tasks_create','tasks_update','subtask_mark','task_delegate','task_ext_request','task_ext_review','tasks_comment'];
+  var trainActions = ['training_create','training_mark','training_comment','training_ext_request','training_ext_review'];
   var handoverActions = ['handover_create','handover_update'];
   var salesActions = ['sales_entry','sales_mtd_update'];
   var todoActions = ['ptodo_add','ptodo_update','ptodo_delete'];
-
-  if (taskActions.indexOf(action) !== -1)    CACHE.bustTasks();
-  if (trainActions.indexOf(action) !== -1)   CACHE.bustTraining();
-  if (handoverActions.indexOf(action) !== -1){ CACHE.bust('handover_dashboard'); CACHE.bust('handover_list'); CACHE.bust('dashboard'); }
-  if (salesActions.indexOf(action) !== -1)   { CACHE.bust('sales_dashboard'); CACHE.bust('dashboard'); }
-  if (todoActions.indexOf(action) !== -1)    { CACHE.bust('ptodo_list'); }
-
+  if (taskActions.indexOf(action) !== -1) CACHE.bustTasks();
+  if (trainActions.indexOf(action) !== -1) CACHE.bustTraining();
+  if (handoverActions.indexOf(action) !== -1) { CACHE.bust('handover_dashboard'); CACHE.bust('handover_list'); CACHE.bust('dashboard'); }
+  if (salesActions.indexOf(action) !== -1) { CACHE.bust('sales_dashboard'); CACHE.bust('dashboard'); }
+  if (todoActions.indexOf(action) !== -1) CACHE.bust('ptodo_list');
   return result;
 };
 

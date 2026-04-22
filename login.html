@@ -34,6 +34,126 @@ input[type=password]::placeholder{letter-spacing:0;font-size:14px;text-align:lef
   h1 { font-size: 19px; }
   input, select { font-size: 16px !important; }
 }
+
+/* ═══════════════════════════════════════════════════
+   KIB MOBILE SCROLL FIX — Natural iOS/Android scroll
+   ═══════════════════════════════════════════════════ */
+
+/* Core scroll reset */
+html {
+  height: 100%;
+  overflow: hidden;            /* prevent double scroll bar on desktop */
+}
+body {
+  height: 100%;
+  overflow: hidden;
+  position: fixed;             /* prevents iOS address bar bounce issues */
+  width: 100%;
+}
+
+/* Main scrollable container */
+.main-content {
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;  /* momentum scroll on iOS */
+  overscroll-behavior-y: contain;     /* prevent page bounce */
+  scroll-behavior: smooth;
+}
+
+/* Page content — let it scroll naturally inside main-content */
+.page-content {
+  min-height: 100%;
+}
+
+/* Sidebar scroll */
+.sidebar {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Modal scroll */
+#taskModal,
+#newTaskModal,
+#newTrainingModal,
+[id$="Modal"] {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Kanban horizontal scroll */
+.kanban-wrap {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+}
+
+/* Tab bars */
+.tab-bar,
+[class*="tab-bar"],
+.filter-row {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+@media (max-width: 768px) {
+  html {
+    height: 100%;
+    overflow: hidden;
+  }
+  body {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .main-content {
+    height: calc(100vh - 0px);
+    overflow-y: scroll;         /* force scrollbar on iOS */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    padding-bottom: 72px;       /* space for bottom nav */
+  }
+  /* Prevent body scroll when modal is open */
+  body.modal-open {
+    overflow: hidden !important;
+    position: fixed !important;
+  }
+  /* Smooth tap highlight */
+  * {
+    -webkit-tap-highlight-color: rgba(0,0,0,0.05);
+    tap-highlight-color: rgba(0,0,0,0.05);
+  }
+  /* Better touch targets */
+  .nav-item, .btn, button, .f-btn, .mbn-item {
+    touch-action: manipulation;
+  }
+  /* Prevent text selection while scrolling */
+  .kanban-board, .kanban-wrap {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+
+/* ── BOTTOM NAV — WFM Portal Style ──────────────────────── */
+.mobile-bottom-nav {
+  background: #0D1B3E;
+  border-top: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 -4px 20px rgba(6,15,36,.2);
+  padding: 6px 0 max(env(safe-area-inset-bottom), 8px);
+}
+.mbn-item {
+  color: rgba(255,255,255,.4);
+  border-radius: 10px;
+  transition: all .2s;
+}
+.mbn-item.active {
+  color: #fff;
+  background: rgba(24,119,197,.25);
+}
+.mbn-item svg { width: 22px; height: 22px; }
+.mbn-item span { font-size: 10px; font-weight: 600; }
+
 </style>
 </head>
 <body>

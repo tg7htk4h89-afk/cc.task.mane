@@ -14,26 +14,33 @@
 
 /* ── Design Tokens ─────────────────────────── */
 :root {
-  /* Brand */
+  /* Brand — KIB */
   --navy:        #060F24;
   --navy-2:      #0D1B3E;
   --navy-3:      #142556;
   --blue:        #1877C5;
+  --blue-2:      #1565A8;
   --blue-dim:    rgba(24,119,197,0.12);
   --blue-light:  #E8F1FB;
 
   /* Semantic */
   --green:       #0EA472;
-  --green-dim:   #E6F7F2;
+  --green-dim:   #ECFDF5;
   --red:         #E5383B;
-  --red-dim:     #FEE8E8;
+  --red-dim:     #FFF0F0;
   --amber:       #F4A523;
-  --amber-dim:   #FEF5E7;
+  --amber-dim:   #FFFBEB;
   --purple:      #7B61FF;
-  --purple-dim:  #F0EEFF;
+  --purple-dim:  #F5F3FF;
+  --teal:        #0891B2;
+  --teal-dim:    #F0F9FF;
+  --pink:        #EC4899;
+  --pink-dim:    #FFF0F9;
+  --orange:      #F97316;
+  --orange-dim:  #FFF7ED;
 
-  /* Surface */
-  --bg:          #F0F4F9;
+  /* Surface — WFM-matching */
+  --bg:          #F4F6FB;
   --card:        #FFFFFF;
   --card-hover:  #FAFCFF;
   --border:      #E4EAF3;
@@ -46,30 +53,24 @@
   --t4:          #B8C5D4;
 
   /* Sidebar */
-  --sb:          var(--navy);
+  --sb:          var(--navy-2);
   --sb-text:     rgba(255,255,255,0.5);
-  --sb-active-bg:rgba(24,119,197,0.18);
-  --sb-active:   #5BA8E8;
-  --sb-width:    224px;
-  --topbar-h:    52px;
+  --sb-active-bg:rgba(24,119,197,0.22);
+  --sb-width:    220px;
 
-  /* Type */
-  --font: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
-  --mono: 'IBM Plex Mono', monospace;
+  /* Sizing */
+  --r-sm:        8px;
+  --r-md:        12px;
+  --r-lg:        16px;
+  --r-xl:        20px;
 
-  /* Radius */
-  --r-sm: 6px;
-  --r-md: 10px;
-  --r-lg: 14px;
-  --r-xl: 18px;
+  /* Shadows */
+  --sh-xs:  0 1px 3px rgba(6,15,36,.04);
+  --sh-sm:  0 2px 8px rgba(6,15,36,.06), 0 1px 3px rgba(6,15,36,.04);
+  --sh-md:  0 4px 16px rgba(6,15,36,.10);
+  --sh-lg:  0 12px 40px rgba(6,15,36,.15);
 
-  /* Shadow */
-  --sh-sm: 0 1px 3px rgba(10,22,40,0.06), 0 1px 2px rgba(10,22,40,0.04);
-  --sh-md: 0 4px 12px rgba(10,22,40,0.08), 0 1px 3px rgba(10,22,40,0.05);
-  --sh-lg: 0 12px 32px rgba(10,22,40,0.12), 0 4px 8px rgba(10,22,40,0.06);
-
-  /* Transitions */
-  --ease: 150ms ease;
+  --ease: .2s cubic-bezier(.4,0,.2,1);
 }
 
 /* ── Reset ─────────────────────────────────── */
@@ -238,48 +239,71 @@ input, select, textarea { font-family: var(--font); }
 .btn-sm       { padding: 5px 12px; font-size: 11px; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ── KPI Cards ──────────────────────────────── */
-.kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+
+/* ── KPI CARDS — WFM Style ─────────────────────────────── */
+.kpi-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; margin-bottom: 24px; }
 .kpi-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--r-lg); padding: 16px;
-  box-shadow: var(--sh-sm); position: relative; overflow: hidden;
-  transition: box-shadow var(--ease), transform var(--ease);
+  background: var(--card);
+  border-radius: var(--r-lg);
+  padding: 18px 18px 16px;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--sh-xs);
+  position: relative;
+  overflow: hidden;
+  transition: transform .15s, box-shadow .15s;
+  cursor: default;
 }
-.kpi-card:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
-.kpi-card::after {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 3px;
-}
-.kpi-blue::after   { background: var(--blue); }
-.kpi-red::after    { background: var(--red); }
-.kpi-green::after  { background: var(--green); }
-.kpi-amber::after  { background: var(--amber); }
-.kpi-purple::after { background: var(--purple); }
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--sh-sm); }
 .kpi-icon {
-  width: 34px; height: 34px; border-radius: var(--r-md);
+  width: 38px; height: 38px; border-radius: var(--r-md);
   display: flex; align-items: center; justify-content: center;
-  margin-bottom: 12px;
+  font-size: 18px; margin-bottom: 12px;
 }
-.kpi-icon svg { width: 16px; height: 16px; }
-.kpi-icon.blue   { background: var(--blue-light); }
-.kpi-icon.blue svg { stroke: var(--blue); }
-.kpi-icon.red    { background: var(--red-dim); }
-.kpi-icon.red svg { stroke: var(--red); }
-.kpi-icon.green  { background: var(--green-dim); }
-.kpi-icon.green svg { stroke: var(--green); }
-.kpi-icon.amber  { background: var(--amber-dim); }
-.kpi-icon.amber svg { stroke: var(--amber); }
-.kpi-icon.purple { background: var(--purple-dim); }
-.kpi-icon.purple svg { stroke: var(--purple); }
-.kpi-value { font-size: 24px; font-weight: 800; color: var(--t1); line-height: 1; letter-spacing: -0.5px; }
-.kpi-value.red    { color: var(--red); }
-.kpi-value.green  { color: var(--green); }
-.kpi-label { font-size: 11px; color: var(--t2); margin-top: 5px; font-weight: 500; }
-.kpi-delta { font-size: 10px; font-weight: 600; margin-top: 6px; display: flex; align-items: center; gap: 3px; }
-.kpi-delta.up  { color: var(--green); }
-.kpi-delta.dn  { color: var(--red); }
-.kpi-delta.neutral { color: var(--t3); }
+.kpi-val, .kpi-value {
+  font-size: 28px; font-weight: 800; color: var(--t1);
+  line-height: 1; margin-bottom: 4px; letter-spacing: -1px;
+}
+.kpi-label, .kpi-lbl {
+  font-size: 11px; font-weight: 600; color: var(--t3);
+  text-transform: uppercase; letter-spacing: .6px;
+}
+.kpi-delta { font-size: 11px; font-weight: 600; margin-top: 4px; }
+.kpi-delta.up   { color: var(--green); }
+.kpi-delta.dn   { color: var(--red); }
+.kpi-delta.warn { color: var(--amber); }
+
+/* Colored KPI variants — matching WFM portal */
+.kpi-green  { background: var(--green-dim);  border-color: #A7F3D0; }
+.kpi-green  .kpi-val, .kpi-green  .kpi-value { color: var(--green); }
+.kpi-green  .kpi-icon { background: #A7F3D0; }
+
+.kpi-amber  { background: var(--amber-dim);  border-color: #FDE68A; }
+.kpi-amber  .kpi-val, .kpi-amber  .kpi-value { color: var(--amber); }
+.kpi-amber  .kpi-icon { background: #FDE68A; }
+
+.kpi-red    { background: var(--red-dim);    border-color: #FECACA; }
+.kpi-red    .kpi-val, .kpi-red    .kpi-value { color: var(--red); }
+.kpi-red    .kpi-icon { background: #FECACA; }
+
+.kpi-blue   { background: var(--blue-light); border-color: #BFDBFE; }
+.kpi-blue   .kpi-val, .kpi-blue   .kpi-value { color: var(--blue); }
+.kpi-blue   .kpi-icon { background: #BFDBFE; }
+
+.kpi-purple { background: var(--purple-dim); border-color: #DDD6FE; }
+.kpi-purple .kpi-val, .kpi-purple .kpi-value { color: var(--purple); }
+.kpi-purple .kpi-icon { background: #DDD6FE; }
+
+.kpi-teal   { background: var(--teal-dim);   border-color: #A5F3FC; }
+.kpi-teal   .kpi-val, .kpi-teal   .kpi-value { color: var(--teal); }
+.kpi-teal   .kpi-icon { background: #A5F3FC; }
+
+.kpi-orange { background: var(--orange-dim); border-color: #FED7AA; }
+.kpi-orange .kpi-val, .kpi-orange .kpi-value { color: var(--orange); }
+.kpi-orange .kpi-icon { background: #FED7AA; }
+
+/* Legacy color support */
+.kpi-blue::after, .kpi-red::after, .kpi-green::after, .kpi-amber::after, .kpi-purple::after { display: none; }
+
 
 /* ── Chart Cards ────────────────────────────── */
 .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 20px; }
@@ -641,7 +665,7 @@ input, select, textarea { font-family: var(--font); }
 .notif-unread-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); flex-shrink: 0; margin-top: 5px; }
 
 /* ── Login page ─────────────────────────────── */
-.login-page { background: var(--navy); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.login-page { background: #0D1B3E; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .login-card { background: var(--card); border-radius: var(--r-xl); padding: 40px; width: 400px; max-width: 100%; box-shadow: var(--sh-lg); }
 .login-logo { margin-bottom: 32px; }
 .login-logomark { width: 48px; height: 48px; background: var(--blue); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; color: #fff; letter-spacing: -0.5px; margin-bottom: 14px; }
@@ -1317,6 +1341,26 @@ body {
     user-select: none;
   }
 }
+
+
+/* ── BOTTOM NAV — WFM Portal Style ──────────────────────── */
+.mobile-bottom-nav {
+  background: #0D1B3E;
+  border-top: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 -4px 20px rgba(6,15,36,.2);
+  padding: 6px 0 max(env(safe-area-inset-bottom), 8px);
+}
+.mbn-item {
+  color: rgba(255,255,255,.4);
+  border-radius: 10px;
+  transition: all .2s;
+}
+.mbn-item.active {
+  color: #fff;
+  background: rgba(24,119,197,.25);
+}
+.mbn-item svg { width: 22px; height: 22px; }
+.mbn-item span { font-size: 10px; font-weight: 600; }
 
 </style>
 </head>
