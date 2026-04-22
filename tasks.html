@@ -1403,7 +1403,7 @@ var KIB_HIERARCHY = {
   // Who each manager can assign tasks to
   direct_reports: {
     'USR-013': ['USR-001','USR-014','USR-015','USR-016'],           // Nawaf's directs
-    'USR-001': ['USR-002'],                                          // Talal → Taher
+    'USR-001': ['USR-001','USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012','USR-013','USR-014','USR-015','USR-016','USR-017','USR-018','USR-099'],
     'USR-002': ['USR-003','USR-004','USR-005','USR-008','USR-009','USR-012'], // Taher's directs
     'USR-003': [],                                                   // Shouq (no assign)
     'USR-004': [],                                                   // Alanoud (no assign)
@@ -1427,7 +1427,7 @@ var KIB_HIERARCHY = {
   // Who each user can SEE tasks for (includes all indirect reports)
   visibility_tree: {
     'USR-013': ['USR-001','USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012','USR-014','USR-015','USR-016','USR-017','USR-018'],
-    'USR-001': ['USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012'],
+    'USR-001': ['USR-001','USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012','USR-013','USR-014','USR-015','USR-016','USR-017','USR-018','USR-099'],
     'USR-002': ['USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012'],
     'USR-003': [],   // Shouq: self only
     'USR-004': [],   // Alanoud: self only
@@ -1871,6 +1871,8 @@ function kcard(t){
     +'<div class="k-card-footer"><div class="k-priority '+pd+'"></div><div class="k-progress"><div class="k-prog-fill '+pf+'" style="width:'+pct+'%"></div></div>'+tl2+'</div></button>';
 }
 function renderBoard(tasks){
+  // DEBUG: log task statuses
+  if(tasks.length>0)console.log('[ADC] Tasks loaded:',tasks.length,'statuses:',tasks.map(function(t){return t.status+'/'+t.task_id;}));
   document.getElementById('kT').textContent=tasks.length;
   var o=tasks.filter(function(t){return!['Completed','Cancelled'].includes(t.status)}).length;
   var x=tasks.filter(function(t){return t.is_overdue==='TRUE'}).length;
