@@ -40,16 +40,8 @@ input[type=password]::placeholder{letter-spacing:0;font-size:14px;text-align:lef
    ═══════════════════════════════════════════════════ */
 
 /* Core scroll reset */
-html {
-  height: 100%;
-  overflow: hidden;            /* prevent double scroll bar on desktop */
-}
-body {
-  height: 100%;
-  overflow: hidden;
-  position: fixed;             /* prevents iOS address bar bounce issues */
-  width: 100%;
-}
+html { height: 100%; }
+body { min-height: 100%; }
 
 /* Main scrollable container */
 .main-content {
@@ -114,10 +106,7 @@ body {
     padding-bottom: 72px;       /* space for bottom nav */
   }
   /* Prevent body scroll when modal is open */
-  body.modal-open {
-    overflow: hidden !important;
-    position: fixed !important;
-  }
+  body.modal-open { overflow: hidden !important; }
   /* Smooth tap highlight */
   * {
     -webkit-tap-highlight-color: rgba(0,0,0,0.05);
@@ -153,6 +142,77 @@ body {
 }
 .mbn-item svg { width: 22px; height: 22px; }
 .mbn-item span { font-size: 10px; font-weight: 600; }
+
+
+  /* Professional skeleton loading */
+  .skeleton {
+    background: linear-gradient(90deg, #f0f4f9 25%, #e4eaf3 50%, #f0f4f9 75%);
+    background-size: 200% 100%;
+    animation: skeleton-wave 1.5s infinite;
+    border-radius: var(--r-md, 10px);
+  }
+  @keyframes skeleton-wave {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  /* Toast improvements */
+  .toast-success { border-left-color: var(--green) !important; }
+  .toast-error   { border-left-color: var(--red) !important; }
+  .toast-warning { border-left-color: var(--amber) !important; }
+  
+  /* Card hover lift */
+  .k-card:hover, .plan-card:hover, .stat-card:hover {
+    transform: translateY(-2px);
+    transition: transform .2s ease, box-shadow .2s ease;
+    box-shadow: 0 8px 24px rgba(6,15,36,.12);
+  }
+  
+  /* Input focus ring */
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(24,119,197,.15);
+    border-color: var(--blue) !important;
+    transition: all .2s ease;
+  }
+  
+  /* Form label consistency */
+  .form-label, label.form-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--t2);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  /* Required field asterisk */
+  .req { color: var(--red); margin-left: 2px; }
+  
+  /* Status pill consistency */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    white-space: nowrap;
+  }
+  
+  /* Smooth page transitions */
+  .page-content { animation: pageIn .25s ease; }
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Professional scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-2, #D0D9E8); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--t4, #B8C5D4); }
 
 </style>
 </head>
