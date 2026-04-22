@@ -1219,6 +1219,106 @@ input, select, textarea, button { font-size: 16px !important; }
   .main-content { margin-left: 220px !important; padding-bottom: 0 !important; }
 }
 
+
+/* ═══════════════════════════════════════════════════
+   KIB MOBILE SCROLL FIX — Natural iOS/Android scroll
+   ═══════════════════════════════════════════════════ */
+
+/* Core scroll reset */
+html {
+  height: 100%;
+  overflow: hidden;            /* prevent double scroll bar on desktop */
+}
+body {
+  height: 100%;
+  overflow: hidden;
+  position: fixed;             /* prevents iOS address bar bounce issues */
+  width: 100%;
+}
+
+/* Main scrollable container */
+.main-content {
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;  /* momentum scroll on iOS */
+  overscroll-behavior-y: contain;     /* prevent page bounce */
+  scroll-behavior: smooth;
+}
+
+/* Page content — let it scroll naturally inside main-content */
+.page-content {
+  min-height: 100%;
+}
+
+/* Sidebar scroll */
+.sidebar {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Modal scroll */
+#taskModal,
+#newTaskModal,
+#newTrainingModal,
+[id$="Modal"] {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Kanban horizontal scroll */
+.kanban-wrap {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+}
+
+/* Tab bars */
+.tab-bar,
+[class*="tab-bar"],
+.filter-row {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+@media (max-width: 768px) {
+  html {
+    height: 100%;
+    overflow: hidden;
+  }
+  body {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .main-content {
+    height: calc(100vh - 0px);
+    overflow-y: scroll;         /* force scrollbar on iOS */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    padding-bottom: 72px;       /* space for bottom nav */
+  }
+  /* Prevent body scroll when modal is open */
+  body.modal-open {
+    overflow: hidden !important;
+    position: fixed !important;
+  }
+  /* Smooth tap highlight */
+  * {
+    -webkit-tap-highlight-color: rgba(0,0,0,0.05);
+    tap-highlight-color: rgba(0,0,0,0.05);
+  }
+  /* Better touch targets */
+  .nav-item, .btn, button, .f-btn, .mbn-item {
+    touch-action: manipulation;
+  }
+  /* Prevent text selection while scrolling */
+  .kanban-board, .kanban-wrap {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1443,9 +1543,9 @@ var KIB_HIERARCHY = {
     'USR-013': ['USR-001','USR-014','USR-015','USR-016'],           // Nawaf's directs
     'USR-001': ['USR-001','USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012','USR-013','USR-014','USR-015','USR-016','USR-017','USR-018','USR-099'],
     'USR-002': ['USR-003','USR-004','USR-005','USR-008','USR-009','USR-012'], // Taher's directs
-    'USR-003': [],                                                   // Shouq (no assign)
-    'USR-004': [],                                                   // Alanoud (no assign)
-    'USR-005': [],                                                   // Mohammad TL (no assign)
+    'USR-003': ['USR-007'],                                                   // Shouq (no assign)
+    'USR-004': ['USR-006'],                                                   // Alanoud (no assign)
+    'USR-005': ['USR-006','USR-007'],                                                   // Mohammad TL (no assign)
     'USR-006': [],                                                   // Hasan AL (no assign)
     'USR-007': [],                                                   // Naser AL (no assign)
     'USR-008': [],
@@ -1464,7 +1564,7 @@ var KIB_HIERARCHY = {
   // ── FULL VISIBILITY TREE ──────────────────────────────────────
   // Who each user can SEE tasks for (includes all indirect reports)
   visibility_tree: {
-    'USR-013': ['USR-001','USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012','USR-014','USR-015','USR-016','USR-017','USR-018'],
+    'USR-013': ['USR-001','USR-014','USR-015','USR-016'],
     'USR-001': ['USR-001','USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012','USR-013','USR-014','USR-015','USR-016','USR-017','USR-018','USR-099'],
     'USR-002': ['USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012'],
     'USR-003': [],   // Shouq: self only
@@ -1491,7 +1591,7 @@ var KIB_HIERARCHY = {
     'HoD':        { canCreate: true,  canAssign: true,  isAdmin: true,  isManager: true,  level: 2 },
     'Manager':    { canCreate: true,  canAssign: true,  isAdmin: true,  isManager: true,  level: 3 },
     'QA Manager': { canCreate: true,  canAssign: true,  isAdmin: false, isManager: true,  level: 3 },
-    'TL':         { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 4 },
+    'TL':         { canCreate: true,  canAssign: true,  isAdmin: false, isManager: false, level: 4 },
     'AL':         { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 4 },
     'QA':         { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 5 },
     'BackOffice': { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 5 },
@@ -2018,6 +2118,21 @@ loadBell();
     loadArchive();
   }, 300000);
 })();
+
+// ── MOBILE SCROLL MANAGEMENT ─────────────────────────────────
+var _scrollY = 0;
+function lockBodyScroll() {
+  _scrollY = document.querySelector('.main-content') ? 
+    document.querySelector('.main-content').scrollTop : window.scrollY;
+  document.body.classList.add('modal-open');
+}
+function unlockBodyScroll() {
+  document.body.classList.remove('modal-open');
+  var mc = document.querySelector('.main-content');
+  if (mc) mc.scrollTop = _scrollY;
+}
+// ── END MOBILE SCROLL ──────────────────────────────────────
+
 </script>
 
 <!-- Mobile Bottom Navigation -->
