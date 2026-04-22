@@ -935,6 +935,151 @@ input, select, textarea {
   .sidebar.open { display: flex !important; }
 }
 
+
+/* ═══════════════════════════════════════════════════════
+   KIB MOBILE PERFECTION v3 — Applied to all pages
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Touch & interaction ────────────────────────── */
+* { -webkit-tap-highlight-color: transparent; }
+input, select, textarea { font-size: 16px !important; }
+button, .btn, .nav-item, a.nav-item { touch-action: manipulation; }
+
+/* ── Bottom nav ─────────────────────────────────── */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--navy-2);
+  border-top: 1px solid rgba(255,255,255,.08);
+  z-index: 300;
+  padding: 4px 0 max(env(safe-area-inset-bottom), 6px);
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: stretch;
+}
+.mbn-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; color: rgba(255,255,255,.4); text-decoration: none;
+  padding: 6px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;
+  transition: color .15s, background .15s; min-width: 48px; flex: 1;
+}
+.mbn-item:active { background: rgba(255,255,255,.07); }
+.mbn-item.active { color: var(--blue); }
+.mbn-item.active svg { stroke: var(--blue); }
+.mbn-item svg { flex-shrink: 0; }
+
+/* ── PHONE ≤480px ───────────────────────────────── */
+@media (max-width: 480px) {
+  /* Sidebar full overlay */
+  .sidebar { display: none !important; }
+  .sidebar.open { display: flex !important; width: min(85vw, 280px) !important; }
+  .main-content { margin-left: 0 !important; }
+  .sidebar-toggle { display: flex !important; }
+  .mobile-bottom-nav { display: flex !important; }
+  .main-content { padding-bottom: 65px !important; }
+
+  /* Top bar tighter */
+  .top-bar { padding: 0 12px !important; height: 52px !important; }
+  .breadcrumb { font-size: 13px !important; font-weight: 700; }
+
+  /* Page padding */
+  .page-content { padding: 12px !important; }
+
+  /* KPI grid — always 2 cols */
+  .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .kpi-card { padding: 14px 12px !important; }
+  .kpi-val, .kpi-value { font-size: 22px !important; }
+  .kpi-label, .kpi-lbl { font-size: 10px !important; }
+
+  /* Cards */
+  .card, .form-card, .plan-card, .shift-card { border-radius: 12px !important; padding: 14px !important; }
+  
+  /* Page header */
+  .page-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+  .page-actions { width: 100% !important; flex-wrap: wrap !important; gap: 8px !important; }
+  .page-actions .btn { flex: 1; justify-content: center; min-width: 0; }
+
+  /* Modals → bottom sheets */
+  .modal-bg { padding: 0 !important; align-items: flex-end !important; }
+  .modal-inner, [id$="Modal"] > div, [id$="modal"] > div {
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 92vh !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* Kanban horizontal scroll */
+  .kanban-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; padding-bottom: 12px !important; scroll-snap-type: x mandatory; }
+  .kanban-board { display: flex !important; gap: 10px !important; min-width: max-content !important; }
+  .k-col, .kanban-col { min-width: 270px !important; width: 270px !important; scroll-snap-align: start; }
+
+  /* Tables scroll */
+  table { display: block !important; overflow-x: auto !important; white-space: nowrap !important; -webkit-overflow-scrolling: touch !important; }
+  
+  /* Forms */
+  .form-row, .form-grid { flex-direction: column !important; grid-template-columns: 1fr !important; }
+  .form-group { width: 100% !important; }
+
+  /* Buttons */
+  .btn { padding: 10px 16px !important; font-size: 12px !important; border-radius: 10px !important; }
+  .btn-primary, .btn-post { min-height: 44px !important; font-size: 13px !important; }
+
+  /* Training cards */
+  .plan-header { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+  .plan-footer { flex-direction: column !important; gap: 8px !important; }
+
+  /* Sales grid */
+  .sales-grid, .chart-grid, .stats-row, .bottom-grid { grid-template-columns: 1fr !important; }
+
+  /* Notification items */
+  .notif-item { padding: 12px 14px !important; }
+
+  /* Search bar hide on mobile */
+  .search-bar, .top-search { display: none !important; }
+
+  /* Floating add button */
+  .fab-btn {
+    position: fixed !important; bottom: 74px !important; right: 16px !important;
+    width: 52px !important; height: 52px !important; border-radius: 50% !important;
+    box-shadow: 0 4px 20px rgba(6,15,36,.3) !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    z-index: 200 !important;
+  }
+  
+  /* Tab bars scroll */
+  .tab-bar, .tabs-row, .filter-bar { 
+    overflow-x: auto !important; -webkit-overflow-scrolling: touch !important;
+    flex-wrap: nowrap !important; scrollbar-width: none !important; padding-bottom: 2px;
+  }
+  .tab-bar::-webkit-scrollbar, .tabs-row::-webkit-scrollbar { display: none !important; }
+
+  /* Hide some columns on mobile */
+  .hide-mobile { display: none !important; }
+}
+
+/* ── TABLET 481–768px ───────────────────────────── */
+@media (min-width: 481px) and (max-width: 768px) {
+  .sidebar { display: none !important; }
+  .sidebar.open { display: flex !important; }
+  .main-content { margin-left: 0 !important; }
+  .sidebar-toggle { display: flex !important; }
+  .mobile-bottom-nav { display: flex !important; }
+  .main-content { padding-bottom: 65px !important; }
+  .page-content { padding: 16px !important; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .kanban-wrap { overflow-x: auto !important; }
+  .kanban-board { display: flex !important; min-width: max-content !important; }
+  .k-col, .kanban-col { min-width: 240px !important; }
+}
+
+/* ── DESKTOP 769px+ ─────────────────────────────── */
+@media (min-width: 769px) {
+  .sidebar-toggle { display: none !important; }
+  .mobile-bottom-nav { display: none !important; }
+  .main-content { margin-left: 220px; padding-bottom: 0 !important; }
+}
+
 </style>
 </head>
 <body>
@@ -1007,7 +1152,7 @@ var AUTH={
   requireAuth:function(){if(!this.getSession())window.location.href='/cc.task.mane/login.html';},
   logout:function(){localStorage.removeItem(SES_KEY);window.location.href='/cc.task.mane/login.html';},
   hasRole:function(r){var s=this.getSession();if(!s)return false;return Array.isArray(r)?r.indexOf(s.role)!==-1:s.role===r;},
-  canDo:function(a){var s=this.getSession();if(!s)return false;var m={'tasks.create':['HoD','Manager'],'handover.create':['HoD','Manager','TL','AL'],'training.create':['HoD','Manager'],'sales.entry':['HoD','Manager','TL','AL'],'settings.edit':['HoD']};return m[a]?m[a].indexOf(s.role)!==-1:true;},
+  canDo:function(a){var s=this.getSession();if(!s)return false;var m={'tasks.create':['HoD','Manager','DGM','DataEntry','QA Manager'],'handover.create':['HoD','Manager','TL','AL'],'training.create':['HoD','Manager','QA Manager'],'sales.entry':['HoD','Manager','TL','AL'],'settings.edit':['HoD','DGM']};if(a==='tasks.create'&&window.KIB_HIERARCHY){return KIB_HIERARCHY.canCreateTask(s.role);}return m[a]?m[a].indexOf(s.role)!==-1:true;},
   getUserId:function(){var s=this.getSession();return s?s.user_id:null;},
   getRole:function(){var s=this.getSession();return s?s.role:'';}
 };
@@ -1030,6 +1175,154 @@ var UTILS={
 
 
 AUTH.requireAuth();
+
+/* ── KIB HIERARCHY CONFIG ──────────────────────────────── */
+// ================================================================
+// KIB HIERARCHY CONFIG — Inject into all portal pages
+// Source of truth for visibility, assignment, and access control
+// ================================================================
+
+var KIB_HIERARCHY = {
+
+  // ── USER TREE ─────────────────────────────────────────────────
+  // reports_to maps: user_id → parent user_id
+  reports_to: {
+    'USR-001': 'USR-013', // Talal → Nawaf
+    'USR-002': 'USR-001', // Taher → Talal
+    'USR-003': 'USR-002', // Shouq → Taher
+    'USR-004': 'USR-002', // Alanoud → Taher
+    'USR-005': 'USR-002', // Mohammad Alothman → Taher
+    'USR-006': 'USR-004', // Hasan → Alanoud
+    'USR-007': 'USR-003', // Naser → Shouq
+    'USR-008': 'USR-002', // Abdulrahman → Taher
+    'USR-009': 'USR-002', // Nourah → Taher
+    'USR-010': 'USR-011', // Badreyah → Fatmah
+    'USR-011': 'USR-012', // Fatmah → Mohammad Abdulraheem
+    'USR-012': 'USR-002', // Mohammad Abdulraheem → Taher
+    'USR-014': 'USR-013', // Ammar → Nawaf
+    'USR-015': 'USR-013', // Hamad → Nawaf
+    'USR-016': 'USR-013', // Abdullah → Nawaf
+    'USR-017': 'USR-014', // Hussein → Ammar
+    'USR-018': 'USR-015', // Ahmad → Hamad
+    // USR-013 Nawaf: no parent (top level)
+    // USR-099 DataEntry: no parent
+  },
+
+  // ── DIRECT REPORTS ────────────────────────────────────────────
+  // Who each manager can assign tasks to
+  direct_reports: {
+    'USR-013': ['USR-001','USR-014','USR-015','USR-016'],           // Nawaf's directs
+    'USR-001': ['USR-002'],                                          // Talal → Taher
+    'USR-002': ['USR-003','USR-004','USR-005','USR-008','USR-009','USR-012'], // Taher's directs
+    'USR-003': [],                                                   // Shouq (no assign)
+    'USR-004': [],                                                   // Alanoud (no assign)
+    'USR-005': [],                                                   // Mohammad TL (no assign)
+    'USR-006': [],                                                   // Hasan AL (no assign)
+    'USR-007': [],                                                   // Naser AL (no assign)
+    'USR-008': [],
+    'USR-009': [],
+    'USR-010': [],
+    'USR-011': ['USR-010'],                                          // Fatmah → Badreyah
+    'USR-012': ['USR-011'],                                          // Mohammad QA Sup → Fatmah
+    'USR-014': ['USR-017'],                                          // Ammar → Hussein
+    'USR-015': ['USR-018'],                                          // Hamad → Ahmad
+    'USR-016': [],                                                   // Abdullah (no assign)
+    'USR-017': [],
+    'USR-018': [],
+    'USR-099': ['USR-001','USR-014','USR-015','USR-016'],           // DataEntry → Nawaf's scope
+  },
+
+  // ── FULL VISIBILITY TREE ──────────────────────────────────────
+  // Who each user can SEE tasks for (includes all indirect reports)
+  visibility_tree: {
+    'USR-013': ['USR-001','USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012','USR-014','USR-015','USR-016','USR-017','USR-018'],
+    'USR-001': ['USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012'],
+    'USR-002': ['USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012'],
+    'USR-003': [],   // Shouq: self only
+    'USR-004': [],   // Alanoud: self only
+    'USR-005': [],   // Mohammad TL: self only
+    'USR-006': [],   // Hasan: self only
+    'USR-007': [],   // Naser: self only
+    'USR-008': [],
+    'USR-009': [],
+    'USR-010': [],   // Badreyah: self only
+    'USR-011': ['USR-010'],              // Fatmah: herself + Badreyah
+    'USR-012': ['USR-010','USR-011'],    // Mohammad QA: himself + Fatmah + Badreyah
+    'USR-014': ['USR-017'],              // Ammar: himself + Hussein
+    'USR-015': ['USR-018'],              // Hamad: himself + Ahmad
+    'USR-016': [],                       // Abdullah: self only
+    'USR-017': [],
+    'USR-018': [],
+    'USR-099': ['USR-001','USR-014','USR-015','USR-016'], // DataEntry: Nawaf's directs
+  },
+
+  // ── ROLE PERMISSIONS ──────────────────────────────────────────
+  roles: {
+    'DGM':        { canCreate: true,  canAssign: true,  isAdmin: false, isManager: true,  level: 1 },
+    'HoD':        { canCreate: true,  canAssign: true,  isAdmin: true,  isManager: true,  level: 2 },
+    'Manager':    { canCreate: true,  canAssign: true,  isAdmin: true,  isManager: true,  level: 3 },
+    'QA Manager': { canCreate: true,  canAssign: true,  isAdmin: false, isManager: true,  level: 3 },
+    'TL':         { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 4 },
+    'AL':         { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 4 },
+    'QA':         { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 5 },
+    'BackOffice': { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 5 },
+    'DataEntry':  { canCreate: true,  canAssign: true,  isAdmin: false, isManager: false, level: 4 },
+  },
+
+  // ── METHODS ───────────────────────────────────────────────────
+
+  // Get all users this user can SEE tasks for (including themselves)
+  getVisibleUserIds: function(userId) {
+    var tree = this.visibility_tree[userId] || [];
+    return [userId].concat(tree);
+  },
+
+  // Get all users this user can ASSIGN tasks to
+  getAssignableUserIds: function(userId) {
+    return this.direct_reports[userId] || [];
+  },
+
+  // Check if user A can see user B's tasks
+  canSeeUser: function(viewerUserId, targetUserId) {
+    if (viewerUserId === targetUserId) return true;
+    var visible = this.visibility_tree[viewerUserId] || [];
+    return visible.indexOf(targetUserId) !== -1;
+  },
+
+  // Get role config
+  getRoleConfig: function(role) {
+    return this.roles[role] || { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 5 };
+  },
+
+  // Can this user create tasks?
+  canCreateTask: function(role) {
+    return (this.roles[role] || {}).canCreate === true;
+  },
+
+  // Can this user assign tasks to others?
+  canAssignTask: function(userId, role) {
+    var cfg = this.roles[role] || {};
+    if (!cfg.canAssign) return false;
+    var directs = this.direct_reports[userId] || [];
+    return directs.length > 0;
+  },
+
+  // Get department display name
+  getDeptColor: function(dept) {
+    var colors = {
+      'Contact Center': '#1877C5',
+      'Quality Assurance': '#7C3AED',
+      'E-Banking': '#0EA472',
+      'ATM': '#F59E0B',
+      'Digital Branches': '#EC4899',
+      'Executive Management': '#0D1B3E',
+    };
+    return colors[dept] || '#64748B';
+  }
+};
+
+/* ── END HIERARCHY CONFIG ──────────────────────────────── */
+
 
 // ═══════════════════════════════════════════════════════════════════
 // ── LOCAL CACHE (stale-while-revalidate) ───────────────────────────
@@ -1171,7 +1464,7 @@ async function loadBell(){
 }
 loadBell();if(window._interval_tasks)clearInterval(window._interval_tasks);window._interval_tasks=setInterval(loadBell,60000);
 
-if(AUTH.canDo('tasks.create'))document.getElementById('btnNew').style.display='flex';
+if(AUTH.canDo('tasks.create')||KIB_HIERARCHY.canCreateTask(S?S.role:''))document.getElementById('btnNew').style.display='flex';
 var COLS=[
   {id:'new',label:'New',s:['New'],c:'#7B61FF'},
   {id:'ip',label:'In Progress',s:['Assigned','InProgress','WaitingInput','UnderReview'],c:'#1877C5'},
@@ -1729,7 +2022,20 @@ function switchNTabById(id){switchNTab(document.getElementById(id));}
 (async function(){
   try{
     var d=await API.get('users_list',{});
-    ntmAllUsers=(d.users||[]).filter(function(u){return u.active_status!=='inactive';}).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+    var allUsers=(d.users||[]).filter(function(u){return u.active_status!=='inactive';});
+    // Filter to only users the current user can assign to (based on hierarchy)
+    var myId=S?S.user_id:null;
+    var assignable = KIB_HIERARCHY.getAssignableUserIds(myId);
+    if(assignable.length>0){
+      // Has specific assignable list — show only those
+      ntmAllUsers=allUsers.filter(function(u){return assignable.indexOf(u.user_id)!==-1;}).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+    } else if(KIB_HIERARCHY.canCreateTask(S?S.role:'')) {
+      // Manager but empty tree — show all (fallback)
+      ntmAllUsers=allUsers.sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+    } else {
+      // Staff: no assignee selection needed, just self
+      ntmAllUsers=allUsers.filter(function(u){return u.user_id===myId;});
+    }
   }catch(e){console.error('users_list',e);}
 })();
 
