@@ -1965,16 +1965,17 @@ function kcard(t){
 function renderBoard(tasks){
   // DEBUG: log task statuses
   if(tasks.length>0)console.log('[ADC] Tasks loaded:',tasks.length,'statuses:',tasks.map(function(t){return t.status+'/'+t.task_id;}));
-  document.getElementById('kT').textContent=tasks.length;
-  var o=tasks.filter(function(t){return!['Completed','Cancelled'].includes(t.status)}).length;
+  var activeTasks=tasks.filter(function(t){return t.status!=='Cancelled';});
+  document.getElementById('kT').textContent=activeTasks.length;
+  var o=activeTasks.filter(function(t){return!['Completed','Cancelled'].includes(t.status)}).length;
   var x=tasks.filter(function(t){return t.is_overdue==='TRUE'}).length;
   var cc=tasks.filter(function(t){return t.status==='Completed'}).length;
   document.getElementById('kO').textContent=o;
   document.getElementById('kX').textContent=x;
   document.getElementById('kC').textContent=cc;
-  document.getElementById('kR').textContent=(tasks.length>0?Math.round(cc/tasks.length*100):0)+'%';
+  document.getElementById('kR').textContent=(activeTasks.length>0?Math.round(cc/activeTasks.length*100):0)+'%';
   document.getElementById('board').innerHTML=COLS.map(function(col){
-    var mine=tasks.filter(function(t){return col.s.includes(t.status)});
+    var mine=tasks.filter(function(t){return col.s.includes(t.status)&&t.status!=='Cancelled'});
     var show=col.id==='done'?mine.slice(0,4):mine;
     var cards=show.length?show.map(kcard).join(''):'<div class="k-empty">No '+col.label.toLowerCase()+' tasks</div>';
     var plus=AUTH.canDo('tasks.create')?'<button class="k-plus-btn" onclick="openNewTaskModal()">+</button>':'';
