@@ -1984,12 +1984,21 @@ async function loadDash(){
     if(!d.risk_tasks||!d.risk_tasks.length){UTILS.empty('dtasks','No active tasks');return;}
     var PRI={Critical:'var(--red)',High:'var(--amber)',Medium:'var(--blue)',Low:'var(--green)'};
     var SPC={Completed:'sp-completed',Overdue:'sp-overdue',Escalated:'sp-escalated',InProgress:'sp-inprogress',New:'sp-new',Assigned:'sp-inprogress',Pending:'sp-pending'};
-    tc.innerHTML=d.risk_tasks.map(function(t){
-      return '<div class="task-row" onclick="location.href=\'/task-detail.html?id='+t.task_id+'\'">'+
+    // Filter out empty/invalid rows from alwaysOutputData
+    var validTasks = d.risk_tasks.filter(function(t){ return t && t.task_id; });
+    if(!validTasks.length){ UTILS.empty('dtasks','No active tasks'); return; }
+    tc.innerHTML=validTasks.map(function(t){
+      var assigneeName = t.assigned_to_name || '—';
+      var category = t.category || '—';
+      var statusLabel = (t.is_overdue==='TRUE'||t.is_overdue===true) ? 'Overdue' : (t.status||'New');
+      var statusClass = SPC[t.status] || 'sp-new';
+      if(t.is_overdue==='TRUE'||t.is_overdue===true) statusClass = 'sp-overdue';
+      return '<div class="task-row" onclick="location.href=\'/tasks.html\'" style="cursor:pointer">'+
         '<div class="priority-line" style="background:'+(PRI[t.priority]||'var(--blue)')+'"></div>'+
-        '<div class="task-info"><div class="task-title">'+UTILS.esc(t.title)+'</div><div class="task-meta">'+UTILS.esc(t.assigned_to_name)+' · '+t.category+'</div></div>'+
-        UTILS.av(t.assigned_to_name,26)+
-        '<span class="status-pill '+(SPC[t.status]||'sp-new')+'">'+(t.is_overdue==='TRUE'?'Overdue':t.status)+'</span></div>';
+        '<div class="task-info"><div class="task-title">'+UTILS.esc(t.title||'Untitled')+'</div>'+
+        '<div class="task-meta">'+UTILS.esc(assigneeName)+' · '+UTILS.esc(category)+'</div></div>'+
+        UTILS.av(assigneeName,26)+
+        '<span class="status-pill '+statusClass+'">'+(statusLabel)+'</span></div>';
     }).join('');
 
     // Alerts
