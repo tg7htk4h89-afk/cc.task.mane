@@ -1290,14 +1290,24 @@ var currentTargetType = 'individual';
 var teamMap = {}; // TL full_name -> array of agent objects
 (async function(){
   try{
-    var d = await API.get('agents_reference', {});
-    allUsers = (d.agents||[]).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+    var d = await API.get('users_list', {});
+    allUsers = (d.users||d.agents||[]).filter(function(u){return u.active_status!=='inactive';}).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
     // Build teamMap keyed by team_leader name — done once at load, exact string match
     var MGMT_R = ['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'];
+    // Build teamMap by TL name (from team_leader field or by finding TL via reports_to)
+    var tlMap = {}; // user_id -> full_name for TLs
     allUsers.forEach(function(u){
-      if(u.team_leader && !MGMT_R.includes(u.role)){
-        var key = u.team_leader.trim();
-        if(!teamMap[key]) teamMap[key] = [];
+      if(u.role==='TL'||u.role==='AL') tlMap[u.user_id]=u.full_name;
+    });
+    allUsers.forEach(function(u){
+      var MGMT_R2=['HoD','TL','AL','CC Manager','Manager','QA Manager','Team Leader','DGM'];
+      if(MGMT_R2.includes(u.role)) return;
+      // Try team_leader field first, then look up reports_to
+      var key = null;
+      if(u.team_leader) key = u.team_leader.trim();
+      else if(u.reports_to && tlMap[u.reports_to]) key = tlMap[u.reports_to];
+      if(key){
+        if(!teamMap[key]) teamMap[key]=[];
         teamMap[key].push(u);
       }
     });
@@ -1319,7 +1329,7 @@ function populateSingleAgent(){
 
 function populateTeamTLs(){
   var sel = document.getElementById('fTeamTL');
-  var tls = allUsers.filter(function(u){return u.role==='TL'||u.role==='Team Leader';});
+  var tls = allUsers.filter(function(u){return u.role==='TL'||u.role==='AL'||u.role==='Team Leader';});
   tls.forEach(function(u){
     var o=document.createElement('option');o.value=u.user_id;o.textContent=u.full_name;sel.appendChild(o);
   });
@@ -1498,7 +1508,7 @@ async function submitTraining(){
     targetAgents = teamAgents.map(function(u){return {user_id:u.user_id,name:u.full_name||u.name};});
     if(!targetAgents.length){showMsg('No agents found for team leader: '+tlName,'error');return;}
   } else if(currentTargetType==='department'){
-    targetAgents=allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name||u.name};});
+    targetAgents=allUsers.filter(function(u){return !['HoD','DGM','TL','CC Manager','Manager','QA Manager','Team Leader','DataEntry'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name||u.name};});
   }
 
   var btn=document.querySelector('button.btn-primary');
