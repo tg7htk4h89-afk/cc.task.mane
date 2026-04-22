@@ -2043,26 +2043,34 @@ function switchNTab(btn){
 }
 function switchNTabById(id){switchNTab(document.getElementById(id));}
 
-// Load users once
-(async function(){
-  try{
-    var d=await API.get('users_list',{});
+// Load users once — deferred so KIB_HIERARCHY and S are ready
+function loadNtmUsers(){
+  API.get('users_list',{}).then(function(d){
     var allUsers=(d.users||[]).filter(function(u){return u.active_status!=='inactive';});
-    // Filter to only users the current user can assign to (based on hierarchy)
-    var myId=S?S.user_id:null;
-    var assignable = KIB_HIERARCHY.getAssignableUserIds(myId);
-    if(assignable.length>0){
-      // Has specific assignable list — show only those
-      ntmAllUsers=allUsers.filter(function(u){return assignable.indexOf(u.user_id)!==-1;}).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
-    } else if(KIB_HIERARCHY.canCreateTask(S?S.role:'')) {
-      // Manager but empty tree — show all (fallback)
-      ntmAllUsers=allUsers.sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+    var myId = S ? S.user_id : (AUTH.getSession()||{}).user_id;
+    var myRole = S ? S.role : (AUTH.getSession()||{}).role;
+    
+    // Use KIB_HIERARCHY if available, fallback to show all
+    var assignable = (window.KIB_HIERARCHY && myId) ? KIB_HIERARCHY.getAssignableUserIds(myId) : [];
+    
+    if(assignable.length > 0){
+      // Show only users this person can assign to
+      ntmAllUsers = allUsers.filter(function(u){
+        return assignable.indexOf(u.user_id) !== -1;
+      }).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
     } else {
-      // Staff: no assignee selection needed, just self
-      ntmAllUsers=allUsers.filter(function(u){return u.user_id===myId;});
+      // Fallback: show all users (for managers without hierarchy config)
+      ntmAllUsers = allUsers.filter(function(u){
+        return u.user_id !== myId; // exclude self from list, self is always assignable
+      }).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+      // Put self first
+      var self = allUsers.find(function(u){return u.user_id===myId;});
+      if(self) ntmAllUsers.unshift(self);
     }
-  }catch(e){console.error('users_list',e);}
-})();
+  }).catch(function(e){console.error('users_list',e);});
+}
+// Run after page is ready
+setTimeout(loadNtmUsers, 200);
 
 // Assignee list
 function renderNAssigneeList(query){
