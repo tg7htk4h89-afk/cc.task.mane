@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign In — CC Task Manager</title>
+<title>Sign In — ADC Task Manager</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -39,8 +39,8 @@ input[type=password]::placeholder{letter-spacing:0;font-size:14px;text-align:lef
 <body>
 <div class="card">
   <div class="logo">KIB</div>
-  <h1>Contact Center Task Manager</h1>
-  <div class="sub">KIB Contact Center · Internal Use Only</div>
+  <h1>ADC Task Manager</h1>
+  <div class="sub">KIB ADC · Internal Use Only</div>
   <form id="frm">
     <div class="fg"><label>Your Name</label><select id="sel" required><option value="">— Loading staff... —</option></select></div>
     <div class="fg">
@@ -56,7 +56,7 @@ input[type=password]::placeholder{letter-spacing:0;font-size:14px;text-align:lef
 <script>
 var GAS='https://n8n.kib-cc-wfm.com/webhook/kib/login';
 var KEY='kib_ops_session';
-try{var s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&new Date(s.expires_at)>new Date())location.href='/cc.task.mane/index.html';}catch(e){}
+try{var s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&new Date(s.expires_at)>new Date())location.href='/index.html';}catch(e){}
 fetch('https://n8n.kib-cc-wfm.com/webhook/kib/users-list',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}).then(function(r){return r.json();}).then(function(data){
   var users=(data&&data.data&&data.data.users)?data.data.users:[];
   users.sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
@@ -76,7 +76,7 @@ document.getElementById('frm').addEventListener('submit',function(e){
   fetch(GAS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:uid,pin:pin})})
   .then(function(r){return r.json();})
   .then(function(data){
-    if(data.success&&data.data){localStorage.setItem(KEY,JSON.stringify(data.data));location.href='/cc.task.mane/index.html';}
+    if(data.success&&data.data){localStorage.setItem(KEY,JSON.stringify(data.data));location.href='/index.html';}
     else{throw new Error((data.error&&data.error.message)?data.error.message:'Login failed');}
   }).catch(function(ex){
     err.textContent=ex.message.indexOf('ncorrect')!==-1||ex.message.indexOf('PIN')!==-1?'Incorrect PIN. Please try again.':'Connection error: '+ex.message;
