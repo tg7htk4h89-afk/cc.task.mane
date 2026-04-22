@@ -914,6 +914,151 @@ input, select, textarea {
   .sidebar.open { display: flex !important; }
 }
 
+
+/* ═══════════════════════════════════════════════════════
+   KIB MOBILE PERFECTION v3 — Applied to all pages
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Touch & interaction ────────────────────────── */
+* { -webkit-tap-highlight-color: transparent; }
+input, select, textarea { font-size: 16px !important; }
+button, .btn, .nav-item, a.nav-item { touch-action: manipulation; }
+
+/* ── Bottom nav ─────────────────────────────────── */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--navy-2);
+  border-top: 1px solid rgba(255,255,255,.08);
+  z-index: 300;
+  padding: 4px 0 max(env(safe-area-inset-bottom), 6px);
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: stretch;
+}
+.mbn-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; color: rgba(255,255,255,.4); text-decoration: none;
+  padding: 6px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;
+  transition: color .15s, background .15s; min-width: 48px; flex: 1;
+}
+.mbn-item:active { background: rgba(255,255,255,.07); }
+.mbn-item.active { color: var(--blue); }
+.mbn-item.active svg { stroke: var(--blue); }
+.mbn-item svg { flex-shrink: 0; }
+
+/* ── PHONE ≤480px ───────────────────────────────── */
+@media (max-width: 480px) {
+  /* Sidebar full overlay */
+  .sidebar { display: none !important; }
+  .sidebar.open { display: flex !important; width: min(85vw, 280px) !important; }
+  .main-content { margin-left: 0 !important; }
+  .sidebar-toggle { display: flex !important; }
+  .mobile-bottom-nav { display: flex !important; }
+  .main-content { padding-bottom: 65px !important; }
+
+  /* Top bar tighter */
+  .top-bar { padding: 0 12px !important; height: 52px !important; }
+  .breadcrumb { font-size: 13px !important; font-weight: 700; }
+
+  /* Page padding */
+  .page-content { padding: 12px !important; }
+
+  /* KPI grid — always 2 cols */
+  .kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .kpi-card { padding: 14px 12px !important; }
+  .kpi-val, .kpi-value { font-size: 22px !important; }
+  .kpi-label, .kpi-lbl { font-size: 10px !important; }
+
+  /* Cards */
+  .card, .form-card, .plan-card, .shift-card { border-radius: 12px !important; padding: 14px !important; }
+  
+  /* Page header */
+  .page-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+  .page-actions { width: 100% !important; flex-wrap: wrap !important; gap: 8px !important; }
+  .page-actions .btn { flex: 1; justify-content: center; min-width: 0; }
+
+  /* Modals → bottom sheets */
+  .modal-bg { padding: 0 !important; align-items: flex-end !important; }
+  .modal-inner, [id$="Modal"] > div, [id$="modal"] > div {
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 92vh !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* Kanban horizontal scroll */
+  .kanban-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; padding-bottom: 12px !important; scroll-snap-type: x mandatory; }
+  .kanban-board { display: flex !important; gap: 10px !important; min-width: max-content !important; }
+  .k-col, .kanban-col { min-width: 270px !important; width: 270px !important; scroll-snap-align: start; }
+
+  /* Tables scroll */
+  table { display: block !important; overflow-x: auto !important; white-space: nowrap !important; -webkit-overflow-scrolling: touch !important; }
+  
+  /* Forms */
+  .form-row, .form-grid { flex-direction: column !important; grid-template-columns: 1fr !important; }
+  .form-group { width: 100% !important; }
+
+  /* Buttons */
+  .btn { padding: 10px 16px !important; font-size: 12px !important; border-radius: 10px !important; }
+  .btn-primary, .btn-post { min-height: 44px !important; font-size: 13px !important; }
+
+  /* Training cards */
+  .plan-header { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+  .plan-footer { flex-direction: column !important; gap: 8px !important; }
+
+  /* Sales grid */
+  .sales-grid, .chart-grid, .stats-row, .bottom-grid { grid-template-columns: 1fr !important; }
+
+  /* Notification items */
+  .notif-item { padding: 12px 14px !important; }
+
+  /* Search bar hide on mobile */
+  .search-bar, .top-search { display: none !important; }
+
+  /* Floating add button */
+  .fab-btn {
+    position: fixed !important; bottom: 74px !important; right: 16px !important;
+    width: 52px !important; height: 52px !important; border-radius: 50% !important;
+    box-shadow: 0 4px 20px rgba(6,15,36,.3) !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    z-index: 200 !important;
+  }
+  
+  /* Tab bars scroll */
+  .tab-bar, .tabs-row, .filter-bar { 
+    overflow-x: auto !important; -webkit-overflow-scrolling: touch !important;
+    flex-wrap: nowrap !important; scrollbar-width: none !important; padding-bottom: 2px;
+  }
+  .tab-bar::-webkit-scrollbar, .tabs-row::-webkit-scrollbar { display: none !important; }
+
+  /* Hide some columns on mobile */
+  .hide-mobile { display: none !important; }
+}
+
+/* ── TABLET 481–768px ───────────────────────────── */
+@media (min-width: 481px) and (max-width: 768px) {
+  .sidebar { display: none !important; }
+  .sidebar.open { display: flex !important; }
+  .main-content { margin-left: 0 !important; }
+  .sidebar-toggle { display: flex !important; }
+  .mobile-bottom-nav { display: flex !important; }
+  .main-content { padding-bottom: 65px !important; }
+  .page-content { padding: 16px !important; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .kanban-wrap { overflow-x: auto !important; }
+  .kanban-board { display: flex !important; min-width: max-content !important; }
+  .k-col, .kanban-col { min-width: 240px !important; }
+}
+
+/* ── DESKTOP 769px+ ─────────────────────────────── */
+@media (min-width: 769px) {
+  .sidebar-toggle { display: none !important; }
+  .mobile-bottom-nav { display: none !important; }
+  .main-content { margin-left: 220px; padding-bottom: 0 !important; }
+}
+
 </style>
 </head>
 <body>
@@ -1191,7 +1336,20 @@ async function openCard(id) {
   try {
     var d = await API.get('training_detail', {training_id: id});
     currentTraining = d;
-    renderCard(d);
+    // API returns {plan: {...}} - extract the plan and merge progress/comments/extensions
+    var plan = d.plan || d;
+    // Parse JSON fields
+    var logs = [];
+    try { logs = typeof plan.progress_data === 'string' ? JSON.parse(plan.progress_data||'[]') : (plan.progress_data||[]); } catch(e) {}
+    var comments = [];
+    try { comments = typeof plan.comments_data === 'string' ? JSON.parse(plan.comments_data||'[]') : (plan.comments_data||[]); } catch(e) {}
+    var exts = [];
+    try { exts = typeof plan.extensions_data === 'string' ? JSON.parse(plan.extensions_data||'[]') : (plan.extensions_data||[]); } catch(e) {}
+    var trainers = [];
+    try { trainers = typeof plan.assigned_trainers_json === 'string' ? JSON.parse(plan.assigned_trainers_json||'[]') : (plan.assigned_trainers_json||[]); } catch(e) {}
+    // Build full plan object
+    var fullPlan = Object.assign({}, plan, { logs: logs, comments: comments, extensions: exts, trainers: trainers });
+    renderCard(fullPlan);
   } catch(ex) {
     document.getElementById('cardBody').innerHTML = '<div style="color:var(--red);padding:16px">Error: '+ex.message+'</div>';
   }
@@ -1467,7 +1625,12 @@ async function markAgent(agentId, agentName, checked) {
     var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
     currentTraining = fresh;
     try {
-      renderCard(fresh);
+      var freshPlan = fresh.plan || fresh;
+    var freshLogs = []; try { freshLogs = typeof freshPlan.progress_data==='string'?JSON.parse(freshPlan.progress_data||'[]'):(freshPlan.progress_data||[]); } catch(e){}
+    var freshComments = []; try { freshComments = typeof freshPlan.comments_data==='string'?JSON.parse(freshPlan.comments_data||'[]'):(freshPlan.comments_data||[]); } catch(e){}
+    var freshExts = []; try { freshExts = typeof freshPlan.extensions_data==='string'?JSON.parse(freshPlan.extensions_data||'[]'):(freshPlan.extensions_data||[]); } catch(e){}
+    var freshTrainers = []; try { freshTrainers = typeof freshPlan.assigned_trainers_json==='string'?JSON.parse(freshPlan.assigned_trainers_json||'[]'):(freshPlan.assigned_trainers_json||[]); } catch(e){}
+    renderCard(Object.assign({}, freshPlan, {logs:freshLogs, comments:freshComments, extensions:freshExts, trainers:freshTrainers}));
     } catch(renderErr) {
       // If renderCard crashes, manually update the badge and row color so UI isn't stuck
       if (row) {
@@ -1534,7 +1697,12 @@ async function submitComment() {
     // Refresh card to show new comment
     var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
     currentTraining = fresh;
-    renderCard(fresh);
+    var freshPlan = fresh.plan || fresh;
+    var freshLogs = []; try { freshLogs = typeof freshPlan.progress_data==='string'?JSON.parse(freshPlan.progress_data||'[]'):(freshPlan.progress_data||[]); } catch(e){}
+    var freshComments = []; try { freshComments = typeof freshPlan.comments_data==='string'?JSON.parse(freshPlan.comments_data||'[]'):(freshPlan.comments_data||[]); } catch(e){}
+    var freshExts = []; try { freshExts = typeof freshPlan.extensions_data==='string'?JSON.parse(freshPlan.extensions_data||'[]'):(freshPlan.extensions_data||[]); } catch(e){}
+    var freshTrainers = []; try { freshTrainers = typeof freshPlan.assigned_trainers_json==='string'?JSON.parse(freshPlan.assigned_trainers_json||'[]'):(freshPlan.assigned_trainers_json||[]); } catch(e){}
+    renderCard(Object.assign({}, freshPlan, {logs:freshLogs, comments:freshComments, extensions:freshExts, trainers:freshTrainers}));
   } catch(ex) {
     UTILS.toast('Error: ' + ex.message, 'error');
     if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
@@ -1560,7 +1728,12 @@ async function handleExtReview(el) {
     UTILS.toast('Extension ' + decision.toLowerCase() + ' successfully', 'success');
     var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
     currentTraining = fresh;
-    renderCard(fresh);
+    var freshPlan = fresh.plan || fresh;
+    var freshLogs = []; try { freshLogs = typeof freshPlan.progress_data==='string'?JSON.parse(freshPlan.progress_data||'[]'):(freshPlan.progress_data||[]); } catch(e){}
+    var freshComments = []; try { freshComments = typeof freshPlan.comments_data==='string'?JSON.parse(freshPlan.comments_data||'[]'):(freshPlan.comments_data||[]); } catch(e){}
+    var freshExts = []; try { freshExts = typeof freshPlan.extensions_data==='string'?JSON.parse(freshPlan.extensions_data||'[]'):(freshPlan.extensions_data||[]); } catch(e){}
+    var freshTrainers = []; try { freshTrainers = typeof freshPlan.assigned_trainers_json==='string'?JSON.parse(freshPlan.assigned_trainers_json||'[]'):(freshPlan.assigned_trainers_json||[]); } catch(e){}
+    renderCard(Object.assign({}, freshPlan, {logs:freshLogs, comments:freshComments, extensions:freshExts, trainers:freshTrainers}));
   } catch(ex) {
     UTILS.toast('Error: ' + ex.message, 'error');
   }
@@ -1584,7 +1757,12 @@ async function submitExtension() {
     // Refresh card
     var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
     currentTraining = fresh;
-    renderCard(fresh);
+    var freshPlan = fresh.plan || fresh;
+    var freshLogs = []; try { freshLogs = typeof freshPlan.progress_data==='string'?JSON.parse(freshPlan.progress_data||'[]'):(freshPlan.progress_data||[]); } catch(e){}
+    var freshComments = []; try { freshComments = typeof freshPlan.comments_data==='string'?JSON.parse(freshPlan.comments_data||'[]'):(freshPlan.comments_data||[]); } catch(e){}
+    var freshExts = []; try { freshExts = typeof freshPlan.extensions_data==='string'?JSON.parse(freshPlan.extensions_data||'[]'):(freshPlan.extensions_data||[]); } catch(e){}
+    var freshTrainers = []; try { freshTrainers = typeof freshPlan.assigned_trainers_json==='string'?JSON.parse(freshPlan.assigned_trainers_json||'[]'):(freshPlan.assigned_trainers_json||[]); } catch(e){}
+    renderCard(Object.assign({}, freshPlan, {logs:freshLogs, comments:freshComments, extensions:freshExts, trainers:freshTrainers}));
   } catch(ex) {
     UTILS.toast('Error: ' + ex.message, 'error');
   }
@@ -1604,7 +1782,12 @@ async function reviewExtension(extId, decision) {
     // Refresh card
     var fresh = await API.get('training_detail', {training_id: currentTraining.training_id});
     currentTraining = fresh;
-    renderCard(fresh);
+    var freshPlan = fresh.plan || fresh;
+    var freshLogs = []; try { freshLogs = typeof freshPlan.progress_data==='string'?JSON.parse(freshPlan.progress_data||'[]'):(freshPlan.progress_data||[]); } catch(e){}
+    var freshComments = []; try { freshComments = typeof freshPlan.comments_data==='string'?JSON.parse(freshPlan.comments_data||'[]'):(freshPlan.comments_data||[]); } catch(e){}
+    var freshExts = []; try { freshExts = typeof freshPlan.extensions_data==='string'?JSON.parse(freshPlan.extensions_data||'[]'):(freshPlan.extensions_data||[]); } catch(e){}
+    var freshTrainers = []; try { freshTrainers = typeof freshPlan.assigned_trainers_json==='string'?JSON.parse(freshPlan.assigned_trainers_json||'[]'):(freshPlan.assigned_trainers_json||[]); } catch(e){}
+    renderCard(Object.assign({}, freshPlan, {logs:freshLogs, comments:freshComments, extensions:freshExts, trainers:freshTrainers}));
   } catch(ex) {
     UTILS.toast('Error: ' + ex.message, 'error');
   }
