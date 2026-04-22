@@ -1558,22 +1558,32 @@ var allUsers=[], selectedAssignees=[], subtasks=[], recurringType='';
 document.getElementById('fDue').min = UTILS.today();
 
 // ── LOAD USERS ────────────────────────────────────────────────────
-(async function(){
+setTimeout(function(){
   var list=document.getElementById('assigneeList');
   list.innerHTML='<div style="padding:20px;text-align:center;color:#94A3B8;font-size:13px"><div style="width:24px;height:24px;border:2px solid #E2E8F0;border-top-color:#1A4A7A;border-radius:50%;animation:formSpin .8s linear infinite;margin:0 auto 8px"></div>Loading staff...</div>';
-  try{
-    var d=await API.get('users_list',{});
-    allUsers=(d.users||[]).filter(function(u){return u.active_status!=='inactive';}).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+  API.get('users_list',{}).then(function(d){
+    var all=(d.users||[]).filter(function(u){return u.active_status!=='inactive';});
+    var myId=(S||AUTH.getSession()||{}).user_id;
+    var myRole=(S||AUTH.getSession()||{}).role;
+    // Filter by hierarchy
+    var assignable=(window.KIB_HIERARCHY&&myId)?KIB_HIERARCHY.getAssignableUserIds(myId):[];
+    if(assignable.length>0){
+      allUsers=all.filter(function(u){return assignable.indexOf(u.user_id)!==-1;}).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+    } else {
+      // Fallback: show all except self at top
+      allUsers=all.filter(function(u){return u.user_id!==myId;}).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+      var self=all.find(function(u){return u.user_id===myId;});
+      if(self)allUsers.unshift(self);
+    }
     if(allUsers.length===0){
-      list.innerHTML='<div style="padding:20px;text-align:center;color:#94A3B8;font-size:13px">No active staff found</div>';
+      list.innerHTML='<div style="padding:20px;text-align:center;color:#94A3B8;font-size:13px">No assignable staff found</div>';
     } else {
       renderAssigneeList('');
     }
-  }catch(e){
+  }).catch(function(e){
     list.innerHTML='<div style="padding:16px;text-align:center;color:#EF4444;font-size:13px">Could not load staff: '+e.message+'</div>';
-    console.error('users_list error:',e);
-  }
-})();
+  });
+}, 200);
 
 // ── ASSIGNEE LIST ─────────────────────────────────────────────────
 function renderAssigneeList(query){
