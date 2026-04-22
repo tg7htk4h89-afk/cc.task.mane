@@ -2335,830 +2335,245 @@ loadT();
 
 
 
-// ══ NEW TRAINING MODAL FUNCTIONS ══════════════════════════════
+
+
+
+
+// ══ NEW TRAINING MODAL ════════════════════════════════════════
+var tnAllUsers=[], tnSelectedAgents=[], tnSelectedTrainers=[], tnTargetType='individual';
+
 function openNewTrainingModal(){
-  document.getElementById('newTrainingModal').style.display='block';
+  var m=document.getElementById('newTrainingModal');
+  m.style.display='flex';
   document.body.style.overflow='hidden';
-  // Reset form
-  setTimeout(function(){
-    ['fTitle','fDesc','fDeadline'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-    ['fCat','fPri'].forEach(function(id){var el=document.getElementById(id);if(el)el.selectedIndex=0;});
-    selectedAgents=[];selectedTrainers=[];
-    setTargetType('individual');
-    initTrainingForm();
-  },100);
+  // Reset
+  ['tnTitle','tnDesc'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['tnCat','tnPri'].forEach(function(id){var el=document.getElementById(id);if(el)el.selectedIndex=0;});
+  var dl=document.getElementById('tnDeadline');
+  if(dl) dl.min=window.KIB_CALENDAR?KIB_CALENDAR.minDueDate():new Date().toISOString().slice(0,10);
+  tnSelectedAgents=[];tnSelectedTrainers=[];tnTargetType='individual';
+  switchTNTab('details');
+  setTNType('individual');
+  loadTNUsers();
 }
+
 function closeNewTrainingModal(){
   document.getElementById('newTrainingModal').style.display='none';
   document.body.style.overflow='';
 }
-// Close on backdrop click
-document.getElementById('newTrainingModal').addEventListener('click',function(e){
-  if(e.target===this)closeNewTrainingModal();
-});
 
-var API_BASE='https://n8n.kib-cc-wfm.com/webhook';
-var SES_KEY='kib_ops_session';
-var API={
-  _t:function(){var s=AUTH.getSession();return s?s.session_token:null;},
-  post:async function(action,body){
-    var path=action.replace(/_/g,'-');
-    var url=API_BASE+'/kib/'+path;
-    var p=Object.assign({},body||{});
-    var t=this._t();if(t)p.session_token=t;
-    var r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
-    var txt=await r.text();var d;
-    try{d=JSON.parse(txt);}catch(e){throw new Error('Server '+r.status+': '+(txt||'empty').slice(0,120));}
-    if(!d.success)throw new Error(d.error&&d.error.message?d.error.message:d.message||'API error');
-    return d.data;
-  },
-  get:async function(action,params){return this.post(action,params||{});}
-};
-var AUTH={
-  getSession:function(){try{var s=JSON.parse(localStorage.getItem(SES_KEY));return s&&new Date(s.expires_at)>new Date()?s:null;}catch(e){return null;}},
-  requireAuth:function(){if(!this.getSession())location.href='/login.html';},
-  logout:function(){localStorage.removeItem(SES_KEY);location.href='/login.html';}
-};
-
-async function loadBell(){
-  try{var d=await API.get('notif_list',{limit:'5',unread_only:'true'});var nb=document.getElementById('notifBadge');if(nb){if(d.unread_count>0){nb.textContent=d.unread_count;nb.classList.remove('hidden');}else nb.classList.add('hidden');}}catch(e){}
+function switchTNTab(tab){
+  ['details','who','trainers'].forEach(function(t){
+    var btn=document.getElementById('tntab-'+t);
+    var panel=document.getElementById('tnpanel-'+t);
+    var active=t===tab;
+    if(btn){btn.style.borderBottom=active?'3px solid #fff':'3px solid transparent';btn.style.fontWeight=active?'700':'500';btn.style.color=active?'#fff':'rgba(255,255,255,.45)';}
+    if(panel)panel.style.display=active?'':'none';
+  });
 }
-AUTH.requireAuth();
-// ── PAGE ACCESS GUARD ────────────────────────────────────
-(function(){
-  var s = AUTH.getSession();
-  if(!s) return; // requireAuth handles redirect
-  var dept = s.department || '';
-  var allowed = ['Contact Center','Quality Assurance','Executive Management'];
-  var isCC = dept === 'Contact Center' || dept === 'Quality Assurance' || dept === 'Executive Management';
-  if(allowed.length > 0 && allowed.indexOf(dept) === -1 && !isCC){
-    window.location.href='/tasks.html';
+
+function setTNType(type){
+  tnTargetType=type;
+  ['individual','multiple','department'].forEach(function(t){
+    var panel=document.getElementById('tntype-'+t);
+    var btn=document.querySelector('[data-type="'+t+'"]');
+    if(panel)panel.style.display=t===type?'':'none';
+    if(btn){
+      btn.style.background=t===type?'#EFF6FF':'#fff';
+      btn.style.borderColor=t===type?'#1877C5':'#E4EAF3';
+      btn.style.color=t===type?'#1877C5':'#4A5568';
+    }
+  });
+  if(type==='department'){
+    var lbl=document.getElementById('tnDeptCount');
+    if(lbl){var cnt=tnAllUsers.filter(function(u){return !['HoD','Manager','DGM','TL','AL','QA Manager','DataEntry'].includes(u.role);}).length;lbl.textContent=cnt+' agents will receive this training';}
   }
-})();
-// ── END ACCESS GUARD ──────────────────────────────────
+}
 
-// ── SIDEBAR VISIBILITY BY DEPARTMENT ────────────────────
-(function(){
-  var s = AUTH.getSession();
-  if(!s) return;
-  var dept = s.department || '';
-  var isCC = ['Contact Center','Quality Assurance','Executive Management'].indexOf(dept) !== -1;
-  // Hide non-task pages for non-CC users
-  if(!isCC){
-    document.querySelectorAll('.nav-item').forEach(function(el){
-      var href = el.getAttribute('href') || '';
-      var allowed = ['tasks.html','todo.html','index.html','notifications.html','tasks-archive.html'];
-      var ok = allowed.some(function(p){return href.indexOf(p)!==-1;});
-      if(!ok) el.style.display='none';
-    });
-    // Also hide bottom nav items
-    document.querySelectorAll('.mbn-item').forEach(function(el){
-      var href = el.getAttribute('href') || '';
-      var allowed = ['tasks.html','todo.html','index.html','notifications.html'];
-      var ok = allowed.some(function(p){return href.indexOf(p)!==-1;});
-      if(!ok) el.style.display='none';
-    });
-  }
-})();
-// ── END SIDEBAR VISIBILITY ───────────────────────────────
-
-/* ── KIB HIERARCHY CONFIG ──────────────────────────────── */
-// ================================================================
-// KIB HIERARCHY CONFIG — Inject into all portal pages
-// Source of truth for visibility, assignment, and access control
-// ================================================================
-
-var KIB_HIERARCHY = {
-
-  // ── USER TREE ─────────────────────────────────────────────────
-  // reports_to maps: user_id → parent user_id
-  reports_to: {
-    'USR-001': 'USR-013', // Talal → Nawaf
-    'USR-002': 'USR-001', // Taher → Talal
-    'USR-003': 'USR-002', // Shouq → Taher
-    'USR-004': 'USR-002', // Alanoud → Taher
-    'USR-005': 'USR-002', // Mohammad Alothman → Taher
-    'USR-006': 'USR-004', // Hasan → Alanoud
-    'USR-007': 'USR-003', // Naser → Shouq
-    'USR-008': 'USR-002', // Abdulrahman → Taher
-    'USR-009': 'USR-002', // Nourah → Taher
-    'USR-010': 'USR-011', // Badreyah → Fatmah
-    'USR-011': 'USR-012', // Fatmah → Mohammad Abdulraheem
-    'USR-012': 'USR-002', // Mohammad Abdulraheem → Taher
-    'USR-014': 'USR-013', // Ammar → Nawaf
-    'USR-015': 'USR-013', // Hamad → Nawaf
-    'USR-016': 'USR-013', // Abdullah → Nawaf
-    'USR-017': 'USR-014', // Hussein → Ammar
-    'USR-018': 'USR-015', // Ahmad → Hamad
-    // USR-013 Nawaf: no parent (top level)
-    // USR-099 DataEntry: no parent
-  },
-
-  // ── DIRECT REPORTS ────────────────────────────────────────────
-  // Who each manager can assign tasks to
-  direct_reports: {
-    'USR-013': ['USR-001','USR-014','USR-015','USR-016'],           // Nawaf's directs
-    'USR-001': ['USR-002'],                                          // Talal → Taher
-    'USR-002': ['USR-003','USR-004','USR-005','USR-008','USR-009','USR-012'], // Taher's directs
-    'USR-003': [],                                                   // Shouq (no assign)
-    'USR-004': [],                                                   // Alanoud (no assign)
-    'USR-005': [],                                                   // Mohammad TL (no assign)
-    'USR-006': [],                                                   // Hasan AL (no assign)
-    'USR-007': [],                                                   // Naser AL (no assign)
-    'USR-008': [],
-    'USR-009': [],
-    'USR-010': [],
-    'USR-011': ['USR-010'],                                          // Fatmah → Badreyah
-    'USR-012': ['USR-011'],                                          // Mohammad QA Sup → Fatmah
-    'USR-014': ['USR-017'],                                          // Ammar → Hussein
-    'USR-015': ['USR-018'],                                          // Hamad → Ahmad
-    'USR-016': [],                                                   // Abdullah (no assign)
-    'USR-017': [],
-    'USR-018': [],
-    'USR-099': ['USR-001','USR-014','USR-015','USR-016'],           // DataEntry → Nawaf's scope
-  },
-
-  // ── FULL VISIBILITY TREE ──────────────────────────────────────
-  // Who each user can SEE tasks for (includes all indirect reports)
-  visibility_tree: {
-    'USR-013': ['USR-001','USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012','USR-014','USR-015','USR-016','USR-017','USR-018'],
-    'USR-001': ['USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012'],
-    'USR-002': ['USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012'],
-    'USR-003': [],   // Shouq: self only
-    'USR-004': [],   // Alanoud: self only
-    'USR-005': [],   // Mohammad TL: self only
-    'USR-006': [],   // Hasan: self only
-    'USR-007': [],   // Naser: self only
-    'USR-008': [],
-    'USR-009': [],
-    'USR-010': [],   // Badreyah: self only
-    'USR-011': ['USR-010'],              // Fatmah: herself + Badreyah
-    'USR-012': ['USR-010','USR-011'],    // Mohammad QA: himself + Fatmah + Badreyah
-    'USR-014': ['USR-017'],              // Ammar: himself + Hussein
-    'USR-015': ['USR-018'],              // Hamad: himself + Ahmad
-    'USR-016': [],                       // Abdullah: self only
-    'USR-017': [],
-    'USR-018': [],
-    'USR-099': ['USR-001','USR-014','USR-015','USR-016'], // DataEntry: Nawaf's directs
-  },
-
-  // ── ROLE PERMISSIONS ──────────────────────────────────────────
-  roles: {
-    'DGM':        { canCreate: true,  canAssign: true,  isAdmin: false, isManager: true,  level: 1 },
-    'HoD':        { canCreate: true,  canAssign: true,  isAdmin: true,  isManager: true,  level: 2 },
-    'Manager':    { canCreate: true,  canAssign: true,  isAdmin: true,  isManager: true,  level: 3 },
-    'QA Manager': { canCreate: true,  canAssign: true,  isAdmin: false, isManager: true,  level: 3 },
-    'TL':         { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 4 },
-    'AL':         { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 4 },
-    'QA':         { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 5 },
-    'BackOffice': { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 5 },
-    'DataEntry':  { canCreate: true,  canAssign: true,  isAdmin: false, isManager: false, level: 4 },
-  },
-
-  // ── METHODS ───────────────────────────────────────────────────
-
-  // Get all users this user can SEE tasks for (including themselves)
-  getVisibleUserIds: function(userId) {
-    var tree = this.visibility_tree[userId] || [];
-    return [userId].concat(tree);
-  },
-
-  // Get all users this user can ASSIGN tasks to
-  getAssignableUserIds: function(userId) {
-    return this.direct_reports[userId] || [];
-  },
-
-  // Check if user A can see user B's tasks
-  canSeeUser: function(viewerUserId, targetUserId) {
-    if (viewerUserId === targetUserId) return true;
-    var visible = this.visibility_tree[viewerUserId] || [];
-    return visible.indexOf(targetUserId) !== -1;
-  },
-
-  // Get role config
-  getRoleConfig: function(role) {
-    return this.roles[role] || { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 5 };
-  },
-
-  // Can this user create tasks?
-  canCreateTask: function(role) {
-    return (this.roles[role] || {}).canCreate === true;
-  },
-
-  // Can this user assign tasks to others?
-  canAssignTask: function(userId, role) {
-    var cfg = this.roles[role] || {};
-    if (!cfg.canAssign) return false;
-    var directs = this.direct_reports[userId] || [];
-    return directs.length > 0;
-  },
-
-  // Get department display name
-  getDeptColor: function(dept) {
-    var colors = {
-      'Contact Center': '#1877C5',
-      'Quality Assurance': '#7C3AED',
-      'E-Banking': '#0EA472',
-      'ATM': '#F59E0B',
-      'Digital Branches': '#EC4899',
-      'Executive Management': '#0D1B3E',
-    };
-    return colors[dept] || '#64748B';
-  }
-};
-
-/* ── END HIERARCHY CONFIG ──────────────────────────────── */
-/* ── KIB WORKING CALENDAR ──────────────────────────────── */
-// ================================================================
-// KIB WORKING CALENDAR — Kuwait Public Holidays + Working Hours
-// Working days: Sunday–Thursday
-// Weekend: Friday, Saturday
-// Working hours: 08:00 – 16:00 AST (UTC+3)
-// ================================================================
-
-var KIB_CALENDAR = {
-
-  // Kuwait timezone offset (UTC+3, no DST)
-  TZ_OFFSET: 3 * 60, // minutes
-
-  // Working hours
-  WORK_START: 8,  // 8:00 AM
-  WORK_END:   16, // 4:00 PM
-
-  // Weekend days (0=Sun,1=Mon,...,5=Fri,6=Sat)
-  WEEKEND: [5, 6], // Friday, Saturday
-
-  // Kuwait Public Holidays (add each year)
-  HOLIDAYS: [
-    // 2025
-    '2025-01-01', // New Year
-    '2025-02-25', // National Day
-    '2025-02-26', // Liberation Day
-    '2025-03-31', // Isra Mi'raj (estimated)
-    '2025-06-07', // Eid Al Fitr (estimated)
-    '2025-06-08',
-    '2025-06-09',
-    '2025-06-15', // Arafat Day (estimated)
-    '2025-06-16', // Eid Al Adha
-    '2025-06-17',
-    '2025-06-18',
-    '2025-07-07', // Islamic New Year (estimated)
-    '2025-09-15', // Prophet's Birthday (estimated)
-    // 2026
-    '2026-01-01', // New Year
-    '2026-02-25', // National Day
-    '2026-02-26', // Liberation Day
-    '2026-03-20', // Isra Mi'raj (estimated)
-    '2026-05-27', // Eid Al Fitr (estimated)
-    '2026-05-28',
-    '2026-05-29',
-    '2026-06-06', // Arafat Day (estimated)
-    '2026-06-07', // Eid Al Adha
-    '2026-06-08',
-    '2026-06-09',
-    '2026-06-27', // Islamic New Year (estimated)
-    '2026-09-05', // Prophet's Birthday (estimated)
-  ],
-
-  // Get current Kuwait time
-  nowKuwait: function() {
-    var now = new Date();
-    return new Date(now.getTime() + (this.TZ_OFFSET - now.getTimezoneOffset()) * 60000);
-  },
-
-  // Convert any date to Kuwait date
-  toKuwait: function(date) {
-    var d = date instanceof Date ? date : new Date(date);
-    return new Date(d.getTime() + (this.TZ_OFFSET - d.getTimezoneOffset()) * 60000);
-  },
-
-  // Format date as YYYY-MM-DD
-  toDateStr: function(date) {
-    var d = this.toKuwait(date instanceof Date ? date : new Date(date));
-    return d.getFullYear() + '-' +
-      String(d.getMonth() + 1).padStart(2, '0') + '-' +
-      String(d.getDate()).padStart(2, '0');
-  },
-
-  // Is a given date a holiday?
-  isHoliday: function(date) {
-    var ds = this.toDateStr(date);
-    return this.HOLIDAYS.indexOf(ds) !== -1;
-  },
-
-  // Is a given date a weekend day?
-  isWeekend: function(date) {
-    var d = this.toKuwait(date instanceof Date ? date : new Date(date));
-    return this.WEEKEND.indexOf(d.getDay()) !== -1;
-  },
-
-  // Is a given date a working day?
-  isWorkingDay: function(date) {
-    return !this.isWeekend(date) && !this.isHoliday(date);
-  },
-
-  // Is the current moment within working hours?
-  // A task is only "overdue" during working hours on working days
-  isWorkingTime: function(date) {
-    var d = this.toKuwait(date instanceof Date ? date : new Date(date));
-    if (!this.isWorkingDay(d)) return false;
-    var h = d.getHours();
-    return h >= this.WORK_START && h < this.WORK_END;
-  },
-
-  // Add N working days to a date, returning the due datetime
-  // Due time = WORK_END (16:00) on the Nth working day
-  addWorkingDays: function(fromDate, days) {
-    var d = this.toKuwait(fromDate instanceof Date ? fromDate : new Date(fromDate));
-    // Start from next working day if outside working hours
-    var h = d.getHours();
-    if (h >= this.WORK_END || !this.isWorkingDay(d)) {
-      // Move to start of next working day
-      d.setDate(d.getDate() + 1);
-      d.setHours(this.WORK_START, 0, 0, 0);
-      while (!this.isWorkingDay(d)) {
-        d.setDate(d.getDate() + 1);
-      }
-      days--; // First day already consumed
+function loadTNUsers(){
+  API.get('users_list',{}).then(function(d){
+    tnAllUsers=(d.users||[]).filter(function(u){return u.active_status!=='inactive';}).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+    // Populate single agent dropdown
+    var sel=document.getElementById('tnSingleAgent');
+    if(sel){sel.innerHTML='<option value="">Select agent...</option>';
+      tnAllUsers.filter(function(u){return !['HoD','Manager','DGM','DataEntry'].includes(u.role);}).forEach(function(u){
+        sel.innerHTML+='<option value="'+u.user_id+'|'+u.full_name+'">'+u.full_name+' ('+u.role+')</option>';
+      });
     }
-    // Count working days
-    var counted = 0;
-    while (counted < days) {
-      d.setDate(d.getDate() + 1);
-      if (this.isWorkingDay(d)) counted++;
-    }
-    // Set due time to end of working day
-    d.setHours(this.WORK_END, 0, 0, 0);
-    return d;
-  },
+    renderTNAgentList('');
+    renderTNTrainerList('');
+    setTNType(tnTargetType);
+  }).catch(function(e){console.error('loadTNUsers',e);});
+}
 
-  // Check if a task is currently overdue
-  // Only overdue during working hours on working days
-  isOverdue: function(dueDateStr, status) {
-    if (!dueDateStr || status === 'Completed' || status === 'Cancelled') return false;
-    var now = this.nowKuwait();
-    if (!this.isWorkingTime(now)) return false; // Not overdue outside working hours
-    var due = this.toKuwait(new Date(dueDateStr));
-    return now > due;
-  },
+function renderTNAgentList(q){
+  var list=document.getElementById('tnAgentList');if(!list)return;
+  var filtered=tnAllUsers.filter(function(u){
+    if(['HoD','Manager','DGM','DataEntry'].includes(u.role))return false;
+    return !q||(u.full_name||'').toLowerCase().includes(q.toLowerCase())||(u.role||'').toLowerCase().includes(q.toLowerCase());
+  });
+  list.innerHTML=filtered.map(function(u){
+    var sel=tnSelectedAgents.some(function(a){return a.user_id===u.user_id;});
+    var av=UTILS.avc(u.full_name);
+    return '<div class="tn-agent-row" data-uid="'+u.user_id+'" data-name="'+u.full_name.replace(/"/g,'&quot;')+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;background:'+(sel?'#EFF6FF':'#fff')+';border:1.5px solid '+(sel?'#BFDBFE':'transparent')+';margin-bottom:2px;transition:all .15s">'
+      +'<div style="width:32px;height:32px;border-radius:50%;background:'+av[0]+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+av[1]+';flex-shrink:0">'+UTILS.ini(u.full_name)+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0A1628">'+UTILS.esc(u.full_name)+'</div><div style="font-size:11px;color:#8A9BB0">'+UTILS.esc(u.role)+' · '+UTILS.esc(u.department||u.team||'')+'</div></div>'
+      +(sel?'<svg width="16" height="16" fill="none" stroke="#1877C5" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':'')
+      +'</div>';
+  }).join('');
+  // Attach click via event delegation
+  list.onclick=function(e){
+    var row=e.target.closest('.tn-agent-row');
+    if(!row)return;
+    var uid=row.dataset.uid, uname=row.dataset.name;
+    var idx=tnSelectedAgents.findIndex(function(a){return a.user_id===uid;});
+    if(idx>-1)tnSelectedAgents.splice(idx,1);else tnSelectedAgents.push({user_id:uid,name:uname});
+    renderTNAgentList(document.getElementById('tnAgentSearch').value);
+    updateTNAgentPills();
+  };
+}
 
-  // Get next working day start
-  nextWorkingDayStart: function() {
-    var d = this.nowKuwait();
-    d.setDate(d.getDate() + 1);
-    d.setHours(this.WORK_START, 0, 0, 0);
-    while (!this.isWorkingDay(d)) {
-      d.setDate(d.getDate() + 1);
-    }
-    return d;
-  },
 
-  // Get minimum due date for calendar picker (next working day)
-  minDueDate: function() {
-    var d = this.nowKuwait();
-    // If still in working hours today, today is valid
-    if (this.isWorkingDay(d) && d.getHours() < this.WORK_END) {
-      return this.toDateStr(d);
-    }
-    return this.toDateStr(this.nextWorkingDayStart());
-  },
 
-  // Format relative time label (working-hours aware)
-  formatTimeLabel: function(dueDateStr) {
-    if (!dueDateStr) return { label: '—', overdue: false };
-    var now = this.nowKuwait();
-    var due = this.toKuwait(new Date(dueDateStr));
-    var diff = due - now;
-    var abs = Math.abs(diff);
-    var label;
-    if (abs < 3600000) label = Math.floor(abs / 60000) + 'm';
-    else if (abs < 86400000) label = Math.floor(abs / 3600000) + 'h';
-    else label = Math.floor(abs / 86400000) + 'd';
-    return {
-      label: diff < 0 ? label + ' over' : label + ' left',
-      overdue: this.isOverdue(dueDateStr, 'active')
+function updateTNAgentPills(){
+  var wrap=document.getElementById('tnAgentPills');
+  var lbl=document.getElementById('tnAgentCountLbl');
+  var cnt=document.getElementById('tnWhoCount');
+  if(wrap){
+    wrap.innerHTML=tnSelectedAgents.map(function(a){
+      return '<span style="display:inline-flex;align-items:center;gap:5px;background:#EFF6FF;border:1.5px solid #BFDBFE;color:#1E40AF;border-radius:20px;padding:4px 10px 4px 6px;font-size:12px;font-weight:600" class="tn-agent-pill" data-uid="'+a.user_id+'">'
+        +'<div style="width:18px;height:18px;border-radius:50%;background:#1877C5;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff">'+UTILS.ini(a.name)+'</div>'
+        +UTILS.esc(a.name.split(' ')[0])
+        +'<span class="tn-pill-rm" style="cursor:pointer;opacity:.5;font-size:14px;margin-left:2px" data-uid="'+a.user_id+'">×</span></span>';
+    }).join('');
+    wrap.onclick=function(e){
+      var rm=e.target.closest('.tn-pill-rm');
+      if(!rm)return;
+      var uid=rm.dataset.uid;
+      tnSelectedAgents=tnSelectedAgents.filter(function(a){return a.user_id!==uid;});
+      renderTNAgentList(document.getElementById('tnAgentSearch').value);
+      updateTNAgentPills();
     };
   }
-};
+  if(lbl)lbl.textContent=tnSelectedAgents.length+' agent'+(tnSelectedAgents.length!==1?'s':'')+' selected';
+  if(cnt){cnt.textContent=tnSelectedAgents.length;cnt.style.display=tnSelectedAgents.length?'inline':'none';}
+}
 
-/* ── END WORKING CALENDAR ──────────────────────────────── */
+function filterTNAgents(q){renderTNAgentList(q);}
+
+function renderTNTrainerList(q){
+  var list=document.getElementById('tnTrainerList');if(!list)return;
+  var filtered=tnAllUsers.filter(function(u){
+    return !q||(u.full_name||'').toLowerCase().includes(q.toLowerCase())||(u.role||'').toLowerCase().includes(q.toLowerCase());
+  });
+  list.innerHTML=filtered.map(function(u){
+    var sel=tnSelectedTrainers.some(function(t){return t.user_id===u.user_id;});
+    var av=UTILS.avc(u.full_name);
+    return '<div class="tn-trainer-row" data-uid="'+u.user_id+'" data-name="'+u.full_name.replace(/"/g,'&quot;')+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;background:'+(sel?'#F0FDF4':'#fff')+';border:1.5px solid '+(sel?'#86EFAC':'transparent')+';margin-bottom:2px;transition:all .15s">'
+      +'<div style="width:32px;height:32px;border-radius:50%;background:'+av[0]+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+av[1]+';flex-shrink:0">'+UTILS.ini(u.full_name)+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#0A1628">'+UTILS.esc(u.full_name)+'</div><div style="font-size:11px;color:#8A9BB0">'+UTILS.esc(u.role)+' · '+UTILS.esc(u.department||u.team||'')+'</div></div>'
+      +(sel?'<svg width="16" height="16" fill="none" stroke="#0EA472" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':'')
+      +'</div>';
+  }).join('');
+  list.onclick=function(e){
+    var row=e.target.closest('.tn-trainer-row');
+    if(!row)return;
+    var uid=row.dataset.uid, uname=row.dataset.name;
+    var idx=tnSelectedTrainers.findIndex(function(t){return t.user_id===uid;});
+    if(idx>-1)tnSelectedTrainers.splice(idx,1);else tnSelectedTrainers.push({user_id:uid,name:uname});
+    renderTNTrainerList(document.getElementById('tnTrainerSearch').value);
+    updateTNTrainerPills();
+  };
+}
 
 
 
-// ═══════════════════════════════════════════════════════════════════
-// ── LOCAL CACHE (stale-while-revalidate) ───────────────────────────
-// Stores API responses in sessionStorage.
-// First load: returns cache instantly (if <5min old), fetches fresh in BG.
-// After 5min: fetches fresh, shows old while waiting.
-// Auto-refreshes in background (2-5min depending on page).
-// ═══════════════════════════════════════════════════════════════════
-var CACHE = {
-  _TTL: 300000,        // 5 min max age before forced refresh
-  _BG:  120000,        // 2min background refresh interval (per-page varies)
-  _pfx: 'kib_cache_',  // storage key prefix
-  _timers: {},
-
-  // Build a cache key from action + params
-  _key: function(action, params) {
-    var p = Object.keys(params||{}).sort().map(function(k){return k+'='+params[k];}).join('&');
-    return this._pfx + action + (p ? '_' + p : '');
-  },
-
-  // Save data to sessionStorage with timestamp
-  set: function(action, params, data) {
-    try {
-      var key = this._key(action, params);
-      sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data: data }));
-    } catch(e) {} // ignore storage errors (private mode etc)
-  },
-
-  // Get cached data. Returns {data, stale} or null
-  get: function(action, params) {
-    try {
-      var key = this._key(action, params);
-      var raw = sessionStorage.getItem(key);
-      if (!raw) return null;
-      var obj = JSON.parse(raw);
-      return { data: obj.data, stale: (Date.now() - obj.ts) > this._TTL };
-    } catch(e) { return null; }
-  },
-
-  // Clear a specific action from cache (use after mutations)
-  bust: function(action) {
-    try {
-      for (var i = sessionStorage.length - 1; i >= 0; i--) {
-        var k = sessionStorage.key(i);
-        if (k && k.indexOf(this._pfx + action) === 0) {
-          sessionStorage.removeItem(k);
-        }
-      }
-    } catch(e) {}
-  },
-
-  // Bust all task-related caches (after create/update/cancel)
-  bustTasks: function() {
-    this.bust('tasks_list');
-    this.bust('tasks_detail');
-    this.bust('dashboard');
-  },
-
-  // Bust all training caches
-  bustTraining: function() {
-    this.bust('training_list');
-    this.bust('training_detail');
-    this.bust('dashboard');
-  },
-
-  // Clear everything
-  clear: function() {
-    try {
-      var keys = [];
-      for (var i = 0; i < sessionStorage.length; i++) {
-        var k = sessionStorage.key(i);
-        if (k && k.indexOf(this._pfx) === 0) keys.push(k);
-      }
-      keys.forEach(function(k){ sessionStorage.removeItem(k); });
-    } catch(e) {}
+function updateTNTrainerPills(){
+  var wrap=document.getElementById('tnTrainerPills');
+  var lbl=document.getElementById('tnTrainerCountLbl');
+  var cnt=document.getElementById('tnTrainersCount');
+  if(wrap){
+    wrap.innerHTML=tnSelectedTrainers.map(function(t){
+      return '<span style="display:inline-flex;align-items:center;gap:5px;background:#F0FDF4;border:1.5px solid #86EFAC;color:#166534;border-radius:20px;padding:4px 10px 4px 6px;font-size:12px;font-weight:600" class="tn-trainer-pill" data-uid="'+t.user_id+'">'
+        +'<div style="width:18px;height:18px;border-radius:50%;background:#0EA472;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff">'+UTILS.ini(t.name)+'</div>'
+        +UTILS.esc(t.name.split(' ')[0])
+        +'<span class="tn-pill-rm" style="cursor:pointer;opacity:.5;font-size:14px;margin-left:2px" data-uid="'+t.user_id+'">×</span></span>';
+    }).join('');
+    wrap.onclick=function(e){
+      var rm=e.target.closest('.tn-pill-rm');
+      if(!rm)return;
+      var uid=rm.dataset.uid;
+      tnSelectedTrainers=tnSelectedTrainers.filter(function(t){return t.user_id!==uid;});
+      renderTNTrainerList(document.getElementById('tnTrainerSearch').value);
+      updateTNTrainerPills();
+    };
   }
-};
+  if(lbl)lbl.textContent=tnSelectedTrainers.length+' trainer'+(tnSelectedTrainers.length!==1?'s':'')+' selected';
+  if(cnt){cnt.textContent=tnSelectedTrainers.length;cnt.style.display=tnSelectedTrainers.length?'inline':'none';}
+}
 
-// Extend API.get to use cache automatically
-var _origAPIGet = API.get.bind(API);
-API.get = async function(action, params) {
-  // Actions that should NOT be cached (always fresh)
-  var noCache = ['login','notif_list','notif_read','notif_read_all'];
-  if (noCache.indexOf(action) !== -1) {
-    return _origAPIGet(action, params);
+function filterTNTrainers(q){renderTNTrainerList(q);}
+
+async function submitTNPlan(){
+  var title=(document.getElementById('tnTitle').value||'').trim();
+  var cat=document.getElementById('tnCat').value;
+  var pri=document.getElementById('tnPri').value||'Medium';
+  var dl=document.getElementById('tnDeadline').value;
+  var desc=(document.getElementById('tnDesc').value||'').trim();
+  
+  if(!title){showTNMsg('Please enter a title','error');switchTNTab('details');return;}
+  if(!cat){showTNMsg('Please select a category','error');switchTNTab('details');return;}
+  if(!dl){showTNMsg('Please select a deadline','error');switchTNTab('details');return;}
+
+  // Build target agents
+  var targetAgents=[];
+  if(tnTargetType==='individual'){
+    var sel=document.getElementById('tnSingleAgent').value;
+    if(!sel){showTNMsg('Please select an agent','error');switchTNTab('who');return;}
+    var parts=sel.split('|');
+    targetAgents=[{user_id:parts[0],name:parts[1]}];
+  } else if(tnTargetType==='multiple'){
+    if(!tnSelectedAgents.length){showTNMsg('Please select at least one agent','error');switchTNTab('who');return;}
+    targetAgents=tnSelectedAgents;
+  } else {
+    targetAgents=tnAllUsers.filter(function(u){return !['HoD','Manager','DGM','DataEntry'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name};});
   }
 
-  var cached = CACHE.get(action, params);
+  if(!tnSelectedTrainers.length){showTNMsg('Please assign at least one trainer','error');return;}
 
-  if (cached && !cached.stale) {
-    // Fresh cache — return immediately, refresh in background silently
-    _origAPIGet(action, params).then(function(fresh) {
-      CACHE.set(action, params, fresh);
-    }).catch(function(){});
-    return cached.data;
-  }
-
-  if (cached && cached.stale) {
-    // Stale cache — return old data immediately so UI shows instantly
-    // Then fetch fresh and update (next load will be fast)
-    _origAPIGet(action, params).then(function(fresh) {
-      CACHE.set(action, params, fresh);
-    }).catch(function(){});
-    return cached.data;
-  }
-
-  // No cache at all — fetch fresh and cache it
-  var fresh = await _origAPIGet(action, params);
-  CACHE.set(action, params, fresh);
-  return fresh;
-};
-
-// Extend API.post to bust relevant caches after mutations
-var _origAPIPost = API.post.bind(API);
-API.post = async function(action, body) {
-  var result = await _origAPIPost(action, body);
-  // Bust caches based on action
-  var taskActions = ['tasks_create','tasks_update','subtask_mark','task_delegate',
-                     'task_ext_request','task_ext_review'];
-  var trainActions = ['training_create','training_mark','training_comment',
-                      'training_ext_request','training_ext_review'];
-  var handoverActions = ['handover_create','handover_update'];
-  var salesActions = ['sales_entry','sales_mtd_update'];
-  var todoActions = ['ptodo_add','ptodo_update','ptodo_delete'];
-
-  if (taskActions.indexOf(action) !== -1)    CACHE.bustTasks();
-  if (trainActions.indexOf(action) !== -1)   CACHE.bustTraining();
-  if (handoverActions.indexOf(action) !== -1){ CACHE.bust('handover_dashboard'); CACHE.bust('handover_list'); CACHE.bust('dashboard'); }
-  if (salesActions.indexOf(action) !== -1)   { CACHE.bust('sales_dashboard'); CACHE.bust('dashboard'); }
-  if (todoActions.indexOf(action) !== -1)    { CACHE.bust('ptodo_list'); }
-
-  return result;
-};
-
-
-var UTILS = {
-  esc: function(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); },
-  ini: function(n){ return String(n||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase(); },
-  avc: function(n){ var c=['#6366F1','#8B5CF6','#EC4899','#F59E0B','#10B981','#3B82F6']; var h=0,s=String(n||'A'); for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))&0xffff; return c[h%c.length]; },
-  today: function(){ return new Date(Date.now()+3*3600000).toISOString().slice(0,10); },
-  toast: function(msg,type){ var c={success:'#0EA472',error:'#E5383B',warning:'#F4A523',info:'#1877C5'}; var t=document.createElement('div'); t.style.cssText='position:fixed;bottom:20px;right:20px;background:#0D1B3E;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;border-left:3px solid '+(c[type]||c.info)+';box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:9999;max-width:340px;font-family:inherit'; t.textContent=msg; document.body.appendChild(t); setTimeout(function(){t.remove();},3500); },
-  setUser: function(s){ if(!s)return; var i=document.getElementById('avatarInitials'),n=document.getElementById('sidebarName'),r=document.getElementById('sidebarRole'); if(i)i.textContent=this.ini(s.full_name); if(n)n.textContent=s.display_name||s.full_name.split(' ')[0]; if(r)r.textContent=s.role; document.querySelectorAll('[data-roles]').forEach(function(el){ if(el.getAttribute('data-roles').split(',').map(function(x){return x.trim();}).indexOf(s.role)===-1)el.style.display='none'; }); }
-};
-
-UTILS.setUser(AUTH.getSession());
-var S=AUTH.getSession();
-function ini(n){return String(n||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();}
-if(S){var av=document.getElementById('avatarInitials'),nm=document.getElementById('sidebarName'),rl=document.getElementById('sidebarRole');if(av)av.textContent=ini(S.full_name);if(nm)nm.textContent=S.display_name||S.full_name.split(' ')[0];if(rl)rl.textContent=S.role;}
-
-var allUsers = [];
-var selectedAgents = [];
-var selectedTrainers = [];
-var currentTargetType = 'individual';
-
-// Load users
-var teamMap = {}; // TL full_name -> array of agent objects
-async function initTrainingForm(){
-  try{
-    var d = await API.get('users_list', {});
-    allUsers = (d.users||d.agents||[]).filter(function(u){return u.active_status!=='inactive';}).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
-    // Build teamMap keyed by team_leader name — done once at load, exact string match
-    var MGMT_R = ['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'];
-    // Build teamMap by TL name (from team_leader field or by finding TL via reports_to)
-    var tlMap = {}; // user_id -> full_name for TLs
-    allUsers.forEach(function(u){
-      if(u.role==='TL'||u.role==='AL') tlMap[u.user_id]=u.full_name;
-    });
-    allUsers.forEach(function(u){
-      var MGMT_R2=['HoD','TL','AL','CC Manager','Manager','QA Manager','Team Leader','DGM'];
-      if(MGMT_R2.includes(u.role)) return;
-      // Try team_leader field first, then look up reports_to
-      var key = null;
-      if(u.team_leader) key = u.team_leader.trim();
-      else if(u.reports_to && tlMap[u.reports_to]) key = tlMap[u.reports_to];
-      if(key){
-        if(!teamMap[key]) teamMap[key]=[];
-        teamMap[key].push(u);
-      }
-    });
-    populateSingleAgent();
-    populateTeamTLs();
-    populateMultiAgents();
-    populateTrainers();
-    updateDeptCount();
-  }catch(e){console.error(e);}
-}
-
-function populateSingleAgent(){
-  var sel = document.getElementById('fSingleAgent');
-  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);});
-  agents.forEach(function(u){
-    var o=document.createElement('option');o.value=u.user_id;o.textContent=(u.full_name||u.name)+' ('+(u.team||'')+')'+(u.team_leader?' - '+u.team_leader:'');sel.appendChild(o);
-  });
-}
-
-function populateTeamTLs(){
-  var sel = document.getElementById('fTeamTL');
-  var tls = allUsers.filter(function(u){return u.role==='TL'||u.role==='AL'||u.role==='Team Leader';});
-  tls.forEach(function(u){
-    var o=document.createElement('option');o.value=u.user_id;o.textContent=u.full_name;sel.appendChild(o);
-  });
-}
-
-function showTeamPreview(){
-  var tlId = document.getElementById('fTeamTL').value;
-  if(!tlId){document.getElementById('teamPreview').style.display='none';return;}
-  var tl = allUsers.find(function(u){return u.user_id===tlId;});
-  if(!tl){document.getElementById('teamPreview').style.display='none';return;}
-  var tlName = (tl.full_name||tl.name||'').trim();
-  var SKIP = ['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'];
-  // Build fresh from allUsers every call - no global dependency
-  var members = allUsers.filter(function(u){
-    if(SKIP.includes(u.role)) return false;
-    var tl_col = (u.team_leader||'').trim();
-    return tl_col === tlName;
-  });
-  var list = document.getElementById('teamPreviewList');
-  list.innerHTML = members.length
-    ? members.map(function(m){return '<span style="display:inline-flex;padding:3px 8px;background:#E8F1FB;color:#1365A0;border-radius:5px;font-size:11px;font-weight:600">'+(m.full_name||m.name)+'</span>';}).join('')
-    : '<span style="font-size:12px;color:var(--t3)">No agents (tlName='+tlName+', total='+allUsers.length+')</span>';
-  document.getElementById('teamPreview').style.display = '';
-}
-
-function updateDeptCount(){
-  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);});
-  document.getElementById('deptCount').textContent = agents.length + ' agents across all teams will be assigned this training';
-}
-
-function getRoleGroup(role){
-  if(['HoD','CC Manager'].includes(role)) return 'CC Management';
-  if(['Manager','QA Manager'].includes(role)) return 'Management';
-  if(role==='TL') return 'Team Leaders';
-  if(role==='AL') return 'Assistant Leaders';
-  if(role==='QA'||role==='QA Agent') return 'Quality Assurance';
-  if(role==='BackOffice') return 'Back Office';
-  return 'Agents';
-}
-function buildDropdownItems(containerId, items, selectedArr, onToggle){
-  var c = document.getElementById(containerId);
-  if(!c) return;
-  // Group by team
-  var groups = {};
-  items.forEach(function(u){
-    var g = onToggle==='toggleTrainer' ? getRoleGroup(u.role) : (u.team || 'Other');
-    if(!groups[g]) groups[g] = [];
-    groups[g].push(u);
-  });
-  var html = '';
-  Object.keys(groups).forEach(function(g){
-    html += '<div class="dropdown-group-label">'+g+'</div>';
-    groups[g].forEach(function(u){
-      var isSel = selectedArr.some(function(x){return x.user_id===u.user_id;});
-      html += '<div class="dropdown-option '+(isSel?'selected':'')+'" data-id="'+u.user_id+'" data-name="'+u.full_name+'" onclick="'+onToggle+'(\''+u.user_id+'\',\''+u.full_name+'\')">'
-        +'<div class="chk"><span class="chk-mark">✓</span></div>'
-        +'<span>'+u.full_name+'</span>'
-        +'<span style="margin-left:auto;font-size:10px;color:var(--t3)">'+u.role+'</span>'
-        +'</div>';
-    });
-  });
-  c.innerHTML = html;
-}
-
-function populateMultiAgents(){
-  var agents = allUsers.filter(function(u){return !['HoD','TL','CC Manager','Manager','QA Manager','Team Leader'].includes(u.role);});
-  buildDropdownItems('agentsDDItems', agents, selectedAgents, 'toggleAgent');
-}
-
-function populateTrainers(){
-  var trainers = allUsers.filter(function(u){ return u.active_flag !== 'FALSE' && u.active_flag !== false; });
-  buildDropdownItems('trainersDDItems', trainers, selectedTrainers, 'toggleTrainer');
-}
-
-function toggleAgent(id, name){
-  var idx = selectedAgents.findIndex(function(x){return x.user_id===id;});
-  if(idx>-1) selectedAgents.splice(idx,1);
-  else selectedAgents.push({user_id:id,name:name});
-  updatePills('agentsPills','agentsPlaceholder',selectedAgents,'toggleAgent');
-  buildDropdownItems('agentsDDItems', allUsers.filter(function(u){return ['Agent','QA Agent'].includes(u.role);}), selectedAgents, 'toggleAgent');
-  document.getElementById('agentsCount').textContent = selectedAgents.length + ' agent'+(selectedAgents.length!==1?'s':'')+' selected';
-}
-
-function toggleTrainer(id, name){
-  var idx = selectedTrainers.findIndex(function(x){return x.user_id===id;});
-  if(idx>-1) selectedTrainers.splice(idx,1);
-  else selectedTrainers.push({user_id:id,name:name});
-  updatePills('trainerPills','trainersPlaceholder',selectedTrainers,'toggleTrainer');
-  populateTrainers();
-  document.getElementById('trainersCount').textContent = selectedTrainers.length + ' trainer'+(selectedTrainers.length!==1?'s':'')+' selected';
-}
-
-function updatePills(containerId, placeholderId, arr, removeFn){
-  var c = document.getElementById(containerId);
-  var existing = c.querySelectorAll('.pill');
-  existing.forEach(function(p){p.remove();});
-  var ph = document.getElementById(placeholderId);
-  if(arr.length===0){ph.style.display='';return;}
-  ph.style.display='none';
-  arr.forEach(function(item){
-    var pill = document.createElement('span');
-    pill.className='pill';
-    pill.innerHTML = item.name+' <button onclick="event.stopPropagation();'+removeFn+'(\''+item.user_id+'\',\''+item.name+'\')">×</button>';
-    c.insertBefore(pill, ph);
-  });
-}
-
-function toggleDropdown(id){
-  var dd = document.getElementById(id);
-  var isOpen = dd.style.display !== 'none';
-  document.querySelectorAll('.dropdown-list').forEach(function(d){d.style.display='none';});
-  dd.style.display = isOpen ? 'none' : '';
-}
-
-function filterDropdown(searchId, listId){
-  var q = document.getElementById(searchId).value.toLowerCase();
-  var items = document.getElementById(listId).querySelectorAll('.dropdown-option');
-  items.forEach(function(item){
-    var name = item.dataset.name ? item.dataset.name.toLowerCase() : '';
-    item.style.display = name.includes(q) ? '' : 'none';
-  });
-  var groups = document.getElementById(listId).querySelectorAll('.dropdown-group-label');
-  groups.forEach(function(g){
-    var next = g.nextElementSibling;
-    var hasVisible = false;
-    while(next && !next.classList.contains('dropdown-group-label')){
-      if(next.style.display!=='none') hasVisible=true;
-      next = next.nextElementSibling;
-    }
-    g.style.display = hasVisible ? '' : 'none';
-  });
-}
-
-document.addEventListener('click', function(e){
-  if(!e.target.closest('.multi-select-wrap')){
-    document.querySelectorAll('.dropdown-list').forEach(function(d){d.style.display='none';});
-  }
-});
-
-function setTargetType(type){
-  currentTargetType = type;
-  ['individual','multiple','team','department'].forEach(function(t){
-    document.getElementById('panel-'+t).style.display = t===type ? '' : 'none';
-    document.getElementById('tab-'+t).classList.toggle('active', t===type);
-  });
-}
-
-async function submitTraining(){
-  var title    = document.getElementById('fTitle').value.trim();
-  var cat      = document.getElementById('fCat').value;
-  var deadline = document.getElementById('fDeadline').value;
-  var desc     = document.getElementById('fDesc').value;
-  var pri      = document.getElementById('fPri').value;
-
-  if(!title){showMsg('Please enter a training title','error');return;}
-  if(!cat){showMsg('Please select a category','error');return;}
-  if(!deadline){showMsg('Please set a deadline','error');return;}
-  if(!selectedTrainers.length){showMsg('Please select at least one trainer','error');return;}
-
-  // Build target agents list
-  var targetAgents = [];
-  if(currentTargetType==='individual'){
-    var sel=document.getElementById('fSingleAgent');
-    if(!sel.value){showMsg('Please select an agent','error');return;}
-    var u=allUsers.find(function(x){return x.user_id===sel.value;});
-    if(u) targetAgents=[{user_id:u.user_id,name:u.full_name}];
-  } else if(currentTargetType==='multiple'){
-    if(!selectedAgents.length){showMsg('Please select at least one agent','error');return;}
-    targetAgents=selectedAgents.map(function(a){return {user_id:a.user_id,name:a.name||a.full_name};});
-  } else if(currentTargetType==='team'){
-    var tlId=document.getElementById('fTeamTL').value;
-    if(!tlId){showMsg('Please select a team leader','error');return;}
-    var tl=allUsers.find(function(u){return u.user_id===tlId;});
-    var tlName=(tl.full_name||tl.name||'').trim();
-    var teamAgents = teamMap[tlName] || [];
-    targetAgents = teamAgents.map(function(u){return {user_id:u.user_id,name:u.full_name||u.name};});
-    if(!targetAgents.length){showMsg('No agents found for team leader: '+tlName,'error');return;}
-  } else if(currentTargetType==='department'){
-    targetAgents=allUsers.filter(function(u){return !['HoD','DGM','TL','CC Manager','Manager','QA Manager','Team Leader','DataEntry'].includes(u.role);}).map(function(u){return {user_id:u.user_id,name:u.full_name||u.name};});
-  }
-
-  var btn=document.querySelector('button.btn-primary');
+  var btn=document.getElementById('tnSubmitBtn');
   btn.disabled=true;btn.textContent='Creating...';
 
   try{
-    var d = await API.post('training_create', {
-      title:                  title,
-      category:               cat,
-      description:            desc,
-      priority:               pri,
-      deadline:               deadline,
-      target_type:            currentTargetType,
-      target_agents_json:     JSON.stringify(targetAgents),
-      assigned_trainers_json: JSON.stringify(selectedTrainers),
-      total_agents:           String(targetAgents.length)
+    var sess=AUTH.getSession()||{};
+    await API.post('training_create',{
+      title:title, description:desc, category:cat, priority:pri,
+      target_type:tnTargetType, deadline:dl,
+      target_agents_json:JSON.stringify(targetAgents),
+      assigned_trainers_json:JSON.stringify(tnSelectedTrainers),
+      total_agents:String(targetAgents.length),
+      created_by_user_id:sess.user_id,
+      created_by_name:sess.full_name
     });
-    showMsg('Training plan created! ID: '+d.training_id,'success');
-    setTimeout(function(){location.href='/training.html';},1500);
+    UTILS.toast('Training plan created!','success');
+    closeNewTrainingModal();
+    loadT();
   }catch(ex){
-    showMsg('Error: '+ex.message,'error');
-    btn.disabled=false;btn.textContent='Create Training Plan';
+    showTNMsg('Error: '+ex.message,'error');
   }
+  btn.disabled=false;btn.textContent='✓ Create Training Plan';
 }
 
-function showMsg(msg,type){
-  var el=document.getElementById('msg');
+function showTNMsg(msg,type){
+  var el=document.getElementById('tnMsg');
+  if(!el)return;
+  var colors={success:{bg:'#ECFDF5',border:'#6EE7B7',color:'#065F46'},error:{bg:'#FEF2F2',border:'#FECACA',color:'#991B1B'}};
+  var s=colors[type]||colors.error;
+  el.style.cssText='display:block;padding:10px 14px;border-radius:10px;font-size:13px;margin-top:14px;background:'+s.bg+';border:1px solid '+s.border+';color:'+s.color;
   el.textContent=msg;
-  el.style.background=type==='success'?'#DCFCE7':'#FEE2E2';
-  el.style.color=type==='success'?'#166534':'#991B1B';
-  el.style.display='block';
+  setTimeout(function(){el.style.display='none';},4000);
 }
-
-// Set default deadline to 2 weeks from now
-var d2w=new Date(Date.now()+14*86400000+3*3600000);
-document.getElementById('fDeadline').value=d2w.toISOString().slice(0,10);
-loadBell();
-// ══ END NEW TRAINING MODAL ═════════════════════════════════════
+// ══ END NEW TRAINING MODAL ════════════════════════════════════
 
 </script>
 
@@ -3194,150 +2609,137 @@ loadBell();
   </a>
 </nav>
 
-<!-- ══ NEW TRAINING PLAN MODAL ══════════════════════════════════ -->
-<div id="newTrainingModal" style="display:none;position:fixed;inset:0;background:rgba(6,15,36,.7);z-index:1000;overflow-y:auto;padding:20px">
-  <div style="background:#fff;border-radius:20px;max-width:860px;margin:0 auto;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.3)">
-    <!-- Modal header -->
-    <div style="background:linear-gradient(135deg,#0D1B3E,#1877C5);padding:22px 28px;display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Create New</div>
-        <div style="font-size:20px;font-weight:800;color:#fff">Training Plan</div>
+
+
+
+<!-- ══ NEW TRAINING MODAL ══════════════════════════════════════ -->
+<div id="newTrainingModal" style="display:none;position:fixed;inset:0;background:rgba(6,15,36,.75);z-index:1000;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px;align-items:center;justify-content:center" onclick="if(event.target===this)closeNewTrainingModal()">
+  <div style="background:#fff;border-radius:20px;max-width:700px;width:100%;margin:0 auto;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.4);animation:fadeIn .2s ease">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#0D1B3E 0%,#1877C5 100%);padding:22px 28px 0;position:relative">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px">NEW PLAN</span>
       </div>
-      <button onclick="closeNewTrainingModal()" style="background:rgba(255,255,255,.1);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;line-height:1">×</button>
-    </div>
-    <!-- Modal body -->
-    <div style="padding:24px;max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
-      <!-- Training Info -->
-    <div class="card">
-      <div class="card-title">Training Information</div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Title <span class="req">*</span></label>
-          <input type="text" id="fTitle" placeholder="e.g. Transfer to Dirwaza Product Knowledge">
-        </div>
-        <div class="field">
-          <label>Category <span class="req">*</span></label>
-          <select id="fCat">
-            <option value="">Select category...</option>
-            <option>Product Knowledge</option>
-            <option>Compliance</option>
-            <option>Soft Skills</option>
-            <option>Process</option>
-            <option>System Training</option>
-            <option>Sales Technique</option>
-            <option>Quality Assurance</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Priority</label>
-          <select id="fPri">
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-            <option value="Critical">Critical</option>
-            <option value="Low">Low</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Deadline <span class="req">*</span></label>
-          <input type="date" id="fDeadline">
-        </div>
-        <div class="field form-full">
-          <label>Description</label>
-          <textarea id="fDesc" placeholder="Training objectives, materials, what agents should know after completion..."></textarea>
-        </div>
+      <div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">Create Training Plan</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:18px">Assign coaching or training to your team</div>
+      <button onclick="closeNewTrainingModal()" style="position:absolute;top:18px;right:18px;background:rgba(255,255,255,.15);border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1">×</button>
+      <!-- Tabs -->
+      <div style="display:flex;gap:0;margin:0 -28px">
+        <button id="tntab-details" onclick="switchTNTab('details')" style="flex:1;background:none;border:none;border-bottom:3px solid #fff;padding:11px 6px 9px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit">📋 Details</button>
+        <button id="tntab-who" onclick="switchTNTab('who')" style="flex:1;background:none;border:none;border-bottom:3px solid transparent;padding:11px 6px 9px;font-size:12px;font-weight:500;color:rgba(255,255,255,.45);cursor:pointer;font-family:inherit">👥 Who <span id="tnWhoCount" style="display:none;background:rgba(255,255,255,.2);font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:3px">0</span></button>
+        <button id="tntab-trainers" onclick="switchTNTab('trainers')" style="flex:1;background:none;border:none;border-bottom:3px solid transparent;padding:11px 6px 9px;font-size:12px;font-weight:500;color:rgba(255,255,255,.45);cursor:pointer;font-family:inherit">🎓 Trainers <span id="tnTrainersCount" style="display:none;background:rgba(255,255,255,.2);font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:3px">0</span></button>
       </div>
     </div>
 
-    <!-- Target Selection -->
-    <div class="card">
-      <div class="card-title">Who Receives This Training</div>
+    <!-- Body -->
+    <div style="padding:24px;max-height:65vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
 
-      <!-- Target type tabs -->
-      <div class="target-tabs">
-        <button class="target-tab active" onclick="setTargetType('individual')" id="tab-individual">Individual</button>
-        <button class="target-tab" onclick="setTargetType('multiple')" id="tab-multiple">Multiple Agents</button>
-        <button class="target-tab" onclick="setTargetType('team')" id="tab-team">Team</button>
-        <button class="target-tab" onclick="setTargetType('department')" id="tab-department">Department</button>
-      </div>
-
-      <!-- Individual -->
-      <div id="panel-individual">
-        <div class="field">
-          <label>Select Agent <span class="req">*</span></label>
-          <select id="fSingleAgent"><option value="">Select agent...</option></select>
-        </div>
-      </div>
-
-      <!-- Multiple agents -->
-      <div id="panel-multiple" style="display:none">
-        <div class="field">
-          <label>Select Agents <span class="req">*</span></label>
-          <div class="multi-select-wrap">
-            <div class="pill-container" id="agentsPills" onclick="toggleDropdown('agentsDD')">
-              <span class="pill-placeholder" id="agentsPlaceholder">Click to select agents...</span>
-            </div>
-            <div class="dropdown-list" id="agentsDD" style="display:none">
-              <div class="dropdown-search"><svg width="14" height="14" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" id="agentsSearch" placeholder="Search agents..." oninput="filterDropdown('agentsSearch','agentsDDItems')"></div>
-              <div id="agentsDDItems"></div>
-            </div>
+      <!-- ── Tab: Details ── -->
+      <div id="tnpanel-details">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div style="grid-column:1/-1">
+            <label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Title <span style="color:#E5383B">*</span></label>
+            <input id="tnTitle" type="text" placeholder="e.g. Transfer to Dirwaza Product Knowledge" style="width:100%;padding:10px 14px;border:1.5px solid #E4EAF3;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='#1877C5'" onblur="this.style.borderColor='#E4EAF3'">
           </div>
-          <div style="font-size:11px;color:var(--t3);margin-top:4px" id="agentsCount">0 agents selected</div>
-        </div>
-      </div>
-
-      <!-- Team -->
-      <div id="panel-team" style="display:none">
-        <div class="field">
-          <label>Select Team Leader <span class="req">*</span></label>
-          <select id="fTeamTL" onchange="showTeamPreview()">
-            <option value="">Select team leader...</option>
-          </select>
-        </div>
-        <div id="teamPreview" style="display:none;margin-top:12px;padding:12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
-          <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Team members that will receive training</div>
-          <div id="teamPreviewList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-        </div>
-      </div>
-
-      <!-- Department -->
-      <div id="panel-department" style="display:none">
-        <div style="padding:14px;background:#E8F1FB;border-radius:8px;border:1px solid #B8D4F0">
-          <div style="font-size:13px;font-weight:600;color:#1365A0;margin-bottom:4px">All department agents will be assigned</div>
-          <div style="font-size:12px;color:#4A7AB5" id="deptCount">Loading count...</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Trainer Selection -->
-    <div class="card">
-      <div class="card-title">Assign Trainer(s)</div>
-      <div class="field">
-        <label>Trainers <span class="req">*</span> <span style="font-size:10px;font-weight:400;color:var(--t3)">(select one or more)</span></label>
-        <div class="multi-select-wrap">
-          <div class="pill-container" id="trainerPills" onclick="toggleDropdown('trainersDD')">
-            <span class="pill-placeholder" id="trainersPlaceholder">Click to select trainers...</span>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Category <span style="color:#E5383B">*</span></label>
+            <select id="tnCat" style="width:100%;padding:10px 14px;border:1.5px solid #E4EAF3;border-radius:10px;font-size:13px;font-family:inherit;outline:none;background:#fff">
+              <option value="">Select category...</option>
+              <option>Product Knowledge</option>
+              <option>Compliance</option>
+              <option>Soft Skills</option>
+              <option>Process</option>
+              <option>System Training</option>
+              <option>Sales Technique</option>
+              <option>Quality Assurance</option>
+              <option>Other</option>
+            </select>
           </div>
-          <div class="dropdown-list" id="trainersDD" style="display:none">
-            <div class="dropdown-search"><svg width="14" height="14" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" id="trainersSearch" placeholder="Search trainers..." oninput="filterDropdown('trainersSearch','trainersDDItems')"></div>
-            <div id="trainersDDItems"></div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Priority</label>
+            <select id="tnPri" style="width:100%;padding:10px 14px;border:1.5px solid #E4EAF3;border-radius:10px;font-size:13px;font-family:inherit;outline:none;background:#fff">
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Deadline <span style="color:#E5383B">*</span></label>
+            <input id="tnDeadline" type="date" style="width:100%;padding:10px 14px;border:1.5px solid #E4EAF3;border-radius:10px;font-size:13px;font-family:inherit;outline:none">
+          </div>
+          <div style="grid-column:1/-1">
+            <label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Description</label>
+            <textarea id="tnDesc" placeholder="Training objectives, materials, what agents should know..." style="width:100%;padding:10px 14px;border:1.5px solid #E4EAF3;border-radius:10px;font-size:13px;font-family:inherit;outline:none;resize:vertical;min-height:80px" onfocus="this.style.borderColor='#1877C5'" onblur="this.style.borderColor='#E4EAF3'"></textarea>
           </div>
         </div>
-        <div style="font-size:11px;color:var(--t3);margin-top:4px" id="trainersCount">0 trainers selected</div>
+        <div style="margin-top:20px;text-align:right">
+          <button onclick="switchTNTab('who')" style="background:linear-gradient(135deg,#1E3A6E,#1877C5);color:#fff;border:none;border-radius:10px;padding:11px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Next: Who Receives → </button>
+        </div>
       </div>
-    </div>
 
-    <div style="display:flex;gap:10px;align-items:center">
-      <button class="btn btn-primary" onclick="submitTraining()">Create Training Plan</button>
-      <a href="/training.html" class="btn btn-secondary">Cancel</a>
-    </div>
-    <div id="msg" style="display:none;margin-top:12px;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600"></div>
-  </div>
-</main>
+      <!-- ── Tab: Who ── -->
+      <div id="tnpanel-who" style="display:none">
+        <!-- Target type -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+          <button class="tn-type-btn active" onclick="setTNType('individual')" data-type="individual" style="padding:8px 16px;border-radius:20px;border:1.5px solid #1877C5;background:#EFF6FF;color:#1877C5;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Individual</button>
+          <button class="tn-type-btn" onclick="setTNType('multiple')" data-type="multiple" style="padding:8px 16px;border-radius:20px;border:1.5px solid #E4EAF3;background:#fff;color:#4A5568;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Multiple Agents</button>
+          <button class="tn-type-btn" onclick="setTNType('department')" data-type="department" style="padding:8px 16px;border-radius:20px;border:1.5px solid #E4EAF3;background:#fff;color:#4A5568;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">All Department</button>
+        </div>
+
+        <!-- Individual -->
+        <div id="tntype-individual">
+          <label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Select Agent <span style="color:#E5383B">*</span></label>
+          <select id="tnSingleAgent" style="width:100%;padding:10px 14px;border:1.5px solid #E4EAF3;border-radius:10px;font-size:13px;font-family:inherit;outline:none;background:#fff">
+            <option value="">Loading agents...</option>
+          </select>
+        </div>
+
+        <!-- Multiple -->
+        <div id="tntype-multiple" style="display:none">
+          <label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:8px">Select Agents <span style="color:#E5383B">*</span></label>
+          <input id="tnAgentSearch" type="text" placeholder="Search agents..." oninput="filterTNAgents(this.value)" style="width:100%;padding:9px 12px;border:1.5px solid #E4EAF3;border-radius:10px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px">
+          <div id="tnAgentList" style="max-height:200px;overflow-y:auto;border:1.5px solid #E4EAF3;border-radius:10px;padding:8px;background:#F8FAFC;margin-bottom:8px"></div>
+          <div id="tnAgentPills" style="display:flex;flex-wrap:wrap;gap:6px;min-height:20px"></div>
+          <div style="font-size:11px;color:#8A9BB0;margin-top:6px" id="tnAgentCountLbl">0 agents selected</div>
+        </div>
+
+        <!-- Department -->
+        <div id="tntype-department" style="display:none">
+          <div style="background:#F0F9FF;border:1.5px solid #BAE6FD;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:24px;margin-bottom:6px">🏢</div>
+            <div style="font-size:13px;font-weight:600;color:#0369A1">All Department</div>
+            <div style="font-size:11px;color:#0EA5E9;margin-top:4px" id="tnDeptCount">Loading count...</div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;margin-top:20px">
+          <button onclick="switchTNTab('details')" style="background:#fff;border:1.5px solid #E4EAF3;color:#4A5568;border-radius:10px;padding:11px 20px;font-size:13px;cursor:pointer;font-family:inherit">← Back</button>
+          <button onclick="switchTNTab('trainers')" style="background:linear-gradient(135deg,#1E3A6E,#1877C5);color:#fff;border:none;border-radius:10px;padding:11px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Next: Trainers →</button>
+        </div>
+      </div>
+
+      <!-- ── Tab: Trainers ── -->
+      <div id="tnpanel-trainers" style="display:none">
+        <label style="font-size:10px;font-weight:700;color:#4A5568;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:8px">Assign Trainer(s) <span style="color:#E5383B">*</span></label>
+        <input id="tnTrainerSearch" type="text" placeholder="Search trainers..." oninput="filterTNTrainers(this.value)" style="width:100%;padding:9px 12px;border:1.5px solid #E4EAF3;border-radius:10px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px">
+        <div id="tnTrainerList" style="max-height:220px;overflow-y:auto;border:1.5px solid #E4EAF3;border-radius:10px;padding:8px;background:#F8FAFC;margin-bottom:8px"></div>
+        <div id="tnTrainerPills" style="display:flex;flex-wrap:wrap;gap:6px;min-height:20px"></div>
+        <div style="font-size:11px;color:#8A9BB0;margin-top:6px" id="tnTrainerCountLbl">0 trainers selected</div>
+
+        <div id="tnMsg" style="display:none;padding:10px 14px;border-radius:10px;font-size:13px;margin-top:14px"></div>
+
+        <div style="display:flex;justify-content:space-between;margin-top:20px">
+          <button onclick="switchTNTab('who')" style="background:#fff;border:1.5px solid #E4EAF3;color:#4A5568;border-radius:10px;padding:11px 20px;font-size:13px;cursor:pointer;font-family:inherit">← Back</button>
+          <button onclick="submitTNPlan()" id="tnSubmitBtn" style="background:linear-gradient(135deg,#0EA472,#1877C5);color:#fff;border:none;border-radius:10px;padding:11px 28px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✓ Create Training Plan</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
-<!-- ══ END NEW TRAINING MODAL ════════════════════════════════════ -->
+<!-- ══ END NEW TRAINING MODAL ══════════════════════════════════ -->
 
 </body>
 </html>
