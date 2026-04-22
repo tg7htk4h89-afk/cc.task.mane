@@ -2047,7 +2047,7 @@ function renderTaskModal(d) {
   var sc = statusColors[t.status] || '#94A3B8';
   var sb = statusBgs[t.status] || '#F8FAFC';
   var pc = priColors[t.priority] || '#94A3B8';
-  var pct = Math.min(100, Number(t.progress_percentage) || 0);
+  var pct = t.status==='Completed' ? 100 : Math.min(100, Number(t.progress_pct||t.progress_percentage) || 0);
 
   var avatarColors = ['#6366F1','#8B5CF6','#EC4899','#F59E0B','#10B981','#3B82F6','#0EA472','#EF4444'];
   function aColor(name){ return avatarColors[(name||'A').charCodeAt(0) % avatarColors.length]; }
@@ -2090,9 +2090,38 @@ function renderTaskModal(d) {
   html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">📋 Category</div>';
   html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9)">'+UTILS.esc(t.category||'—')+'</div>';
   html += '</div>';
+  // SLA Performance calculation
+  var slaPerf = null;
+  var slaPerfLabel = '';
+  var slaPerfColor = 'rgba(255,255,255,.9)';
+  if(t.created_at && t.due_datetime) {
+    var created = new Date(t.created_at);
+    var due     = new Date(t.due_datetime);
+    var slaTotalMs = due - created;
+    if(slaTotalMs > 0) {
+      if(t.status === 'Completed' && t.completed_at) {
+        var completed = new Date(t.completed_at);
+        var timeUsedMs = completed - created;
+        slaPerf = Math.round((slaTotalMs / timeUsedMs) * 100);
+        if(slaPerf >= 100){ slaPerfColor='#6EE7B7'; slaPerfLabel='On time'; }
+        else { slaPerfColor='#FCA5A5'; slaPerfLabel='Delayed'; }
+      } else if(t.status !== 'Cancelled') {
+        var now = new Date();
+        var remaining = due - now;
+        slaPerf = Math.max(0, Math.round((remaining / slaTotalMs) * 100));
+        slaPerfColor = slaPerf > 30 ? '#6EE7B7' : slaPerf > 10 ? '#FCD34D' : '#FCA5A5';
+        slaPerfLabel = slaPerf + '% left';
+      }
+    }
+  }
   html += '<div style="flex:1;padding:10px 16px">';
-  html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">📊 Progress</div>';
-  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9)">'+pct+'%</div>';
+  html += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">⚡ SLA</div>';
+  if(slaPerf !== null) {
+    html += '<div style="font-size:14px;font-weight:800;color:'+slaPerfColor+'">'+slaPerf+'%</div>';
+    html += '<div style="font-size:10px;color:rgba(255,255,255,.4)">'+slaPerfLabel+'</div>';
+  } else {
+    html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9)">'+(t.sla_value||4)+' '+(t.sla_unit||'days')+'</div>';
+  }
   html += '</div>';
   html += '</div>';
   // Tabs
@@ -2165,10 +2194,34 @@ function renderTaskModal(d) {
   html += '<div style="display:flex;align-items:center;gap:8px">'+avatar(t.assigned_by_name,28)+'<span style="font-weight:600;font-size:13px;color:#0F172A">'+UTILS.esc(t.assigned_by_name||'—')+'</span></div>';
   html += '</div>';
   html += '</div>';
-  // SLA
-  if(t.sla_value) {
-    html += '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px;color:#92400E">⏱ SLA: <b>'+UTILS.esc(t.sla_value+' '+t.sla_unit)+'</b></div>';
+  // Progress bar + SLA Performance card
+  var progBg = pct>=100?'#10B981':pct>=70?'#3B82F6':'#F59E0B';
+  html += '<div style="background:#F8FAFC;border-radius:12px;padding:14px 16px;margin-bottom:14px">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+  html += '<span style="font-size:11px;font-weight:700;color:#64748B">Task Progress</span>';
+  html += '<span style="font-size:14px;font-weight:800;color:'+progBg+'">'+pct+'%</span>';
+  html += '</div>';
+  html += '<div style="height:8px;background:#E2E8F0;border-radius:6px;overflow:hidden">';
+  html += '<div style="height:100%;width:'+pct+'%;background:'+progBg+';border-radius:6px;transition:width .6s ease"></div>';
+  html += '</div>';
+  if(slaPerf !== null){
+    var slaCardBg = slaPerf>=100 ? '#ECFDF5' : '#FFF0F0';
+    var slaCardBd = slaPerf>=100 ? '#A7F3D0' : '#FECACA';
+    var slaCardTx = slaPerf>=100 ? '#065F46' : '#991B1B';
+    var slaIcon   = slaPerf>=100 ? '✅' : '⚠️';
+    html += '<div style="margin-top:10px;background:'+slaCardBg+';border:1px solid '+slaCardBd+';border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px">';
+    html += '<span style="font-size:14px">'+slaIcon+'</span>';
+    html += '<div>';
+    html += '<div style="font-size:11px;font-weight:700;color:'+slaCardTx+'">SLA Performance: '+slaPerf+'%</div>';
+    if(t.status==='Completed'){
+      html += '<div style="font-size:10px;color:'+slaCardTx+';opacity:.7">'+(slaPerf>=100?'Completed before deadline ✓':'Completed after deadline'+(t.completed_at?' on '+UTILS.fdt(t.completed_at):''))+'</div>';
+    } else {
+      var daysLeft = Math.ceil((new Date(t.due_datetime)-new Date())/86400000);
+      html += '<div style="font-size:10px;color:'+slaCardTx+';opacity:.7">'+(daysLeft>0?daysLeft+' day'+(daysLeft!==1?'s':'')+' remaining':'Overdue by '+Math.abs(daysLeft)+' day'+(Math.abs(daysLeft)!==1?'s':''))+'</div>';
+    }
+    html += '</div></div>';
   }
+  html += '</div>';
   // Action buttons
   if (canAct) {
     html += '<div style="display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #F1F5F9;padding-top:16px">';
