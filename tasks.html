@@ -3828,16 +3828,158 @@ var UTILS={
 
 
 
+var KIB_HIERARCHY = {
+
+  // ── USER TREE ─────────────────────────────────────────────────
+  // reports_to maps: user_id → parent user_id
+  reports_to: {
+    'USR-001': 'USR-013', // Talal → Nawaf
+    'USR-002': 'USR-001', // Taher → Talal
+    'USR-003': 'USR-002', // Shouq → Taher
+    'USR-004': 'USR-002', // Alanoud → Taher
+    'USR-005': 'USR-002', // Mohammad Alothman → Taher
+    'USR-006': 'USR-004', // Hasan → Alanoud
+    'USR-007': 'USR-003', // Naser → Shouq
+    'USR-008': 'USR-002', // Abdulrahman → Taher
+    'USR-009': 'USR-002', // Nourah → Taher
+    'USR-010': 'USR-011', // Badreyah → Fatmah
+    'USR-011': 'USR-012', // Fatmah → Mohammad Abdulraheem
+    'USR-012': 'USR-002', // Mohammad Abdulraheem → Taher
+    'USR-014': 'USR-013', // Ammar → Nawaf
+    'USR-015': 'USR-013', // Hamad → Nawaf
+    'USR-016': 'USR-013', // Abdullah → Nawaf
+    'USR-017': 'USR-014', // Hussein → Ammar
+    'USR-018': 'USR-015', // Ahmad → Hamad
+    // USR-013 Nawaf: no parent (top level)
+    // USR-099 DataEntry: no parent
+  },
+
+  // ── DIRECT REPORTS ────────────────────────────────────────────
+  // Who each manager can assign tasks to
+  direct_reports: {
+    'USR-013': ['USR-001','USR-014','USR-015','USR-016'],           // Nawaf's directs
+    'USR-001': ['USR-001','USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012','USR-013','USR-014','USR-015','USR-016','USR-017','USR-018','USR-099'],
+    'USR-002': ['USR-003','USR-004','USR-005','USR-008','USR-009','USR-012'], // Taher's directs
+    'USR-003': ['USR-007'],                                                   // Shouq (no assign)
+    'USR-004': ['USR-006'],                                                   // Alanoud (no assign)
+    'USR-005': ['USR-006','USR-007'],                                                   // Mohammad TL (no assign)
+    'USR-006': [],                                                   // Hasan AL (no assign)
+    'USR-007': [],                                                   // Naser AL (no assign)
+    'USR-008': [],
+    'USR-009': [],
+    'USR-010': [],
+    'USR-011': ['USR-010'],                                          // Fatmah → Badreyah
+    'USR-012': ['USR-011'],                                          // Mohammad QA Sup → Fatmah
+    'USR-014': ['USR-017'],                                          // Ammar → Hussein
+    'USR-015': ['USR-018'],                                          // Hamad → Ahmad
+    'USR-016': [],                                                   // Abdullah (no assign)
+    'USR-017': [],
+    'USR-018': [],
+    'USR-099': ['USR-001','USR-014','USR-015','USR-016'],           // DataEntry → Nawaf's scope
+  },
+
+  // ── FULL VISIBILITY TREE ──────────────────────────────────────
+  // Who each user can SEE tasks for (includes all indirect reports)
+  visibility_tree: {
+    'USR-013': ['USR-001','USR-014','USR-015','USR-016'],
+    'USR-001': ['USR-001','USR-002','USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012','USR-013','USR-014','USR-015','USR-016','USR-017','USR-018','USR-099'],
+    'USR-002': ['USR-003','USR-004','USR-005','USR-006','USR-007','USR-008','USR-009','USR-010','USR-011','USR-012'],
+    'USR-003': [],   // Shouq: self only
+    'USR-004': [],   // Alanoud: self only
+    'USR-005': [],   // Mohammad TL: self only
+    'USR-006': [],   // Hasan: self only
+    'USR-007': [],   // Naser: self only
+    'USR-008': [],
+    'USR-009': [],
+    'USR-010': [],   // Badreyah: self only
+    'USR-011': ['USR-010'],              // Fatmah: herself + Badreyah
+    'USR-012': ['USR-010','USR-011'],    // Mohammad QA: himself + Fatmah + Badreyah
+    'USR-014': ['USR-017'],              // Ammar: himself + Hussein
+    'USR-015': ['USR-018'],              // Hamad: himself + Ahmad
+    'USR-016': [],                       // Abdullah: self only
+    'USR-017': [],
+    'USR-018': [],
+    'USR-099': ['USR-001','USR-014','USR-015','USR-016'], // DataEntry: Nawaf's directs
+  },
+
+  // ── ROLE PERMISSIONS ──────────────────────────────────────────
+  roles: {
+    'DGM':        { canCreate: true,  canAssign: true,  isAdmin: false, isManager: true,  level: 1 },
+    'HoD':        { canCreate: true,  canAssign: true,  isAdmin: true,  isManager: true,  level: 2 },
+    'Manager':    { canCreate: true,  canAssign: true,  isAdmin: true,  isManager: true,  level: 3 },
+    'QA Manager': { canCreate: true,  canAssign: true,  isAdmin: false, isManager: true,  level: 3 },
+    'TL':         { canCreate: true,  canAssign: true,  isAdmin: false, isManager: false, level: 4 },
+    'AL':         { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 4 },
+    'QA':         { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 5 },
+    'BackOffice': { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 5 },
+    'DataEntry':  { canCreate: true,  canAssign: true,  isAdmin: false, isManager: false, level: 4 },
+  },
+
+  // ── METHODS ───────────────────────────────────────────────────
+
+  // Get all users this user can SEE tasks for (including themselves)
+  getVisibleUserIds: function(userId) {
+    var tree = this.visibility_tree[userId] || [];
+    return [userId].concat(tree);
+  },
+
+  // Get all users this user can ASSIGN tasks to
+  getAssignableUserIds: function(userId) {
+    return this.direct_reports[userId] || [];
+  },
+
+  // Check if user A can see user B's tasks
+  canSeeUser: function(viewerUserId, targetUserId) {
+    if (viewerUserId === targetUserId) return true;
+    var visible = this.visibility_tree[viewerUserId] || [];
+    return visible.indexOf(targetUserId) !== -1;
+  },
+
+  // Get role config
+  getRoleConfig: function(role) {
+    return this.roles[role] || { canCreate: false, canAssign: false, isAdmin: false, isManager: false, level: 5 };
+  },
+
+  // Can this user create tasks?
+  canCreateTask: function(role) {
+    return (this.roles[role] || {}).canCreate === true;
+  },
+
+  // Can this user assign tasks to others?
+  canAssignTask: function(userId, role) {
+    var cfg = this.roles[role] || {};
+    if (!cfg.canAssign) return false;
+    var directs = this.direct_reports[userId] || [];
+    return directs.length > 0;
+  },
+
+  // Get department display name
+  getDeptColor: function(dept) {
+    var colors = {
+      'Contact Center': '#1877C5',
+      'Quality Assurance': '#7C3AED',
+      'E-Banking': '#0EA472',
+      'ATM': '#F59E0B',
+      'Digital Branches': '#EC4899',
+      'Executive Management': '#0D1B3E',
+    };
+    return colors[dept] || '#64748B';
+  }
+};
+
 AUTH.requireAuth();
 UTILS.setUser(AUTH.getSession());
 UTILS.sidebar();
+
+// ── KIB HIERARCHY ─────────────────────────────────────────
+
 
 // ── CONFIG ────────────────────────────────────────────────
 var _sess = AUTH.getSession() || {};
 var allT = [], curF = 'all', currentTask = null;
 
 // Show New Task button for users who can create
-if (KIB_HIERARCHY.canCreateTask((_sess.role||''))) {
+if (window.KIB_HIERARCHY&&KIB_HIERARCHY.canCreateTask((_sess.role||''))) {
   var btnNew = document.getElementById('btnNew');
   if (btnNew) btnNew.style.display = 'flex';
 }
@@ -3910,7 +4052,7 @@ function renderBoard() {
       + '<span class="k-count">' + colTasks.length + '</span>'
       + '</div>'
       + cardsHtml
-      + (KIB_HIERARCHY.canCreateTask(_sess.role||'') ? '<button class="k-add" onclick="openNewTaskModal()" title="Add task"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>' : '')
+      + (window.KIB_HIERARCHY&&KIB_HIERARCHY.canCreateTask(_sess.role||'') ? '<button class="k-add" onclick="openNewTaskModal()" title="Add task"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>' : '')
       + '</div>';
   }).join('');
 
@@ -4707,6 +4849,87 @@ function refreshData(){
   loadT();loadBell();
   setTimeout(function(){if(icon)icon.style.animation='';},800);
 }
+
+async function markSubtask(sid) {
+  try {
+    await API.post('subtask_mark', {subtask_id: sid});
+    if (currentTask) {
+      var t = currentTask.task || currentTask;
+      var d = await API.get('tasks_detail', {task_id: t.task_id});
+      currentTask = d; renderTaskModal(d);
+    }
+  } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
+}
+
+async function addComment() {
+  var inp = document.getElementById('commentInput');
+  if (!inp || !inp.value.trim()) return;
+  var msg = inp.value.trim();
+  if (!currentTask) return;
+  var t = currentTask.task || currentTask;
+  try {
+    inp.value = '';
+    await API.post('tasks_comment', {task_id: t.task_id, message: msg});
+    var d = await API.get('tasks_detail', {task_id: t.task_id});
+    currentTask = d; renderTaskModal(d);
+  } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
+}
+
+async function delegateTask() {
+  var sel = document.getElementById('delegateSelect');
+  if (!sel || !sel.value) { UTILS.toast('Select a person to delegate to', 'warning'); return; }
+  if (!currentTask) return;
+  var t = currentTask.task || currentTask;
+  try {
+    await API.post('task_delegate', {task_id: t.task_id, delegate_to_user_id: sel.value});
+    UTILS.toast('Task delegated ✓', 'success');
+    closeTaskModal(); loadT();
+  } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
+}
+
+async function requestExtension() {
+  var inp = document.getElementById('extReason');
+  var days = document.getElementById('extDays');
+  if (!inp || !inp.value.trim()) { UTILS.toast('Please provide a reason', 'warning'); return; }
+  if (!currentTask) return;
+  var t = currentTask.task || currentTask;
+  try {
+    await API.post('task_ext_request', {task_id: t.task_id, reason: inp.value.trim(), requested_days: days?days.value:'1'});
+    UTILS.toast('Extension requested ✓', 'success'); if(inp) inp.value='';
+  } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
+}
+
+function openNewTaskModal() {
+  var m = document.getElementById('newTaskModal');
+  if (!m) return;
+  m.style.display = 'flex';
+  ['nTitle','nDesc','nDue','nSV'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['nCat','nPri','nSU'].forEach(function(id){var el=document.getElementById(id);if(el)el.selectedIndex=0;});
+  ntmAssignees=[]; ntmSubtasks=[]; ntmRecurring='';
+  var rt=document.getElementById('nRecurringToggle'); if(rt)rt.checked=false;
+  var rp=document.getElementById('nRecurringPanel'); if(rp)rp.style.display='none';
+  document.querySelectorAll('.nrec-btn').forEach(function(b){b.style.background='#fff';b.style.color='#64748B';b.style.borderColor='#E2E8F0';});
+  switchNTabById('ntab-details');
+  var due=document.getElementById('nDue'); if(due)due.min=window.KIB_CALENDAR?KIB_CALENDAR.minDueDate():UTILS.today();
+  renderNAssigneeList(''); renderNSubtasks(); renderNSelectedPills();
+}
+
+function closeNewTaskModal() {
+  var m = document.getElementById('newTaskModal');
+  if (m) m.style.display = 'none';
+}
+
+function openTaskModal(d) { renderTaskModal(d); }
+
+// ── INIT ─────────────────────────────────────────────────
+loadT();
+loadBell();
+window._bgTasks = setInterval(loadT, 30000);
+
+// Auto hash
+if (window.location.hash === '#new') {
+  try { if(AUTH.canDo && AUTH.canDo('tasks.create')) setTimeout(openNewTaskModal, 600); } catch(e){}
+}
 </script>
 
 <!-- ══ TASK DETAIL MODAL ═══════════════════════════════════════ -->
@@ -4915,90 +5138,6 @@ function closeMobileMore(){
     if(overlay)overlay.style.display='none';
   },280);
 }
-</script>
+</script></script>
 </body>
-</html
-
-
-
-async function markSubtask(sid) {
-  try {
-    await API.post('subtask_mark', {subtask_id: sid});
-    if (currentTask) {
-      var t = currentTask.task || currentTask;
-      var d = await API.get('tasks_detail', {task_id: t.task_id});
-      currentTask = d; renderTaskModal(d);
-    }
-  } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
-}
-
-async function addComment() {
-  var inp = document.getElementById('commentInput');
-  if (!inp || !inp.value.trim()) return;
-  var msg = inp.value.trim();
-  if (!currentTask) return;
-  var t = currentTask.task || currentTask;
-  try {
-    inp.value = '';
-    await API.post('tasks_comment', {task_id: t.task_id, message: msg});
-    var d = await API.get('tasks_detail', {task_id: t.task_id});
-    currentTask = d; renderTaskModal(d);
-  } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
-}
-
-async function delegateTask() {
-  var sel = document.getElementById('delegateSelect');
-  if (!sel || !sel.value) { UTILS.toast('Select a person to delegate to', 'warning'); return; }
-  if (!currentTask) return;
-  var t = currentTask.task || currentTask;
-  try {
-    await API.post('task_delegate', {task_id: t.task_id, delegate_to_user_id: sel.value});
-    UTILS.toast('Task delegated ✓', 'success');
-    closeTaskModal(); loadT();
-  } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
-}
-
-async function requestExtension() {
-  var inp = document.getElementById('extReason');
-  var days = document.getElementById('extDays');
-  if (!inp || !inp.value.trim()) { UTILS.toast('Please provide a reason', 'warning'); return; }
-  if (!currentTask) return;
-  var t = currentTask.task || currentTask;
-  try {
-    await API.post('task_ext_request', {task_id: t.task_id, reason: inp.value.trim(), requested_days: days?days.value:'1'});
-    UTILS.toast('Extension requested ✓', 'success'); if(inp) inp.value='';
-  } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
-}
-
-function openNewTaskModal() {
-  var m = document.getElementById('newTaskModal');
-  if (!m) return;
-  m.style.display = 'flex';
-  ['nTitle','nDesc','nDue','nSV'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-  ['nCat','nPri','nSU'].forEach(function(id){var el=document.getElementById(id);if(el)el.selectedIndex=0;});
-  ntmAssignees=[]; ntmSubtasks=[]; ntmRecurring='';
-  var rt=document.getElementById('nRecurringToggle'); if(rt)rt.checked=false;
-  var rp=document.getElementById('nRecurringPanel'); if(rp)rp.style.display='none';
-  document.querySelectorAll('.nrec-btn').forEach(function(b){b.style.background='#fff';b.style.color='#64748B';b.style.borderColor='#E2E8F0';});
-  switchNTabById('ntab-details');
-  var due=document.getElementById('nDue'); if(due)due.min=window.KIB_CALENDAR?KIB_CALENDAR.minDueDate():UTILS.today();
-  renderNAssigneeList(''); renderNSubtasks(); renderNSelectedPills();
-}
-
-function closeNewTaskModal() {
-  var m = document.getElementById('newTaskModal');
-  if (m) m.style.display = 'none';
-}
-
-function openTaskModal(d) { renderTaskModal(d); }
-
-// ── INIT ─────────────────────────────────────────────────
-loadT();
-loadBell();
-window._bgTasks = setInterval(loadT, 30000);
-
-// Auto hash
-if (window.location.hash === '#new') {
-  try { if(AUTH.canDo && AUTH.canDo('tasks.create')) setTimeout(openNewTaskModal, 600); } catch(e){}
-}
-</script>
+</html>

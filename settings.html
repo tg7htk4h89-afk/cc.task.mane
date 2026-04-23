@@ -1636,6 +1636,20 @@ body { min-height: 100%; }
   .settings-section:last-child { padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)); }
 }
 
+
+/* ── PAGE HERO CARD (shared) ─────────────────────────────── */
+.page-hero { background:linear-gradient(135deg,#0D1B3E 0%,#1565A8 55%,#1877C5 100%); border-radius:20px; padding:24px 28px; margin-bottom:18px; position:relative; overflow:hidden; display:flex; align-items:center; gap:20px; }
+.page-hero::before { content:''; position:absolute; top:-50px; right:-40px; width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,.04); pointer-events:none; }
+.ph-body { flex:1; z-index:1; }
+.ph-tag   { font-size:9px; font-weight:800; color:rgba(255,255,255,.45); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:5px; }
+.ph-title { font-size:19px; font-weight:800; color:#fff; margin-bottom:6px; letter-spacing:-.3px; }
+.ph-sub   { font-size:12px; color:rgba(255,255,255,.5); margin-bottom:0; }
+.ph-stats { display:flex; gap:20px; flex-wrap:wrap; margin-top:14px; }
+.ph-stat-val { font-size:24px; font-weight:900; color:#fff; line-height:1; }
+.ph-stat-lbl { font-size:10px; font-weight:600; color:rgba(255,255,255,.45); text-transform:uppercase; letter-spacing:.8px; margin-top:2px; }
+.ph-ring { width:76px; height:76px; flex-shrink:0; z-index:1; }
+@media(max-width:768px){ .page-hero { padding:18px 20px; gap:14px; } .ph-title { font-size:16px; } .ph-stat-val { font-size:20px; } .ph-ring { width:60px; height:60px; } }
+
 </style>
 </head>
 <body>
@@ -1663,7 +1677,16 @@ body { min-height: 100%; }
   
 </header>
 <div class="page-content" style="max-width:800px">
-  <div class="page-header"><div><h1 class="page-title">Settings</h1><p class="page-sub">Score weights — HoD only</p></div></div>
+  <div class="page-hero">
+    <div class="ph-body">
+      <div class="ph-tag">System Configuration</div>
+      <div class="ph-title">Settings</div>
+      <div class="ph-sub">Portal configuration — HoD & Managers only</div>
+    </div>
+    <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1">
+      <svg width="28" height="28" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+    </div>
+  </div>
   <div class="form-card">
     <div class="form-section-title">Performance Score Weights (must total 100%)</div>
     <div class="form-row">
