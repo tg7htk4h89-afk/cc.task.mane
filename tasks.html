@@ -2788,9 +2788,17 @@ function openNewTaskModal(){
   // Set min date
   var due=document.getElementById('nDue');if(due)due.min=window.KIB_CALENDAR?KIB_CALENDAR.minDueDate():UTILS.today();
   // Load/render
-  renderNAssigneeList('');
   renderNSubtasks();
   renderNSelectedPills();
+  // Load users - show loading state then render
+  if(ntmAllUsers.length>0){
+    renderNAssigneeList('');
+  } else {
+    // Show loading state in list
+    var al=document.getElementById('nAssigneeList');
+    if(al)al.innerHTML='<div style="padding:16px;text-align:center;color:#94A3B8;font-size:13px">Loading staff...</div>';
+    loadNtmUsers();
+  }
 }
 
 function closeNewTaskModal(){
@@ -2799,13 +2807,20 @@ function closeNewTaskModal(){
 
 // Tab switching
 function switchNTab(btn){
-  var panels={'ntab-details':'npanel-details','ntab-assignees':'npanel-assignees','ntab-subtasks':'npanel-subtasks','ntab-recurring':'npanel-recurring'};
-  Object.keys(panels).forEach(function(tid){
-    var t=document.getElementById(tid),p=document.getElementById(panels[tid]);
-    var active=tid===btn.dataset.tab;
-    if(t){t.style.color=active?'#fff':'rgba(255,255,255,.45)';t.style.borderBottom=active?'2px solid #60A5FA':'2px solid transparent';t.style.fontWeight=active?'700':'500';}
-    if(p)p.style.display=active?'':'none';
+  var tabId=btn.dataset.tab;
+  document.querySelectorAll('[id^="ntab-"]').forEach(function(b){
+    b.style.borderBottomColor='transparent';b.style.color='rgba(255,255,255,.45)';b.style.fontWeight='500';
   });
+  btn.style.borderBottomColor='#60A5FA';btn.style.color='#fff';btn.style.fontWeight='700';
+  document.querySelectorAll('[id^="npanel-"]').forEach(function(p){p.style.display='none';});
+  var pid='npanel-'+tabId.replace('ntab-','');
+  var panel=document.getElementById(pid);
+  if(panel)panel.style.display='block';
+  // If switching to assignees and list is empty, reload
+  if(tabId==='ntab-assignees'){
+    if(ntmAllUsers.length===0){loadNtmUsers();}
+    else{renderNAssigneeList('');}
+  }
 }
 function switchNTabById(id){switchNTab(document.getElementById(id));}
 
@@ -2815,15 +2830,30 @@ function loadNtmUsers(){
   if(!_sess){setTimeout(loadNtmUsers,300);return;}
   var myId = _sess.user_id;
   API.get('users_list',{}).then(function(d){
-    var allUsers=(d.users||[]).filter(function(u){return u.active_status!=='inactive';});
-    if(!allUsers.length){ntmAllUsers=[];return;}
+    var allUsers=(d.users||[]).filter(function(u){return u&&u.user_id&&u.active_status!=='inactive';});
+    if(!allUsers.length){
+      // Fallback: build list from KIB_HIERARCHY if API fails
+      if(window.KIB_HIERARCHY&&KIB_HIERARCHY.users){
+        ntmAllUsers=Object.values(KIB_HIERARCHY.users).filter(function(u){return u&&u.user_id;});
+      } else { ntmAllUsers=[]; }
+      renderNAssigneeList('');
+      return;
+    }
     var assignable=(window.KIB_HIERARCHY&&myId)?KIB_HIERARCHY.getAssignableUserIds(myId):[];
     if(assignable.length>0){
-      ntmAllUsers=allUsers.filter(function(u){return assignable.indexOf(u.user_id)!==-1;}).sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+      ntmAllUsers=allUsers.filter(function(u){return assignable.indexOf(u.user_id)!==-1;}).sort(function(a,b){return(a.full_name||'').localeCompare(b.full_name||'');});
     } else {
-      ntmAllUsers=allUsers.sort(function(a,b){return a.full_name.localeCompare(b.full_name);});
+      ntmAllUsers=allUsers.sort(function(a,b){return(a.full_name||'').localeCompare(b.full_name||'');});
     }
-  }).catch(function(e){console.error('users_list failed:',e);ntmAllUsers=[];});
+    renderNAssigneeList('');
+  }).catch(function(e){
+    console.error('users_list failed:',e);
+    // Fallback from hierarchy
+    if(window.KIB_HIERARCHY&&KIB_HIERARCHY.users){
+      ntmAllUsers=Object.values(KIB_HIERARCHY.users).filter(function(u){return u&&u.user_id;});
+    } else { ntmAllUsers=[]; }
+    renderNAssigneeList('');
+  });
 }
 setTimeout(loadNtmUsers,500);
 
@@ -2833,8 +2863,10 @@ function renderNAssigneeList(query){
   if(!list)return;
   if(ntmAllUsers.length===0){
     list.innerHTML='<div style="padding:16px;text-align:center;color:#94A3B8;font-size:13px"><div style="width:20px;height:20px;border:2px solid #E2E8F0;border-top-color:#1A4A7A;border-radius:50%;animation:ntmSpin .8s linear infinite;margin:0 auto 8px"></div>Loading staff...</div>';
-    // Retry
-    if(!ntmAllUsers.length){setTimeout(function(){renderNAssigneeList(query);},600);}
+    // Retry with increasing backoff
+    var _retryMs = (renderNAssigneeList._retryCount||0) < 3 ? 600 : 2000;
+    renderNAssigneeList._retryCount = (renderNAssigneeList._retryCount||0)+1;
+    if(ntmAllUsers.length===0){loadNtmUsers();setTimeout(function(){renderNAssigneeList(query);},_retryMs);}
     return;
   }
   var q=(query||'').toLowerCase();
@@ -2959,7 +2991,11 @@ async function submitNewTask(){
   if(!cat){UTILS.toast('Please select a category','error');switchNTabById('ntab-details');return;}
   if(!pri){UTILS.toast('Please select a priority','error');switchNTabById('ntab-details');return;}
   // SLA auto-defaults to 4 days
-  if(ntmAssignees.length===0){UTILS.toast('Please select at least one assignee','error');switchNTabById('ntab-assignees');return;}
+  // If no assignees selected, self-assign
+  if(ntmAssignees.length===0){
+    var _s=AUTH.getSession()||{};
+    ntmAssignees=[{user_id:_s.user_id,name:_s.full_name,role:_s.role,team:_s.team}];
+  }
   if(document.getElementById('nRecurringToggle').checked&&!ntmRecurring){UTILS.toast('Please select a recurring frequency','error');switchNTabById('ntab-recurring');return;}
   var btn=document.getElementById('nSubmitBtn');
   if(btn){btn.disabled=true;btn.textContent='Creating...';}
@@ -2978,7 +3014,7 @@ async function submitNewTask(){
     loadT();
 // Auto-open new task modal if navigated from dashboard
 if(window.location.hash==='#new'){try{if(AUTH.canDo&&AUTH.canDo('tasks.create'))setTimeout(openNewTaskModal,600);}catch(e){}}
-  }catch(ex){UTILS.toast('Error: '+ex.message,'error');}
+  }catch(ex){if(btn){btn.disabled=false;btn.textContent='✓ Create Task';}UTILS.toast('Error: '+(ex.message||'Unknown error'),'error');return;}
   if(btn){btn.disabled=false;btn.textContent='✓ Create Task';}
 }
 
