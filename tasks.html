@@ -4180,7 +4180,7 @@ button, .btn, a { cursor: pointer !important; }
 <!-- Task Detail Modal (bottom sheet) -->
 <div id="taskModal" style="display:none;position:fixed;inset:0;z-index:300">
   <div id="taskModalBackdrop" onclick="closeTaskModal()" style="position:absolute;inset:0;background:rgba(0,0,0,.65)"></div>
-  <div id="taskModalSheet" style="position:absolute;bottom:0;left:0;right:0;max-height:calc(100vh - 56px);display:flex;flex-direction:column;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.3);overflow:hidden;transform:translateY(100%)">
+  <div id="taskModalSheet" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:860px;max-height:calc(100vh - 56px);display:flex;flex-direction:column;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.3);overflow:hidden">
     <div style="flex-shrink:0;background:linear-gradient(160deg,#0D1F3C 0%,#1E3A6E 100%);display:flex;justify-content:center;padding:10px 0 0">
       <div style="width:36px;height:4px;border-radius:4px;background:rgba(255,255,255,.3)"></div>
     </div>
@@ -4638,7 +4638,7 @@ function closeTaskModal() {
   var sheet = document.getElementById('taskModalSheet');
   if (sheet) {
     sheet.style.transition = 'transform .25s cubic-bezier(.32,0,.67,0)';
-    sheet.style.transform = 'translateY(100%)';
+    sheet.style.transform = 'translateX(-50%) translateY(100%)';
   }
   setTimeout(function() {
     document.getElementById('taskModal').style.display = 'none';
@@ -5143,11 +5143,11 @@ function renderTaskModal(d) {
   populateDelegateSelect();
   var sheet = document.getElementById('taskModalSheet');
   if (sheet) {
-    sheet.style.transform = 'translateY(100%)';
+    sheet.style.transform = 'translateX(-50%) translateY(100%)';
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
         sheet.style.transition = 'transform .32s cubic-bezier(.32,0,.15,1)';
-        sheet.style.transform = 'translateY(0)';
+        sheet.style.transform = 'translateX(-50%) translateY(0)';
       });
     });
   };
