@@ -1558,6 +1558,71 @@ body { min-height: 100%; }
 .logout-btn:hover { color:#fff; }
 .logout-btn svg { display:block; }
 
+
+/* ── MOBILE MORE SHEET ─────────────────────────────────── */
+.mbn-more {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.mbn-more.active { color: #fff !important; }
+
+/* Better touch targets */
+@media (max-width: 768px) {
+  .mbn-item {
+    min-height: 52px;
+    padding: 6px 4px;
+  }
+  /* Top bar mobile refinements */
+  .top-bar {
+    padding: 0 14px;
+    height: 52px;
+  }
+  .breadcrumb {
+    font-size: 14px;
+  }
+  /* Page content safe area */
+  .page-content {
+    padding: 16px 14px max(calc(env(safe-area-inset-bottom) + 72px), 84px);
+  }
+  /* Cards full width */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .kpi-grid .kpi-card:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
+  /* Search bar full width */
+  .search-bar, .search-wrap {
+    width: 100%;
+  }
+  /* Modals full screen on mobile */
+  #taskModal > div,
+  #newTaskModal > div {
+    max-height: 95vh;
+    border-radius: 20px 20px 0 0;
+    margin-top: auto;
+  }
+  /* Sidebar hidden on mobile */
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  /* Improve kanban scroll */
+  .kanban-wrap {
+    gap: 10px;
+    padding: 0 0 16px;
+    scroll-snap-type: x mandatory;
+  }
+  .kanban-col {
+    min-width: 80vw;
+    scroll-snap-align: start;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1929,6 +1994,50 @@ function goPage(p){
 loadBell();
 loadArchive();
 setInterval(loadBell, 60000);
+
+// ── MOBILE MORE SHEET ────────────────────────────────────
+function toggleMobileMore() {
+  var sheet = document.getElementById('mobileMoreSheet');
+  var overlay = document.getElementById('mobileMoreOverlay');
+  var isOpen = sheet.style.transform === 'translateY(0px)' || sheet.style.transform === 'translateY(0%)' || sheet.style.transform === 'translateY(0)';
+  if (isOpen) { closeMobileMore(); }
+  else { openMobileMore(); }
+}
+function openMobileMore() {
+  var sheet = document.getElementById('mobileMoreSheet');
+  var overlay = document.getElementById('mobileMoreOverlay');
+  var btn = document.getElementById('btnMobileMore');
+  sheet.style.display = 'block';
+  overlay.style.display = 'block';
+  if (btn) btn.classList.add('active');
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      sheet.style.transform = 'translateY(0)';
+      sheet.style.transition = 'transform .3s cubic-bezier(.32,0,.67,0)';
+    });
+  });
+  // Fill user info
+  var s = AUTH.getSession() || {};
+  if (s.full_name) {
+    var ini = s.full_name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+    var av = document.getElementById('moreAvatar'); if(av) av.textContent = ini;
+    var nm = document.getElementById('moreName'); if(nm) nm.textContent = s.full_name;
+    var rl = document.getElementById('moreRole'); if(rl) rl.textContent = s.role || '';
+    var dp = document.getElementById('moreDept'); if(dp) dp.textContent = s.department || 'KIB';
+  }
+}
+function closeMobileMore() {
+  var sheet = document.getElementById('mobileMoreSheet');
+  var overlay = document.getElementById('mobileMoreOverlay');
+  var btn = document.getElementById('btnMobileMore');
+  sheet.style.transform = 'translateY(100%)';
+  if (btn) btn.classList.remove('active');
+  setTimeout(function(){
+    sheet.style.display = 'none';
+    overlay.style.display = 'none';
+  }, 300);
+}
+
 </script>
 </body>
 </html>

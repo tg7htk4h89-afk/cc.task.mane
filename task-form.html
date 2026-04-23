@@ -1532,6 +1532,71 @@ body { min-height: 100%; }
 .logout-btn:hover { color:#fff; }
 .logout-btn svg { display:block; }
 
+
+/* ── MOBILE MORE SHEET ─────────────────────────────────── */
+.mbn-more {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.mbn-more.active { color: #fff !important; }
+
+/* Better touch targets */
+@media (max-width: 768px) {
+  .mbn-item {
+    min-height: 52px;
+    padding: 6px 4px;
+  }
+  /* Top bar mobile refinements */
+  .top-bar {
+    padding: 0 14px;
+    height: 52px;
+  }
+  .breadcrumb {
+    font-size: 14px;
+  }
+  /* Page content safe area */
+  .page-content {
+    padding: 16px 14px max(calc(env(safe-area-inset-bottom) + 72px), 84px);
+  }
+  /* Cards full width */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .kpi-grid .kpi-card:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
+  /* Search bar full width */
+  .search-bar, .search-wrap {
+    width: 100%;
+  }
+  /* Modals full screen on mobile */
+  #taskModal > div,
+  #newTaskModal > div {
+    max-height: 95vh;
+    border-radius: 20px 20px 0 0;
+    margin-top: auto;
+  }
+  /* Sidebar hidden on mobile */
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  /* Improve kanban scroll */
+  .kanban-wrap {
+    gap: 10px;
+    padding: 0 0 16px;
+    scroll-snap-type: x mandatory;
+  }
+  .kanban-col {
+    min-width: 80vw;
+    scroll-snap-align: start;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2388,21 +2453,59 @@ function unlockBodyScroll() {
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
     <span>Home</span>
   </a>
-  <a href="/tasks.html" class="mbn-item active" data-page="tasks">
+  <a href="/tasks.html" class="mbn-item active" data-page="tasks" class="mbn-item active">
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <span>Tasks</span>
   </a>
-  <a href="/handover.html" class="mbn-item" data-page="handover" style="display:none">
-    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-    <span>Handover</span>
-  </a>
-  <a href="/training.html" class="mbn-item" data-page="training">
-    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-    <span>Training</span>
+  <a href="/todo.html" class="mbn-item" data-page="todo">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <span>To-Do</span>
   </a>
   <a href="/notifications.html" class="mbn-item" data-page="notifications">
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     <span>Alerts</span>
   </a>
+  <button class="mbn-item mbn-more" onclick="toggleMobileMore()" id="btnMobileMore">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+    <span>More</span>
+  </button>
 </nav>
+
+<!-- Mobile More Sheet -->
+<div id="mobileMoreOverlay" onclick="closeMobileMore()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:490;backdrop-filter:blur(2px)"></div>
+<div id="mobileMoreSheet" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:500;background:#fff;border-radius:20px 20px 0 0;padding:0 0 max(env(safe-area-inset-bottom),12px);box-shadow:0 -8px 40px rgba(6,15,36,.18);transform:translateY(100%);transition:transform .3s cubic-bezier(.32,0,.67,0)">
+  <!-- Handle -->
+  <div style="display:flex;justify-content:center;padding:12px 0 4px">
+    <div style="width:36px;height:4px;border-radius:4px;background:#E2E8F0"></div>
+  </div>
+  <!-- User card -->
+  <div id="moreUserCard" style="display:flex;align-items:center;gap:12px;padding:14px 20px;margin:8px 16px;background:#F4F6FB;border-radius:14px">
+    <div id="moreAvatar" style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#1877C5,#0EA472);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">?</div>
+    <div>
+      <div id="moreName" style="font-size:14px;font-weight:700;color:#0A1628">—</div>
+      <div id="moreRole" style="font-size:11px;color:#8A9BB0">—</div>
+    </div>
+    <div style="margin-left:auto;font-size:10px;font-weight:700;background:#E8F1FB;color:#1877C5;padding:3px 10px;border-radius:10px" id="moreDept">KIB</div>
+  </div>
+  <!-- Menu items -->
+  <div style="padding:8px 16px">
+    <div style="font-size:10px;font-weight:700;color:#B8C5D4;text-transform:uppercase;letter-spacing:.8px;padding:4px 4px 8px">Pages</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <a href="/training.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#F8FAFD;border-radius:12px;text-decoration:none;color:#0A1628;font-size:13px;font-weight:600;transition:background .15s" onmousedown="this.style.background='#EEF4FF'" onmouseup="this.style.background='#F8FAFD'">
+        <svg width="18" height="18" fill="none" stroke="#1877C5" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Training</a>
+      <a href="/tasks-archive.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#F8FAFD;border-radius:12px;text-decoration:none;color:#0A1628;font-size:13px;font-weight:600" onmousedown="this.style.background='#EEF4FF'" onmouseup="this.style.background='#F8FAFD'">
+        <svg width="18" height="18" fill="none" stroke="#1877C5" stroke-width="2" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>Archive</a>
+      <a href="/sales.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#F8FAFD;border-radius:12px;text-decoration:none;color:#0A1628;font-size:13px;font-weight:600" onmousedown="this.style.background='#EEF4FF'" onmouseup="this.style.background='#F8FAFD'">
+        <svg width="18" height="18" fill="none" stroke="#1877C5" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>Sales</a>
+      <a href="/settings.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#F8FAFD;border-radius:12px;text-decoration:none;color:#0A1628;font-size:13px;font-weight:600" onmousedown="this.style.background='#EEF4FF'" onmouseup="this.style.background='#F8FAFD'">
+        <svg width="18" height="18" fill="none" stroke="#1877C5" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </div>
+    <!-- Logout -->
+    <button onclick="AUTH.logout()" style="width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;background:#FEF2F2;border:none;border-radius:12px;color:#DC2626;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s" onmousedown="this.style.background='#FEE2E2'" onmouseup="this.style.background='#FEF2F2'">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Log Out
+    </button>
+  </div>
+  <div style="height:8px"></div>
+</div>
 </body>>
