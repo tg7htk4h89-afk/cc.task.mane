@@ -2728,129 +2728,29 @@ function renderTaskModal(d) {
 
   html += '</div>'; // end panels
 
-  document.getElementById('taskModalBody').innerHTML = html;
-
-  // Populate delegate dropdown after render
-  if(document.getElementById('delegateSelect')){
-    API.get('agents_reference',{}).then(function(dr){
-      var sel = document.getElementById('delegateSelect');
-      if(!sel) return;
-      (dr.agents||[]).sort(function(a,b){return a.full_name.localeCompare(b.full_name);}).forEach(function(u){
-        if(u.user_id === t.assigned_to_user_id) return;
-        var o = document.createElement('option');
-        o.value = u.user_id; o.textContent = u.full_name+' ('+u.role+')';
-        sel.appendChild(o);
-      });
-    }).catch(function(){});
+  var splitMarker = '<div style="padding:20px 22px 24px;min-height:200px">';
+  var splitIdx = html.indexOf(splitMarker);
+  if (splitIdx > -1) {
+    var hdr = document.getElementById('taskModalHeader');
+    var bdy = document.getElementById('taskModalBody');
+    if (hdr) hdr.innerHTML = html.slice(0, splitIdx);
+    if (bdy) bdy.innerHTML = html.slice(splitIdx);
+  } else {
+    var bdy = document.getElementById('taskModalBody');
+    if (bdy) bdy.innerHTML = html;
   }
-}
-
-function switchTmTab(activeId) {
-  var map = {'tmtab-detail':'tmpanel-detail','tmtab-subtasks':'tmpanel-subtasks','tmtab-comments':'tmpanel-comments','tmtab-extension':'tmpanel-extension','tmtab-activity':'tmpanel-activity'};
-  Object.keys(map).forEach(function(tabId){
-    var tab = document.getElementById(tabId);
-    var panel = document.getElementById(map[tabId]);
-    var active = tabId === activeId;
-    if(tab){ tab.style.color = active?'#fff':'rgba(255,255,255,.45)'; tab.style.borderBottom = active?'2px solid #60A5FA':'2px solid transparent'; tab.style.fontWeight = active?'700':'500'; }
-    if(panel) panel.style.display = active ? '' : 'none';
-  });
-}
-
-async function updateTask(status) {
-  if(!currentTask) return;
-  var tid = currentTask.task.task_id;
-  var notes = '';
-  if(status === 'Completed') notes = prompt('Completion notes (optional):') || '';
-  try {
-    var payload = {task_id: tid, status: status, completion_notes: notes};
-    if(status === 'Completed') payload.progress_pct = 100;
-    if(status === 'Cancelled') payload.progress_pct = 0;
-    await API.post('tasks_update', payload);
-    UTILS.toast('Task ' + status.toLowerCase(), 'success');
-    closeTaskModal();
-    loadT();
-  } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
-}
-
-async function addTaskComment() {
-  if(!currentTask) return;
-  var txt = (document.getElementById('tmCmt')||{}).value || '';
-  txt = txt.trim();
-  if(!txt) { UTILS.toast('Write a comment first', 'error'); return; }
-  try {
-    await API.post('tasks_comment', {task_id: currentTask.task.task_id, comment_text: txt});
-    var fresh = await API.get('tasks_detail', {task_id: currentTask.task.task_id});
-    currentTask = fresh;
-    renderTaskModal(fresh);
-    switchTmTab('tmtab-comments');
-  } catch(ex) { UTILS.toast('Error: ' + ex.message, 'error'); }
-}
-
-function confirmCancel(){if(confirm("Cancel this task? This cannot be undone."))updateTask("Cancelled");}
-async function markSubtask(sid, done) {
-  if(!currentTask) return;
-  try {
-    await API.post('subtask_mark', {subtask_id: sid, status: done ? 'Completed' : 'Pending'});
-    var fresh = await API.get('tasks_detail', {task_id: currentTask.task.task_id});
-    currentTask = fresh;
-    renderTaskModal(fresh);
-    switchTmTab('tmtab-subtasks');
-  } catch(ex) { UTILS.toast('Error: '+ex.message, 'error'); }
-}
-
-async function delegateTask() {
-  if(!currentTask) return;
-  var sel = document.getElementById('delegateSelect');
-  var uid = sel ? sel.value : '';
-  if(!uid) { UTILS.toast('Please select a staff member', 'error'); return; }
-  var reason = (document.getElementById('delegateReason')||{}).value || '';
-  try {
-    var d = await API.post('task_delegate', {task_id: currentTask.task.task_id, delegate_to_user_id: uid, reason: reason});
-    UTILS.toast('Task delegated to '+d.delegated_to, 'success');
-    var fresh = await API.get('tasks_detail', {task_id: currentTask.task.task_id});
-    currentTask = fresh;
-    renderTaskModal(fresh);
-  } catch(ex) { UTILS.toast('Error: '+ex.message, 'error'); }
-}
-
-async function submitTaskExt() {
-  if(!currentTask) return;
-  var date   = (document.getElementById('tmExtDate')||{}).value || '';
-  var reason = ((document.getElementById('tmExtReason')||{}).value||'').trim();
-  if(!date)   { UTILS.toast('Please select a new due date', 'error'); return; }
-  if(!reason) { UTILS.toast('Please enter a reason', 'error'); return; }
-  try {
-    await API.post('task_ext_request', {task_id: currentTask.task.task_id, requested_due: date, reason: reason});
-    UTILS.toast('Extension request submitted', 'success');
-    var fresh = await API.get('tasks_detail', {task_id: currentTask.task.task_id});
-    currentTask = fresh;
-    renderTaskModal(fresh);
-    switchTmTab('tmtab-extension');
-  } catch(ex) { UTILS.toast('Error: '+ex.message, 'error'); }
-}
-
-async function reviewTaskExt(btn) {
-  if(!currentTask) return;
-  var extId = btn.dataset.extid;
-  var dec   = btn.dataset.dec;
-  var note  = (document.getElementById('extReviewNote')||{}).value || '';
-  if(!confirm((dec==='Approved'?'Approve':'Reject')+' this extension request?')) return;
-  try {
-    await API.post('task_ext_review', {ext_id: extId, decision: dec, review_notes: note});
-    UTILS.toast('Extension '+dec.toLowerCase(), 'success');
-    var fresh = await API.get('tasks_detail', {task_id: currentTask.task.task_id});
-    currentTask = fresh;
-    renderTaskModal(fresh);
-  } catch(ex) { UTILS.toast('Error: '+ex.message, 'error'); }
-}
-
-
-// ══ NEW TASK MODAL ═══════════════════════════════════════════════
-var ntmAllUsers=[], ntmAssignees=[], ntmSubtasks=[], ntmRecurring='';
-
-function openNewTaskModal(){
-  var m=document.getElementById('newTaskModal');
-  m.style.display='flex';
+  var modal = document.getElementById('taskModal');
+  if (modal) modal.style.display = 'block';
+  var sheet = document.getElementById('taskModalSheet');
+  if (sheet) {
+    sheet.style.transform = 'translateY(100%)';
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        sheet.style.transition = 'transform .32s cubic-bezier(.32,0,.15,1)';
+        sheet.style.transform = 'translateY(0)';
+      });
+    });
+  };
   // Reset form
   ['nTitle','nDesc','nDue','nSV'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   ['nCat','nPri','nSU'].forEach(function(id){var el=document.getElementById(id);if(el)el.selectedIndex=0;});
@@ -3144,10 +3044,19 @@ function refreshData(){
 </script>
 
 <!-- ══ TASK DETAIL MODAL ═══════════════════════════════════════ -->
-<div id="taskModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;padding:16px;align-items:center;justify-content:center;overflow:hidden">
-  <div style="background:#fff;border-radius:20px;width:100%;max-width:660px;max-height:min(calc(100vh - 32px), calc(100vh - 80px));display:flex;flex-direction:column;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.4);position:relative">
-    <button onclick="closeTaskModal()" style="position:absolute;top:14px;right:14px;z-index:20;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:15px;color:#fff;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
-    <div id="taskModalBody" style="overflow-y:auto;flex:1;min-height:0"></div>
+<div id="taskModal" style="display:none;position:fixed;inset:0;z-index:300">
+  <!-- Backdrop -->
+  <div id="taskModalBackdrop" onclick="closeTaskModal()" style="position:absolute;inset:0;background:rgba(0,0,0,0.65)"></div>
+  <!-- Sheet -->
+  <div id="taskModalSheet" style="position:absolute;bottom:0;left:0;right:0;max-height:calc(100vh - 52px);display:flex;flex-direction:column;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.3);overflow:hidden">
+    <!-- Drag handle -->
+    <div style="display:flex;justify-content:center;padding:10px 0 0;flex-shrink:0;background:linear-gradient(160deg,#0D1F3C 0%,#1E3A6E 100%)">
+      <div style="width:36px;height:4px;border-radius:4px;background:rgba(255,255,255,.3)"></div>
+    </div>
+    <!-- Header (fixed, dark) -->
+    <div id="taskModalHeader" style="flex-shrink:0;overflow:hidden"></div>
+    <!-- Scrollable body -->
+    <div id="taskModalBody" style="overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:16px"></div>
   </div>
 </div>
 
