@@ -960,39 +960,6 @@ input, select, textarea {
 }
 
 
-/* ═══════════════════════════════════════════════════════
-   KIB MOBILE PERFECTION v3 — Applied to all pages
-   ═══════════════════════════════════════════════════════ */
-
-/* ── Touch & interaction ────────────────────────── */
-* { -webkit-tap-highlight-color: transparent; }
-input, select, textarea { font-size: 16px !important; }
-button, .btn, .nav-item, a.nav-item { touch-action: manipulation; }
-
-/* ── Bottom nav ─────────────────────────────────── */
-.mobile-bottom-nav {
-  display: none;
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: var(--navy-2);
-  border-top: 1px solid rgba(255,255,255,.08);
-  z-index: 300;
-  padding: 4px 0 max(env(safe-area-inset-bottom), 6px);
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: stretch;
-}
-.mbn-item {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; color: rgba(255,255,255,.4); text-decoration: none;
-  padding: 6px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;
-  transition: color .15s, background .15s; min-width: 48px; flex: 1;
-}
-.mbn-item:active { background: rgba(255,255,255,.07); }
-.mbn-item.active { color: var(--blue); }
-.mbn-item.active svg { stroke: var(--blue); }
-.mbn-item svg { flex-shrink: 0; }
-
-/* ── PHONE ≤480px ───────────────────────────────── */
 @media (max-width: 480px) {
   /* Sidebar full overlay */
   .sidebar { display: none !important; }
@@ -1104,14 +1071,6 @@ button, .btn, .nav-item, a.nav-item { touch-action: manipulation; }
   .main-content { margin-left: 220px; padding-bottom: 0 !important; }
 }
 
-
-/* ═══════════════════════════════════════════════════
-   KIB GLOBAL MOBILE FIX v4
-   ═══════════════════════════════════════════════════ */
-html, body { overflow-x: hidden !important; }
-*, *::before, *::after { box-sizing: border-box !important; }
-img, video, iframe { max-width: 100% !important; }
-input, select, textarea, button { font-size: 16px !important; }
 
 @media (max-width: 768px) {
   /* Prevent any element from exceeding viewport */
@@ -1264,76 +1223,7 @@ input, select, textarea, button { font-size: 16px !important; }
 }
 
 
-/* ═══════════════════════════════════════════════════
-   KIB MOBILE SCROLL FIX — Natural iOS/Android scroll
-   ═══════════════════════════════════════════════════ */
 
-/* Core scroll reset */
-html { height: 100%; }
-body { min-height: 100%; }
-
-/* Main scrollable container */
-.main-content {
-  height: 100vh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;  /* momentum scroll on iOS */
-  overscroll-behavior-y: contain;     /* prevent page bounce */
-  scroll-behavior: smooth;
-}
-
-/* Page content — let it scroll naturally inside main-content */
-.page-content {
-  min-height: 100%;
-}
-
-/* Sidebar scroll */
-.sidebar {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Modal scroll */
-#taskModal,
-#newTaskModal,
-#newTrainingModal,
-[id$="Modal"] {
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-/* Kanban horizontal scroll */
-.kanban-wrap {
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
-}
-
-/* Tab bars */
-.tab-bar,
-[class*="tab-bar"],
-.filter-row {
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-}
-
-@media (max-width: 768px) {
-  html {
-    height: 100%;
-    overflow: hidden;
-  }
-  body {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
-  .main-content {
-    height: calc(100vh - 0px);
-    overflow-y: scroll;         /* force scrollbar on iOS */
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-    padding-bottom: 72px;       /* space for bottom nav */
-  }
   /* Prevent body scroll when modal is open */
   body.modal-open { overflow: hidden !important; }
   /* Smooth tap highlight */
@@ -1550,152 +1440,70 @@ body { min-height: 100%; }
 .logout-btn svg { display:block; }
 
 
-/* ── MOBILE MORE SHEET ─────────────────────────────────── */
-.mbn-more {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-}
-.mbn-more.active { color: #fff !important; }
 
-/* Better touch targets */
+/* ── CLEAN MOBILE LAYOUT ───────────────────────────────── */
 @media (max-width: 768px) {
-  .mbn-item {
-    min-height: 52px;
-    padding: 6px 4px;
-  }
-  /* Top bar mobile refinements */
-  .top-bar {
-    padding: 0 14px;
-    height: 52px;
-  }
-  .breadcrumb {
-    font-size: 14px;
-  }
-  /* Page content safe area */
-  .page-content {
-    padding: 16px 14px max(calc(env(safe-area-inset-bottom) + 72px), 84px);
-  }
-  /* Cards full width */
-  .kpi-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-  .kpi-grid .kpi-card:last-child:nth-child(odd) {
-    grid-column: span 2;
-  }
-  /* Search bar full width */
-  .search-bar, .search-wrap {
-    width: 100%;
-  }
-  /* Modals full screen on mobile */
-  #taskModal > div,
-  #newTaskModal > div {
-    max-height: 95vh;
-    border-radius: 20px 20px 0 0;
-    margin-top: auto;
-  }
-  /* Sidebar hidden on mobile */
-  .sidebar {
-    transform: translateX(-100%);
-  }
-  .sidebar.open {
-    transform: translateX(0);
-  }
-  /* Improve kanban scroll */
-  .kanban-wrap {
-    gap: 10px;
-    padding: 0 0 16px;
-    scroll-snap-type: x mandatory;
-  }
-  .kanban-col {
-    min-width: 80vw;
-    scroll-snap-align: start;
-  }
-}
+  /* Sidebar hidden, opens as overlay */
+  .sidebar { display: none !important; }
+  .sidebar.open { display: flex !important; position: fixed; left:0; top:0; bottom:0; z-index:200; width: min(85vw, 280px); }
+  .sidebar-toggle { display: flex !important; }
+  .layout-main { margin-left: 0 !important; }
+  .main-content { margin-left: 0 !important; }
 
+  /* Natural scroll - NO position:fixed on body */
+  html, body { overflow-x: hidden; }
+  .main-content { overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
-@media(max-width:600px) {
-  .kpi-grid { grid-template-columns: repeat(2,1fr) !important; }
-  #kpiRate { grid-column: span 2; }
-}
+  /* Bottom nav */
+  .mobile-bottom-nav { display: flex !important; }
 
-
-
-@media (max-width: 768px) {
-  .main-content {
-    padding-bottom: 0 !important;
+  /* Content padding so last item isn't under bottom nav */
+  .page-content { 
+    padding: 14px !important;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 12px)) !important;
   }
-  .page-content {
-    padding-bottom: calc(72px + env(safe-area-inset-bottom, 16px)) !important;
-  }
-  /* Modal content also needs room */
-  .modal-body, [style*="overflow-y:auto"] {
-    padding-bottom: 16px;
-  }
-}
 
+  /* Kanban — swipeable columns */
+  .kanban-board {
+    overflow: hidden;
+    margin: 0 -14px;
+  }
+  .kanban-scroll {
+    display: flex !important;
+    overflow-x: scroll !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x proximity !important;
+    gap: 10px !important;
+    padding: 0 14px calc(80px + env(safe-area-inset-bottom, 16px)) 14px !important;
+    touch-action: pan-x !important;
+    cursor: grab;
+  }
+  .kanban-scroll:active { cursor: grabbing; }
+  .k-col {
+    min-width: calc(100vw - 40px) !important;
+    max-width: calc(100vw - 40px) !important;
+    flex-shrink: 0 !important;
+    scroll-snap-align: start !important;
+  }
 
-/* ── UNIVERSAL MOBILE BOTTOM PADDING ──────────────────────── */
-@media (max-width: 768px) {
-  /* Ensure main scroll area has room for bottom nav */
-  .main-content {
-    height: calc(100vh - 52px) !important;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-  }
-  /* Page content bottom padding = nav height + safe area */
-  .page-content {
-    padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)) !important;
-  }
-  /* Kanban last column extra space */
-  .kanban-col:last-child {
-    padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px));
-  }
-  /* Todo list last item */
-  #tdList { padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)); }
-  /* Table last row */
-  .arch-table-wrap, .arch-cards { padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)); }
-  /* Training cards */
-  #trainingList { padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)); }
-  /* Settings */
-  .settings-section:last-child { padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)); }
-}
+  /* KPI 2x2 */
+  .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .kpi-card:last-child { grid-column: span 2; }
 
-
-/* ── TASK MODAL MOBILE ─────────────────────────────────── */
-@media (max-width: 768px) {
-  #taskModal {
-    padding: 0 !important;
-    align-items: flex-end !important;
-  }
-  #taskModal > div {
+  /* Modals as bottom sheets */
+  #taskModal, #newTaskModal { padding: 0 !important; align-items: flex-end !important; }
+  #taskModal > div, #newTaskModal > div {
     border-radius: 20px 20px 0 0 !important;
-    max-height: calc(100vh - 64px) !important;
-    margin-bottom: 0;
-  }
-  #newTaskModal {
-    padding: 8px 0 0 !important;
-    align-items: flex-end !important;
-  }
-  #newTaskModal > div {
-    border-radius: 20px 20px 0 0 !important;
-    max-height: calc(100vh - 64px) !important;
-    margin-bottom: 0;
-  }
-  /* Modal body scroll */
-  #taskModalBody {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-  }
-  /* Tab bar not cropped */
-  #taskModal .modal-tabs, [style*="display:flex;background:rgba(0,0,0,.15)"] {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    max-height: calc(100vh - 56px) !important;
   }
 }
-
+@media (min-width: 769px) {
+  .sidebar-toggle { display: none !important; }
+  .mobile-bottom-nav { display: none !important; }
+  .sidebar { display: flex !important; }
+  .main-content { margin-left: var(--sb-width, 220px) !important; }
+}
 </style>
 
 <style>
@@ -5135,6 +4943,28 @@ function closeMobileMore(){
     if(overlay)overlay.style.display='none';
   },280);
 }
+
+// ── KANBAN TOUCH DRAG ─────────────────────────────────────
+(function() {
+  var board, startX, scrollStart, isDragging = false;
+  document.addEventListener('touchstart', function(e) {
+    board = document.getElementById('kanbanBoard');
+    if (!board || !board.contains(e.target)) return;
+    startX = e.touches[0].clientX;
+    scrollStart = board.scrollLeft;
+    isDragging = false;
+  }, {passive: true});
+  document.addEventListener('touchmove', function(e) {
+    if (!board) return;
+    var dx = e.touches[0].clientX - startX;
+    if (Math.abs(dx) > 5) isDragging = true;
+    board.scrollLeft = scrollStart - dx;
+  }, {passive: true});
+  document.addEventListener('touchend', function() {
+    board = null; isDragging = false;
+  }, {passive: true});
+})();
+
 </script></script>
 </body>
 </html>
