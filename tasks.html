@@ -4284,7 +4284,8 @@ button, .btn, a { cursor: pointer !important; }
 
 
 
-<script>
+<script>function retryFromBanner(){ var b=document.getElementById('loadErrBanner'); if(b)b.remove(); loadT(true); }
+
 
 
 var API_BASE='https://n8n.kib-cc-wfm.com/webhook';
@@ -4525,17 +4526,49 @@ var COLS = [
 var PRI_COLOR = {Critical:'#DC2626',High:'#D97706',Medium:'#2563EB',Low:'#16A34A'};
 
 // ── LOAD TASKS ────────────────────────────────────────────
-async function loadT() {
+var _loadRetryTimer = null;
+var _loadFailCount = 0;
+
+async function loadT(isRetry) {
   try {
     var params = {};
     if (curF === 'mine') params.assigned_to = _sess.user_id;
     if (curF === 'overdue') params.status = 'Overdue';
     var d = await API.get('tasks_list', params);
     allT = (d.tasks || []).filter(function(t){ return t && t.task_id; });
+    _loadFailCount = 0; // reset on success
+    if (_loadRetryTimer) { clearTimeout(_loadRetryTimer); _loadRetryTimer = null; }
     renderBoard();
   } catch(ex) {
-    document.getElementById('kanbanBoard').innerHTML =
-      '<div style="padding:40px;text-align:center;color:var(--red);font-size:13px">Failed to load tasks: ' + UTILS.esc(ex.message) + '</div>';
+    _loadFailCount++;
+    // If we already have data — keep it, just show a soft banner
+    var board = document.getElementById('kanbanBoard');
+    if (allT && allT.length > 0) {
+      // Keep existing board visible, show top warning banner
+      var existing = board.innerHTML;
+      var banner = '<div id="loadErrBanner" style="background:#FFF0F0;border:1px solid #FECACA;border-radius:12px;padding:10px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:12px;color:#B91C1C">'
+        + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+        + '<span>Connection issue — showing cached data</span>'
+        + '<button onclick="retryFromBanner()" style="margin-left:auto;background:none;border:1px solid #FECACA;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;color:#B91C1C;cursor:pointer">Retry</button>'
+        + '</div>';
+      // Only add banner if not already there
+      if (!document.getElementById('loadErrBanner')) {
+        board.insertAdjacentHTML('beforebegin', banner);
+      }
+    } else {
+      // No cached data — show error with retry
+      board.innerHTML = '<div style="padding:32px 24px;text-align:center">'
+        + '<div style="font-size:28px;margin-bottom:12px">📡</div>'
+        + '<div style="font-size:14px;font-weight:700;color:#0A1628;margin-bottom:6px">Connection issue</div>'
+        + '<div style="font-size:12px;color:#8A9BB0;margin-bottom:20px">' + UTILS.esc(ex.message) + '</div>'
+        + '<button onclick="loadT(true)" style="background:linear-gradient(135deg,#1877C5,#1565A8);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">↻ Retry</button>'
+        + '</div>';
+    }
+    // Auto-retry: 5s, 10s, 30s
+    var delays = [5000, 10000, 30000];
+    var delay = delays[Math.min(_loadFailCount - 1, delays.length - 1)];
+    if (_loadRetryTimer) clearTimeout(_loadRetryTimer);
+    _loadRetryTimer = setTimeout(function(){ loadT(true); }, delay);
   }
 }
 
@@ -5415,8 +5448,13 @@ loadT();
   var _bgKey = '_bg_tasks';
   if(window[_bgKey]) clearInterval(window[_bgKey]);
   window[_bgKey] = setInterval(function(){
-    loadT();
-  }, 30000);
+    // Only refresh if page is visible
+    if (!document.hidden) loadT();
+  }, 60000);
+  // Refresh when tab becomes visible again
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden) loadT();
+  });
 })();
 // Auto-open new task modal if navigated from dashboard
 if(window.location.hash==='#new'){try{if(AUTH.canDo&&AUTH.canDo('tasks.create'))setTimeout(openNewTaskModal,600);}catch(e){}}
