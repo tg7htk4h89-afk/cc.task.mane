@@ -3937,6 +3937,39 @@ function refreshTasks() {
 }
 
 // ── UPDATE TASK STATUS ────────────────────────────────────
+// ── DELEGATE SELECT POPULATION ────────────────────────────
+function populateDelegateSelect() {
+  var sel = document.getElementById('delegateSelect');
+  if (!sel) return;
+  // Clear existing options except placeholder
+  while (sel.options.length > 1) sel.remove(1);
+  var myId = (_sess && _sess.user_id) || '';
+  var assignable = (window.KIB_HIERARCHY && myId) ? KIB_HIERARCHY.getAssignableUserIds(myId) : [];
+
+  function fillSelect(users) {
+    var filtered = assignable.length > 0
+      ? users.filter(function(u) { return assignable.indexOf(u.user_id) !== -1; })
+      : users.filter(function(u) { return u.user_id !== myId; });
+    filtered.forEach(function(u) {
+      var opt = document.createElement('option');
+      opt.value = u.user_id;
+      opt.textContent = (u.full_name || '') + ' (' + (u.role || '') + ')';
+      sel.appendChild(opt);
+    });
+  }
+
+  if (window._cachedUsers && window._cachedUsers.length) {
+    fillSelect(window._cachedUsers);
+  } else {
+    API.get('users_list', {}).then(function(d) {
+      window._cachedUsers = (d.users || []).filter(function(u) {
+        return u && u.user_id && u.active_status !== 'inactive';
+      });
+      fillSelect(window._cachedUsers);
+    }).catch(function(e) { console.error('users_list:', e); });
+  }
+}
+
 // ── TASK MODAL TAB SWITCHER ────────────────────────────────
 function switchTmTab(tabId) {
   var panels = ['detail','subtasks','comments','extension','activity'];
@@ -4375,39 +4408,8 @@ function renderTaskModal(d) {
   }
   var modal = document.getElementById('taskModal');
   if (modal) modal.style.display = 'block';
-  // Populate delegate dropdown with assignable users
-  (function populateDelegateSelect() {
-    var sel = document.getElementById('delegateSelect');
-    if (!sel) return;
-    var myId = (_sess && _sess.user_id) || '';
-    var assignable = (window.KIB_HIERARCHY && myId) ? KIB_HIERARCHY.getAssignableUserIds(myId) : [];
-    // Add current task's assignees as options + all visible users
-    var visibleIds = (window.KIB_HIERARCHY && myId) ? KIB_HIERARCHY.getVisibleUserIds(myId) : [];
-    var allIds = assignable.length > 0 ? assignable : visibleIds;
-    if (!allIds.length) return;
-    // Fetch users if we have them cached
-    if (window._cachedUsers && window._cachedUsers.length) {
-      window._cachedUsers.filter(function(u){ return allIds.indexOf(u.user_id) !== -1; })
-        .forEach(function(u) {
-          var opt = document.createElement('option');
-          opt.value = u.user_id;
-          opt.textContent = u.full_name + ' (' + u.role + ')';
-          sel.appendChild(opt);
-        });
-    } else {
-      // Fetch from API
-      API.get('users_list', {}).then(function(d) {
-        window._cachedUsers = d.users || [];
-        window._cachedUsers.filter(function(u){ return allIds.indexOf(u.user_id) !== -1; })
-          .forEach(function(u) {
-            var opt = document.createElement('option');
-            opt.value = u.user_id;
-            opt.textContent = u.full_name + ' (' + u.role + ')';
-            sel.appendChild(opt);
-          });
-      }).catch(function(){});
-    }
-  })();
+  // Populate delegate dropdown
+  populateDelegateSelect();
   var sheet = document.getElementById('taskModalSheet');
   if (sheet) {
     sheet.style.transform = 'translateY(100%)';
