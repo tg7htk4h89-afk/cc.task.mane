@@ -2149,7 +2149,7 @@ function renderN(){
     var unread=n.read_flag==='FALSE'||!n.read_flag;
     return '<div class="notif-item" onclick="rd(\''+n.notification_id+'\',\''+UTILS.esc(n.action_target||'')+'\');" style="padding:12px 18px;border-bottom:1px solid var(--border);cursor:pointer;'+(unread?'background:#F5F9FF':'')+'">'
       +'<div class="notif-severity" style="background:'+(SEV[n.severity]||SEV.info)+'"></div>'
-      +'<div style="flex:1;min-width:0"><div class="notif-title">'+UTILS.esc(n.title)+'</div><div class="notif-body">'+UTILS.esc(n.message)+'</div><div style="display:flex;gap:8px;margin-top:4px"><span class="notif-time">'+UTILS.fdt(n.created_datetime)+'</span><span class="badge badge-gray">'+n.module_name+'</span></div></div>'
+      +'<div style="flex:1;min-width:0"><div class="notif-title">'+UTILS.esc(n.title||'Notification')+'</div><div class="notif-body">'+UTILS.esc(n.message||'')+'</div><div style="display:flex;gap:8px;margin-top:4px"><span class="notif-time">'+UTILS.fdt(n.created_at||n.created_datetime)+'</span><span class="badge badge-gray">'+(n.module_name||'system')+'</span></div></div>'
       +(unread?'<div style="width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:4px"></div>':'')
       +'</div>';
   }).join('');
