@@ -4178,9 +4178,9 @@ button, .btn, a { cursor: pointer !important; }
 
 
 <!-- Task Detail Modal (bottom sheet) -->
-<div id="taskModal" style="display:none;position:fixed;inset:0;z-index:300">
+<div id="taskModal" style="display:none;position:fixed;inset:0;z-index:300;align-items:center;justify-content:center;padding:20px">
   <div id="taskModalBackdrop" onclick="closeTaskModal()" style="position:absolute;inset:0;background:rgba(0,0,0,.65)"></div>
-  <div id="taskModalSheet" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:860px;max-height:calc(100vh - 56px);display:flex;flex-direction:column;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.3);overflow:hidden">
+  <div id="taskModalSheet" style="position:relative;width:100%;max-width:860px;height:90vh;max-height:780px;display:flex;flex-direction:column;background:#fff;border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.35);overflow:hidden;transform:scale(.96) translateY(12px);opacity:0">
     <div style="flex-shrink:0;background:linear-gradient(160deg,#0D1F3C 0%,#1E3A6E 100%);display:flex;justify-content:center;padding:10px 0 0">
       <div style="width:36px;height:4px;border-radius:4px;background:rgba(255,255,255,.3)"></div>
     </div>
@@ -4637,8 +4637,9 @@ async function openTask(id) {
 function closeTaskModal() {
   var sheet = document.getElementById('taskModalSheet');
   if (sheet) {
-    sheet.style.transition = 'transform .25s cubic-bezier(.32,0,.67,0)';
-    sheet.style.transform = 'translateX(-50%) translateY(100%)';
+    sheet.style.transition = 'transform .22s cubic-bezier(.32,0,.67,0), opacity .22s';
+    sheet.style.transform = 'scale(.94) translateY(16px)';
+    sheet.style.opacity = '0';
   }
   setTimeout(function() {
     document.getElementById('taskModal').style.display = 'none';
@@ -5138,16 +5139,18 @@ function renderTaskModal(d) {
     if (bdy) bdy.innerHTML = html;
   }
   var modal = document.getElementById('taskModal');
-  if (modal) modal.style.display = 'block';
+  if (modal) modal.style.display = 'flex';
   // Populate delegate dropdown
   populateDelegateSelect();
   var sheet = document.getElementById('taskModalSheet');
   if (sheet) {
-    sheet.style.transform = 'translateX(-50%) translateY(100%)';
+    sheet.style.transform = 'scale(.96) translateY(12px)';
+    sheet.style.opacity = '0';
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
-        sheet.style.transition = 'transform .32s cubic-bezier(.32,0,.15,1)';
-        sheet.style.transform = 'translateX(-50%) translateY(0)';
+        sheet.style.transition = 'transform .32s cubic-bezier(.32,0,.15,1), opacity .28s';
+        sheet.style.transform = 'scale(1) translateY(0)';
+        sheet.style.opacity = '1';
       });
     });
   };
