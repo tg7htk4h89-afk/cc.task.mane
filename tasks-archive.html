@@ -2497,6 +2497,7 @@ button, .btn, a { cursor: pointer !important; }
           <div><div class="ph-stat-val" id="stCompleted" style="color:#6EE7B7">—</div><div class="ph-stat-lbl">Completed</div></div>
           <div><div class="ph-stat-val" id="stCancelled" style="color:rgba(255,255,255,.5)">—</div><div class="ph-stat-lbl">Cancelled</div></div>
           <div><div class="ph-stat-val" id="stThisMonth">—</div><div class="ph-stat-lbl">This Month</div></div>
+          <div><div class="ph-stat-val" id="stRate" style="color:#6EE7B7">—</div><div class="ph-stat-lbl">Done Rate</div></div>
         </div>
       </div>
       <div class="ph-ring">
@@ -2577,6 +2578,8 @@ button, .btn, a { cursor: pointer !important; }
           </tbody>
         </table>
       </div>
+      <!-- Mobile card view -->
+      <div id="archCards" style="display:none"></div>
       <div class="pagination" id="paginationWrap" style="display:none">
         <div class="pag-info" id="pagInfo"></div>
         <div class="pag-btns" id="pagBtns"></div>
@@ -2700,10 +2703,11 @@ function updateStats(){
   var archPct = document.getElementById('archRingPct');
   if(archRing){ var circ=32*2*Math.PI; archRing.style.strokeDashoffset=circ-(archRate/100)*circ; archRing.setAttribute('stroke-dasharray',circ); }
   if(archPct) archPct.textContent = archRate+'%';
-  document.getElementById('stCompleted').textContent = completed;
-  document.getElementById('stCancelled').textContent = cancelled;
-  document.getElementById('stRate').textContent = rate+'%';
-  document.getElementById('stThisMonth').textContent = thisMonth;
+  var _se = function(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; };
+  _se('stCompleted', completed);
+  _se('stCancelled', cancelled);
+  _se('stRate', rate+'%');
+  _se('stThisMonth', thisMonth);
 }
 
 function applyFilters(){
