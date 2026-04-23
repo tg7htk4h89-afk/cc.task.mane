@@ -4014,28 +4014,25 @@ async function loadT() {
 // ── RENDER BOARD ──────────────────────────────────────────
 function renderBoard() {
   var tasks = allT.filter(function(t){ return t.status !== 'Cancelled'; });
+  function setEl(id, val){ var el=document.getElementById(id); if(el) el.textContent=val; }
 
   // KPIs
   var done = tasks.filter(function(t){ return t.status === 'Completed'; }).length;
   var open = tasks.filter(function(t){ return !['Completed','Cancelled'].includes(t.status); }).length;
   var over = tasks.filter(function(t){ return t.is_overdue === 'TRUE' || t.is_overdue === true; }).length;
   var rate = tasks.length > 0 ? Math.round(done / tasks.length * 100) : 0;
-  document.getElementById('kT').textContent = tasks.length;
-  document.getElementById('kO').textContent = open;
-  document.getElementById('kV').textContent = over;
-  document.getElementById('kD').textContent = done;
-  document.getElementById('kR').textContent = rate + '%';
+  setEl('kT', tasks.length);
+  setEl('kO', open);
+  setEl('kV', over);
+  setEl('kD', done);
+  // kR shown via ring
   // Update hero card
   var heroTitle = document.getElementById('heroTitle');
   if(heroTitle) heroTitle.textContent = curF==='mine'?'My Tasks':curF==='overdue'?'Overdue Tasks':'Task Board';
   var ring = document.getElementById('heroRingFill');
   var ringPct = document.getElementById('heroRingPct');
-  if(ring) {
-    var circ = 32*2*Math.PI;
-    ring.style.strokeDashoffset = circ - (rate/100)*circ;
-    ring.setAttribute('stroke-dasharray', circ);
-    ring.style.stroke = rate>=80?'#6EE7B7':rate>=50?'#FCD34D':'#FCA5A5';
-  }
+  var circ = 32*2*Math.PI;
+  if(ring){ ring.style.strokeDashoffset=circ-(rate/100)*circ; ring.setAttribute('stroke-dasharray',circ); ring.style.stroke=rate>=80?'#6EE7B7':rate>=50?'#FCD34D':'#FCA5A5'; }
   if(ringPct) ringPct.textContent = rate+'%';
 
   // Build kanban
