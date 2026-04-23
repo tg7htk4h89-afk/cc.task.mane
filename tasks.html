@@ -3937,6 +3937,27 @@ function refreshTasks() {
 }
 
 // ── UPDATE TASK STATUS ────────────────────────────────────
+// ── TASK MODAL TAB SWITCHER ────────────────────────────────
+function switchTmTab(tabId) {
+  var panels = ['detail','subtasks','comments','extension','activity'];
+  panels.forEach(function(p) {
+    var el = document.getElementById('tmpanel-' + p);
+    if (el) el.style.display = 'none';
+  });
+  var panelId = tabId.replace('tmtab-', 'tmpanel-');
+  var active = document.getElementById(panelId);
+  if (active) active.style.display = 'block';
+  // Update tab button styles
+  panels.forEach(function(p) {
+    var btn = document.getElementById('tmtab-' + p);
+    if (!btn) return;
+    var isActive = 'tmtab-' + p === tabId;
+    btn.style.borderBottomColor = isActive ? '#60A5FA' : 'transparent';
+    btn.style.color = isActive ? '#fff' : 'rgba(255,255,255,.45)';
+    btn.style.fontWeight = isActive ? '700' : '500';
+  });
+}
+
 async function updateTask(status) {
   if (!currentTask) return;
   var notes = '';
