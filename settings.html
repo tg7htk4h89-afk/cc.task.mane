@@ -1594,7 +1594,7 @@ body { min-height: 100%; }
 }
 
 
-/* ── SCROLL + BOTTOM NAV PADDING ───────────────────────── */
+
 @media (max-width: 768px) {
   .main-content {
     padding-bottom: 0 !important;
@@ -1606,6 +1606,34 @@ body { min-height: 100%; }
   .modal-body, [style*="overflow-y:auto"] {
     padding-bottom: 16px;
   }
+}
+
+
+/* ── UNIVERSAL MOBILE BOTTOM PADDING ──────────────────────── */
+@media (max-width: 768px) {
+  /* Ensure main scroll area has room for bottom nav */
+  .main-content {
+    height: calc(100vh - 52px) !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+  /* Page content bottom padding = nav height + safe area */
+  .page-content {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)) !important;
+  }
+  /* Kanban last column extra space */
+  .kanban-col:last-child {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px));
+  }
+  /* Todo list last item */
+  #tdList { padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)); }
+  /* Table last row */
+  .arch-table-wrap, .arch-cards { padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)); }
+  /* Training cards */
+  #trainingList { padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)); }
+  /* Settings */
+  .settings-section:last-child { padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)); }
 }
 
 </style>
