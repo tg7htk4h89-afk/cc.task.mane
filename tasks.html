@@ -4741,9 +4741,13 @@ async function delegateTask() {
   var t = currentTask.task || currentTask;
   try {
     var reason = document.getElementById('delegateReason');
+    // Get the selected option text to extract the name
+    var selectedOpt = sel.options[sel.selectedIndex];
+    var delegateName = selectedOpt ? selectedOpt.text.replace(/\s*\([^)]+\)\s*$/, '').trim() : '';
     await API.post('task_delegate', {
       task_id: t.task_id,
       delegate_to_user_id: sel.value,
+      delegate_to_name: delegateName,
       reason: reason ? reason.value : ''
     });
     UTILS.toast('Task delegated ✓', 'success');
