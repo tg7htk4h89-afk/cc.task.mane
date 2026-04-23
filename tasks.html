@@ -3636,6 +3636,11 @@ var UTILS={
 
 
 
+
+// ── NAME SANITIZER ─────────────────────────────────────────
+// Guards against literal 'undefined' stored by old bad delegate writes
+function cleanName(n){ return (n && n !== 'undefined' && n !== 'null') ? n : ''; }
+
 var KIB_HIERARCHY = {
 
   // ── USER TREE ─────────────────────────────────────────────────
@@ -3872,7 +3877,7 @@ function renderCard(t) {
   var pct = t.status === 'Completed' ? 100 : Math.min(100, Number(t.progress_pct || t.progress_percentage || 0));
   var isOver = t.is_overdue === 'TRUE' || t.is_overdue === true;
   var priClass = t.priority || 'Medium';
-  var av = UTILS.av(t.assigned_to_name || '?', 26);
+  var _an = cleanName(t.assigned_to_name); var av = UTILS.av(_an || '?', 26);
   var dueStr = '';
   if (t.due_datetime) {
     var d = new Date(t.due_datetime);
@@ -4068,8 +4073,8 @@ function renderTaskModal(d) {
   html += '<div style="font-size:11px;color:rgba(255,255,255,.4)">'+UTILS.esc(t.category)+'  ·  Assigned by '+UTILS.esc(t.assigned_by_name||'—')+'</div>';
   html += '</div>';
   html += '<div style="flex-shrink:0;text-align:center">';
-  html += avatar(t.assigned_to_name, 48);
-  html += '<div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:4px;max-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+UTILS.esc((t.assigned_to_name||'').split(' ')[0])+'</div>';
+  html += avatar(cleanName(t.assigned_to_name) || '?', 48);
+  html += '<div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:4px;max-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+UTILS.esc((cleanName(t.assigned_to_name)||'—').split(' ')[0])+'</div>';
   html += '</div></div>';
   // Stats strip
   html += '<div style="display:flex;background:rgba(0,0,0,.15);border-radius:10px 10px 0 0;overflow-x:auto;overflow-y:hidden;margin:0 -24px;-webkit-overflow-scrolling:touch;scrollbar-width:none">';
@@ -4200,7 +4205,7 @@ function renderTaskModal(d) {
   html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">';
   html += '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px">';
   html += '<div style="font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Assigned To</div>';
-  var modalAssignees = assignees.length ? assignees : (t.assigned_to_name ? [{ name: t.assigned_to_name, role: t.assigned_to_role }] : []);
+  var modalAssignees = assignees.length ? assignees : (cleanName(t.assigned_to_name) ? [{ name: cleanName(t.assigned_to_name), role: t.assigned_to_role }] : []);
   var assigneesHtml = modalAssignees.map(function(a) {
     var n = a.name || a.full_name || '';
     return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'+avatar(n,24)+'<span style="font-size:12px;color:#0F172A;font-weight:600">'+UTILS.esc(n)+'</span>'+(a.role?'<span style="font-size:10px;color:#64748B">('+UTILS.esc(a.role)+')</span>':'')+'</div>';
