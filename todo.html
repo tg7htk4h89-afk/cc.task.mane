@@ -3597,7 +3597,7 @@ body { min-height: 100%; }
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <span>Tasks</span>
   </a>
-  <a href="/todo.html" class="mbn-item active" data-page="todo" class="mbn-item active">
+  <a href="/todo.html" class="mbn-item active" data-page="todo" class="mbn-item">
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
     <span>To-Do</span>
   </a>
@@ -3766,8 +3766,7 @@ function dateClass(iso) {
 async function loadTodos() {
   try {
     var d = await API.get('ptodo_list', {});
-    var raw = d.data ? (d.data.todos || d.data || []) : (d.todos || []);
-    todos = (Array.isArray(raw) ? raw : []).filter(function(t) { return t && t.todo_id; }).map(function(t){
+    todos = (d.todos || []).filter(function(t) { return t && t.todo_id; }).map(function(t){
       // Normalize status: n8n stores 'Done', UI uses 'Completed'
       if(t.status === 'Done') t.status = 'Completed';
       // Normalize due_date to YYYY-MM-DD string
@@ -4156,6 +4155,45 @@ loadTodos();
 setInterval(loadBell, 60000);
 setInterval(loadTodos, 60000);
 
+</script>
+<script>
+// ── MOBILE MORE SHEET ─────────────────────────────────────
+function toggleMobileMore(){
+  var sheet=document.getElementById('mobileMoreSheet');
+  var isOpen=sheet&&sheet.style.transform==='translateY(0px)';
+  isOpen?closeMobileMore():openMobileMore();
+}
+function openMobileMore(){
+  var sheet=document.getElementById('mobileMoreSheet');
+  var overlay=document.getElementById('mobileMoreOverlay');
+  var btn=document.getElementById('btnMobileMore');
+  if(!sheet)return;
+  sheet.style.display='block';
+  if(overlay)overlay.style.display='block';
+  if(btn)btn.classList.add('active');
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){sheet.style.transform='translateY(0px)';});
+  });
+  var s=AUTH&&AUTH.getSession?AUTH.getSession():{};
+  if(s&&s.full_name){
+    var ini=s.full_name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+    var av=document.getElementById('moreAvatar');if(av)av.textContent=ini;
+    var nm=document.getElementById('moreName');if(nm)nm.textContent=s.full_name;
+    var rl=document.getElementById('moreRole');if(rl)rl.textContent=s.role||'';
+    var dp=document.getElementById('moreDept');if(dp)dp.textContent=s.department||'KIB';
+  }
+}
+function closeMobileMore(){
+  var sheet=document.getElementById('mobileMoreSheet');
+  var overlay=document.getElementById('mobileMoreOverlay');
+  var btn=document.getElementById('btnMobileMore');
+  if(sheet)sheet.style.transform='translateY(100%)';
+  if(btn)btn.classList.remove('active');
+  setTimeout(function(){
+    if(sheet)sheet.style.display='none';
+    if(overlay)overlay.style.display='none';
+  },280);
+}
 </script>
 </body>
 </html>

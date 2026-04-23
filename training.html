@@ -3126,5 +3126,44 @@ function unlockBodyScroll() {
 </div>
 <!-- ══ END NEW TRAINING MODAL ══════════════════════════════════ -->
 
+<script>
+// ── MOBILE MORE SHEET ─────────────────────────────────────
+function toggleMobileMore(){
+  var sheet=document.getElementById('mobileMoreSheet');
+  var isOpen=sheet&&sheet.style.transform==='translateY(0px)';
+  isOpen?closeMobileMore():openMobileMore();
+}
+function openMobileMore(){
+  var sheet=document.getElementById('mobileMoreSheet');
+  var overlay=document.getElementById('mobileMoreOverlay');
+  var btn=document.getElementById('btnMobileMore');
+  if(!sheet)return;
+  sheet.style.display='block';
+  if(overlay)overlay.style.display='block';
+  if(btn)btn.classList.add('active');
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){sheet.style.transform='translateY(0px)';});
+  });
+  var s=AUTH&&AUTH.getSession?AUTH.getSession():{};
+  if(s&&s.full_name){
+    var ini=s.full_name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+    var av=document.getElementById('moreAvatar');if(av)av.textContent=ini;
+    var nm=document.getElementById('moreName');if(nm)nm.textContent=s.full_name;
+    var rl=document.getElementById('moreRole');if(rl)rl.textContent=s.role||'';
+    var dp=document.getElementById('moreDept');if(dp)dp.textContent=s.department||'KIB';
+  }
+}
+function closeMobileMore(){
+  var sheet=document.getElementById('mobileMoreSheet');
+  var overlay=document.getElementById('mobileMoreOverlay');
+  var btn=document.getElementById('btnMobileMore');
+  if(sheet)sheet.style.transform='translateY(100%)';
+  if(btn)btn.classList.remove('active');
+  setTimeout(function(){
+    if(sheet)sheet.style.display='none';
+    if(overlay)overlay.style.display='none';
+  },280);
+}
+</script>
 </body>
 </html>

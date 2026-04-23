@@ -2299,7 +2299,7 @@ function refreshData(){
 
 <!-- Mobile Bottom Navigation -->
 <nav class="mobile-bottom-nav" id="mobileBottomNav">
-  <a href="/index.html" class="mbn-item active" data-page="index" class="mbn-item active">
+  <a href="/index.html" class="mbn-item active" data-page="index" class="mbn-item">
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
     <span>Home</span>
   </a>
@@ -2358,5 +2358,44 @@ function refreshData(){
   </div>
   <div style="height:8px"></div>
 </div>
+<script>
+// ── MOBILE MORE SHEET ─────────────────────────────────────
+function toggleMobileMore(){
+  var sheet=document.getElementById('mobileMoreSheet');
+  var isOpen=sheet&&sheet.style.transform==='translateY(0px)';
+  isOpen?closeMobileMore():openMobileMore();
+}
+function openMobileMore(){
+  var sheet=document.getElementById('mobileMoreSheet');
+  var overlay=document.getElementById('mobileMoreOverlay');
+  var btn=document.getElementById('btnMobileMore');
+  if(!sheet)return;
+  sheet.style.display='block';
+  if(overlay)overlay.style.display='block';
+  if(btn)btn.classList.add('active');
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){sheet.style.transform='translateY(0px)';});
+  });
+  var s=AUTH&&AUTH.getSession?AUTH.getSession():{};
+  if(s&&s.full_name){
+    var ini=s.full_name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+    var av=document.getElementById('moreAvatar');if(av)av.textContent=ini;
+    var nm=document.getElementById('moreName');if(nm)nm.textContent=s.full_name;
+    var rl=document.getElementById('moreRole');if(rl)rl.textContent=s.role||'';
+    var dp=document.getElementById('moreDept');if(dp)dp.textContent=s.department||'KIB';
+  }
+}
+function closeMobileMore(){
+  var sheet=document.getElementById('mobileMoreSheet');
+  var overlay=document.getElementById('mobileMoreOverlay');
+  var btn=document.getElementById('btnMobileMore');
+  if(sheet)sheet.style.transform='translateY(100%)';
+  if(btn)btn.classList.remove('active');
+  setTimeout(function(){
+    if(sheet)sheet.style.display='none';
+    if(overlay)overlay.style.display='none';
+  },280);
+}
+</script>
 </body>
 </html>
