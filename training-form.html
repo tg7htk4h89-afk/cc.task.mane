@@ -1072,6 +1072,184 @@ body { min-height: 100%; }
   .settings-section:last-child { padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px)); }
 }
 
+
+/* ── TRAINING FORM POLISH ─────────────────────────────── */
+
+/* Cards */
+.card {
+  background: #fff !important;
+  border: 1.5px solid #E4EAF3 !important;
+  border-radius: 16px !important;
+  padding: 22px !important;
+  margin-bottom: 18px !important;
+  box-shadow: 0 2px 10px rgba(6,15,36,.05) !important;
+}
+.card-title {
+  font-size: 10px !important; font-weight: 800 !important;
+  color: #1877C5 !important; text-transform: uppercase !important;
+  letter-spacing: 1px !important; margin-bottom: 18px !important;
+  padding-bottom: 12px !important;
+  border-bottom: 1.5px solid #F0F4F9 !important;
+}
+
+/* Form fields */
+.field label {
+  font-size: 11px !important; font-weight: 700 !important;
+  color: #4A5568 !important; text-transform: uppercase !important;
+  letter-spacing: .5px !important; margin-bottom: 7px !important;
+}
+.field input, .field select, .field textarea {
+  border: 1.5px solid #E4EAF3 !important;
+  border-radius: 10px !important; padding: 9px 12px !important;
+  font-size: 13px !important; background: #FAFBFE !important;
+  transition: border-color .15s, box-shadow .15s !important;
+  outline: none !important; width: 100% !important; box-sizing: border-box !important;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: #1877C5 !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 3px rgba(24,119,197,.1) !important;
+}
+
+/* Target tabs */
+.target-tabs {
+  display: flex !important; gap: 0 !important;
+  background: #F4F6FB !important;
+  border: 1.5px solid #E4EAF3 !important;
+  border-radius: 10px !important; padding: 3px !important;
+  margin-bottom: 18px !important; overflow: hidden !important;
+}
+.target-tab {
+  flex: 1 !important; padding: 8px 12px !important;
+  border: none !important; background: transparent !important;
+  border-radius: 8px !important; font-size: 12px !important;
+  font-weight: 600 !important; color: #4A5568 !important;
+  cursor: pointer !important; transition: all .15s !important;
+  font-family: inherit !important;
+}
+.target-tab:hover { background: rgba(255,255,255,.7) !important; color: #0A1628 !important; }
+.target-tab.active {
+  background: #fff !important; color: #1877C5 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 4px rgba(6,15,36,.1) !important;
+}
+
+/* Multi-select dropdown */
+.pill-container {
+  border: 1.5px solid #E4EAF3 !important;
+  border-radius: 10px !important; padding: 8px 12px !important;
+  min-height: 42px !important; background: #FAFBFE !important;
+  cursor: pointer !important; transition: border-color .15s !important;
+}
+.pill-container:hover { border-color: #1877C5 !important; }
+.dropdown-list {
+  border: 1.5px solid #E4EAF3 !important;
+  border-radius: 12px !important; margin-top: 4px !important;
+  box-shadow: 0 8px 24px rgba(6,15,36,.12) !important;
+  overflow: hidden !important; background: #fff !important;
+}
+.dropdown-search {
+  padding: 10px 12px !important; border-bottom: 1px solid #F0F4F9 !important;
+  display: flex !important; align-items: center !important; gap: 8px !important;
+  background: #FAFBFE !important;
+}
+.dropdown-search input {
+  border: none !important; background: transparent !important;
+  font-size: 13px !important; outline: none !important; flex: 1 !important;
+  box-shadow: none !important; padding: 0 !important;
+}
+.dropdown-group-label {
+  padding: 10px 14px 4px !important; font-size: 9px !important;
+  font-weight: 800 !important; color: #8A9BB0 !important;
+  text-transform: uppercase !important; letter-spacing: 1px !important;
+  background: #F8FAFC !important;
+}
+.dropdown-option {
+  display: flex !important; align-items: center !important; gap: 10px !important;
+  padding: 10px 14px !important; cursor: pointer !important;
+  font-size: 13px !important; color: #0A1628 !important;
+  transition: background .12s !important;
+  border-bottom: 1px solid #F8FAFC !important;
+}
+.dropdown-option:last-child { border-bottom: none !important; }
+.dropdown-option:hover { background: #F0F6FE !important; }
+.dropdown-option.selected { background: #EFF6FF !important; color: #1D4ED8 !important; }
+.chk {
+  width: 18px !important; height: 18px !important;
+  border-radius: 5px !important; border: 1.5px solid #D0D9E8 !important;
+  display: flex !important; align-items: center !important;
+  justify-content: center !important; flex-shrink: 0 !important;
+  transition: all .15s !important;
+}
+.dropdown-option.selected .chk {
+  background: #1877C5 !important; border-color: #1877C5 !important;
+}
+.chk-mark { display: none !important; color: #fff !important; font-size: 11px !important; }
+.dropdown-option.selected .chk-mark { display: block !important; }
+
+/* Pills */
+.pill-item {
+  display: inline-flex !important; align-items: center !important;
+  gap: 5px !important; background: #EFF6FF !important;
+  border: 1px solid #BFDBFE !important; color: #1D4ED8 !important;
+  border-radius: 20px !important; padding: 3px 10px !important;
+  font-size: 11px !important; font-weight: 600 !important;
+}
+.pill-item button {
+  background: none !important; border: none !important;
+  color: #93C5FD !important; cursor: pointer !important;
+  padding: 0 !important; font-size: 13px !important; line-height: 1 !important;
+}
+.pill-item button:hover { color: #1D4ED8 !important; }
+
+/* Agent/Trainer counts */
+#agentsCount, #trainersCount, #deptCount {
+  font-size: 11px !important; color: #1877C5 !important;
+  font-weight: 700 !important; margin-top: 8px !important;
+}
+
+/* Submit button */
+.btn-submit, button[onclick*="submitTraining"] {
+  background: linear-gradient(135deg, #1877C5, #1565A8) !important;
+  color: #fff !important; border: none !important;
+  border-radius: 12px !important; padding: 12px 28px !important;
+  font-size: 14px !important; font-weight: 700 !important;
+  cursor: pointer !important; font-family: inherit !important;
+  box-shadow: 0 4px 14px rgba(24,119,197,.35) !important;
+  transition: all .18s !important;
+}
+.btn-submit:hover, button[onclick*="submitTraining"]:hover {
+  box-shadow: 0 6px 20px rgba(24,119,197,.45) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Page header */
+.page-title {
+  font-size: 22px !important; font-weight: 900 !important;
+  color: #0A1628 !important; letter-spacing: -.4px !important;
+}
+.page-sub { font-size: 13px !important; color: #8A9BB0 !important; margin-bottom: 0 !important; }
+
+/* Team preview */
+#teamPreview {
+  background: #F4F6FB !important; border: 1.5px solid #E4EAF3 !important;
+  border-radius: 12px !important; padding: 14px !important; margin-top: 12px !important;
+}
+#teamPreviewList {
+  display: flex !important; flex-wrap: wrap !important;
+  gap: 6px !important; margin-top: 10px !important;
+}
+
+/* Null guards already in JS - just guard the textContent ones visually */
+#agentsCount:empty::before { content: '0 agents selected'; color: #8A9BB0; }
+#trainersCount:empty::before { content: '0 trainers selected'; color: #8A9BB0; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .form-grid, .form-grid-3 { grid-template-columns: 1fr !important; }
+  .target-tab { font-size: 11px !important; padding: 7px 8px !important; }
+  .page-content { padding: 14px 14px 90px !important; }
+}
 </style>
 </head>
 <body class="app-layout">
@@ -1841,7 +2019,7 @@ function toggleAgent(id, name){
   else selectedAgents.push({user_id:id,name:name});
   updatePills('agentsPills','agentsPlaceholder',selectedAgents,'toggleAgent');
   buildDropdownItems('agentsDDItems', allUsers.filter(function(u){return ['Agent','QA Agent'].includes(u.role);}), selectedAgents, 'toggleAgent');
-  document.getElementById('agentsCount').textContent = selectedAgents.length + ' agent'+(selectedAgents.length!==1?'s':'')+' selected';
+  var _ac=document.getElementById('agentsCount'); if(_ac) _ac.textContent = selectedAgents.length + ' agent'+(selectedAgents.length!==1?'s':'')+' selected';
 }
 
 function toggleTrainer(id, name){
@@ -1850,7 +2028,7 @@ function toggleTrainer(id, name){
   else selectedTrainers.push({user_id:id,name:name});
   updatePills('trainerPills','trainersPlaceholder',selectedTrainers,'toggleTrainer');
   populateTrainers();
-  document.getElementById('trainersCount').textContent = selectedTrainers.length + ' trainer'+(selectedTrainers.length!==1?'s':'')+' selected';
+  var _tc=document.getElementById('trainersCount'); if(_tc) _tc.textContent = selectedTrainers.length + ' trainer'+(selectedTrainers.length!==1?'s':'')+' selected';
 }
 
 function updatePills(containerId, placeholderId, arr, removeFn){
