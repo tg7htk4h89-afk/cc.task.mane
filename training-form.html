@@ -567,6 +567,53 @@ main, .main-content {
   #kanbanBoard::-webkit-scrollbar { display: none !important; }
 }
 
+
+
+/* ══ FINAL LAYOUT FIX — handles all 3 wrapper structures ══ */
+
+/* Sidebar: always fixed on desktop, offscreen on mobile */
+@media (min-width: 769px) {
+  .sidebar {
+    position: fixed !important; left: 0; top: 0; bottom: 0;
+    transform: none !important; display: flex !important;
+    width: var(--sb-width);
+  }
+  .sb-toggle, .sidebar-toggle { display: none !important; }
+  .mobile-bottom-nav { display: none !important; }
+
+  /* Case 1: layout-main is the outer wrapper (tasks, todo) */
+  .layout-main {
+    margin-left: var(--sb-width) !important;
+  }
+  /* inner main/main-content inside layout-main: no extra margin */
+  .layout-main > main,
+  .layout-main > .main-content {
+    margin-left: 0 !important;
+  }
+
+  /* Case 2: .main-content that is NOT inside .layout-main (training, settings, archive) */
+  .main-content:not(.layout-main .main-content):not(.layout-main main) {
+    margin-left: var(--sb-width) !important;
+  }
+
+  /* Task modal centered */
+  #taskModal { align-items: center !important; padding: 20px !important; }
+  #taskModalSheet {
+    width: 100% !important; max-width: 860px !important;
+    height: 88vh !important; border-radius: 14px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%) !important; position: fixed !important; z-index: 500 !important; }
+  .sidebar.open { transform: translateX(0) !important; }
+  .sb-toggle, .sidebar-toggle { display: flex !important; }
+  .mobile-bottom-nav { display: flex !important; }
+  .layout-main,
+  main.main-content,
+  div.main-content { margin-left: 0 !important; }
+}
+
 </style>
 </head>
 <body class="app-layout">

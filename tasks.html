@@ -542,6 +542,53 @@ main, .main-content {
   #kanbanBoard::-webkit-scrollbar { display: none !important; }
 }
 
+
+
+/* ══ FINAL LAYOUT FIX — handles all 3 wrapper structures ══ */
+
+/* Sidebar: always fixed on desktop, offscreen on mobile */
+@media (min-width: 769px) {
+  .sidebar {
+    position: fixed !important; left: 0; top: 0; bottom: 0;
+    transform: none !important; display: flex !important;
+    width: var(--sb-width);
+  }
+  .sb-toggle, .sidebar-toggle { display: none !important; }
+  .mobile-bottom-nav { display: none !important; }
+
+  /* Case 1: layout-main is the outer wrapper (tasks, todo) */
+  .layout-main {
+    margin-left: var(--sb-width) !important;
+  }
+  /* inner main/main-content inside layout-main: no extra margin */
+  .layout-main > main,
+  .layout-main > .main-content {
+    margin-left: 0 !important;
+  }
+
+  /* Case 2: .main-content that is NOT inside .layout-main (training, settings, archive) */
+  .main-content:not(.layout-main .main-content):not(.layout-main main) {
+    margin-left: var(--sb-width) !important;
+  }
+
+  /* Task modal centered */
+  #taskModal { align-items: center !important; padding: 20px !important; }
+  #taskModalSheet {
+    width: 100% !important; max-width: 860px !important;
+    height: 88vh !important; border-radius: 14px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%) !important; position: fixed !important; z-index: 500 !important; }
+  .sidebar.open { transform: translateX(0) !important; }
+  .sb-toggle, .sidebar-toggle { display: flex !important; }
+  .mobile-bottom-nav { display: flex !important; }
+  .layout-main,
+  main.main-content,
+  div.main-content { margin-left: 0 !important; }
+}
+
 </style>
 </head>
 <body>
@@ -1060,14 +1107,17 @@ async function loadT(isRetry) {
     if (curF === 'overdue') params.status = 'Overdue';
     var d = await API.get('tasks_list', params);
     allT = (d.tasks || []).filter(function(t){ return t && t.task_id; });
-    _loadFailCount = 0; // reset on success
+    _loadFailCount = 0;
     if (_loadRetryTimer) { clearTimeout(_loadRetryTimer); _loadRetryTimer = null; }
+    var eb = document.getElementById('loadErrBanner');
+    if (eb) { eb.style.transition='opacity .3s'; eb.style.opacity='0'; setTimeout(function(){eb.remove();},300); }
     renderBoard();
   } catch(ex) {
     _loadFailCount++;
     // If we already have data — keep it, just show a soft banner
     var board = document.getElementById('kanbanBoard');
     if (allT && allT.length > 0) {
+      if (_loadFailCount < 2) return; // ignore single blip
       // Keep existing board visible, show top warning banner
       var existing = board.innerHTML;
       var banner = '<div id="loadErrBanner" style="background:#FFF0F0;border:1px solid #FECACA;border-radius:12px;padding:10px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:12px;color:#B91C1C">'
@@ -1089,7 +1139,7 @@ async function loadT(isRetry) {
         + '</div>';
     }
     // Auto-retry: 5s, 10s, 30s
-    var delays = [5000, 10000, 30000];
+    var delays = [10000, 30000, 120000];
     var delay = delays[Math.min(_loadFailCount - 1, delays.length - 1)];
     if (_loadRetryTimer) clearTimeout(_loadRetryTimer);
     _loadRetryTimer = setTimeout(function(){ loadT(true); }, delay);
@@ -2010,7 +2060,7 @@ loadT();
   if(window[_bgKey]) clearInterval(window[_bgKey]);
   window[_bgKey] = setInterval(function(){
     if (!document.hidden) loadT();
-  }, 60000);
+  }, 180000);
   // Re-render on orientation change (mobile ↔ desktop)
   window.addEventListener('resize', function(){
     if (allT && allT.length) renderBoard();

@@ -608,6 +608,182 @@ main, .main-content {
   #kanbanBoard::-webkit-scrollbar { display: none !important; }
 }
 
+
+
+/* ══ FINAL LAYOUT FIX — handles all 3 wrapper structures ══ */
+
+/* Sidebar: always fixed on desktop, offscreen on mobile */
+@media (min-width: 769px) {
+  .sidebar {
+    position: fixed !important; left: 0; top: 0; bottom: 0;
+    transform: none !important; display: flex !important;
+    width: var(--sb-width);
+  }
+  .sb-toggle, .sidebar-toggle { display: none !important; }
+  .mobile-bottom-nav { display: none !important; }
+
+  /* Case 1: layout-main is the outer wrapper (tasks, todo) */
+  .layout-main {
+    margin-left: var(--sb-width) !important;
+  }
+  /* inner main/main-content inside layout-main: no extra margin */
+  .layout-main > main,
+  .layout-main > .main-content {
+    margin-left: 0 !important;
+  }
+
+  /* Case 2: .main-content that is NOT inside .layout-main (training, settings, archive) */
+  .main-content:not(.layout-main .main-content):not(.layout-main main) {
+    margin-left: var(--sb-width) !important;
+  }
+
+  /* Task modal centered */
+  #taskModal { align-items: center !important; padding: 20px !important; }
+  #taskModalSheet {
+    width: 100% !important; max-width: 860px !important;
+    height: 88vh !important; border-radius: 14px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%) !important; position: fixed !important; z-index: 500 !important; }
+  .sidebar.open { transform: translateX(0) !important; }
+  .sb-toggle, .sidebar-toggle { display: flex !important; }
+  .mobile-bottom-nav { display: flex !important; }
+  .layout-main,
+  main.main-content,
+  div.main-content { margin-left: 0 !important; }
+}
+
+
+
+/* ── TODO: Missing component CSS ── */
+.td-tab {
+  padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--card); color: var(--t2); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 5px; height: 32px;
+  transition: all .15s; flex-shrink: 0;
+}
+.td-tab:hover { border-color: var(--blue); color: var(--blue); }
+.td-tab.active { background: var(--navy-2); color: #fff; border-color: var(--navy-2); }
+
+.td-group {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 2px; margin-bottom: 6px; margin-top: 10px;
+  font-size: 10px; font-weight: 700; color: var(--t3);
+  text-transform: uppercase; letter-spacing: .7px;
+}
+.td-group:first-child { margin-top: 0; }
+.td-group-cnt {
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--t3); border-radius: 10px; padding: 1px 7px;
+  font-size: 10px; font-weight: 700;
+}
+
+.td-item {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: 11px 13px;
+  margin-bottom: 6px; display: flex; align-items: flex-start; gap: 10px;
+  box-shadow: var(--sh-sm); transition: box-shadow .15s, border-color .15s;
+}
+.td-item:hover { box-shadow: var(--sh-md); border-color: var(--border-2); }
+.td-item.done { opacity: .7; }
+
+.td-chk-wrap { padding-top: 1px; flex-shrink: 0; }
+.td-chk {
+  width: 18px; height: 18px; border-radius: 5px;
+  border: 1.5px solid var(--border-2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s; flex-shrink: 0;
+}
+.td-chk.done { background: var(--green); border-color: var(--green); }
+.td-chk:hover { border-color: var(--green); }
+
+.td-body { flex: 1; min-width: 0; }
+.td-title { font-size: 13px; font-weight: 600; color: var(--t1); line-height: 1.4; }
+.td-title.done { text-decoration: line-through; color: var(--t3); }
+.td-note { font-size: 11px; color: var(--t3); margin-top: 3px; line-height: 1.4; }
+.td-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+.td-date { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; display: inline-flex; align-items: center; gap: 4px; }
+.td-ok    { color: var(--t3); background: var(--bg); }
+.td-over  { color: #991B1B; background: var(--red-dim); }
+.td-today { color: #92400E; background: var(--amber-dim); }
+
+.td-actions { display: flex; gap: 4px; flex-shrink: 0; padding-top: 1px; }
+.td-btn {
+  width: 28px; height: 28px; border: 1px solid var(--border);
+  border-radius: var(--r-sm); background: var(--card); color: var(--t3);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.td-btn:hover { background: var(--bg); color: var(--t1); border-color: var(--border-2); }
+.td-btn.del:hover { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+
+.td-empty { text-align: center; padding: 48px 20px; }
+.td-empty-icon  { font-size: 36px; margin-bottom: 10px; opacity: .6; }
+.td-empty-title { font-size: 14px; font-weight: 700; color: var(--t2); margin-bottom: 4px; }
+.td-empty-sub   { font-size: 12px; color: var(--t3); }
+
+/* Add card */
+.addCard {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: var(--r-lg); padding: 12px 14px; margin-bottom: 14px;
+  box-shadow: var(--sh-sm); transition: border-color .2s, box-shadow .2s;
+}
+.addCard.focused { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
+.add-row { display: flex; align-items: center; gap: 10px; }
+.add-icon {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--blue);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 18px; font-weight: 300; cursor: pointer;
+  transition: background .15s;
+}
+.add-icon:hover { background: var(--blue-2); }
+#tdInput {
+  flex: 1; border: none; background: transparent; font-size: 14px;
+  font-family: var(--font); color: var(--t1); outline: none;
+}
+#tdInput::placeholder { color: var(--t3); }
+.add-actions {
+  display: flex; align-items: center; gap: 8px; margin-top: 10px;
+  padding-top: 10px; border-top: 1px solid var(--border); flex-wrap: wrap;
+}
+.add-pill {
+  display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px;
+  border: 1px solid var(--border); border-radius: 20px; background: var(--card);
+  color: var(--t2); font-size: 12px; font-weight: 500; cursor: pointer;
+  font-family: inherit; transition: all .15s;
+}
+.add-pill:hover { border-color: var(--blue); color: var(--blue); }
+.add-pill.set  { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+.add-pill-spacer { flex: 1; }
+#btnAdd {
+  background: var(--blue); color: #fff; border: none; border-radius: var(--r-md);
+  padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: background .15s;
+}
+#btnAdd:hover:not(:disabled) { background: var(--blue-2); }
+#btnAdd:disabled { opacity: .4; cursor: not-allowed; }
+#noteWrap { display: none; margin-top: 10px; }
+#tdNote {
+  width: 100%; border: 1.5px solid var(--border); border-radius: var(--r-md);
+  padding: 8px 12px; font-size: 13px; font-family: var(--font);
+  background: #FAFCFF; color: var(--t1); outline: none; resize: vertical; min-height: 60px;
+}
+#tdNote:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
+
+/* Edit modal */
+.edit-modal {
+  position: fixed; inset: 0; background: rgba(10,22,40,.55);
+  display: none; align-items: center; justify-content: center; z-index: 300; padding: 20px;
+}
+.edit-modal.show { display: flex; }
+.edit-box {
+  background: var(--card); border-radius: var(--r-lg); width: 100%;
+  max-width: 480px; box-shadow: var(--sh-lg); animation: modalIn .2s ease;
+}
+
 </style>
 </head>
 <body>
