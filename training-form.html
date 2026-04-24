@@ -485,6 +485,32 @@ tbody td { padding: 11px 14px; font-size: 12.5px; color: var(--t2); vertical-ali
   }
 }
 
+
+
+/* ── TRAINING FORM PAGE ── */
+.target-tabs { display:flex; background:var(--bg); border:1px solid var(--border); border-radius:var(--r-md); padding:3px; margin-bottom:16px; }
+.target-tab  { flex:1; padding:7px 10px; border:none; background:transparent; border-radius:var(--r-sm); font-size:12px; font-weight:600; color:var(--t2); cursor:pointer; font-family:var(--font); transition:all .15s; }
+.target-tab:hover { background:rgba(255,255,255,.7); color:var(--t1); }
+.target-tab.active { background:var(--card); color:var(--blue); font-weight:700; box-shadow:var(--sh-sm); }
+
+.multi-select-wrap { position:relative; }
+.pill-container { display:flex; flex-wrap:wrap; gap:5px; padding:8px 10px; border:1.5px solid var(--border); border-radius:var(--r-md); min-height:40px; cursor:pointer; background:#FAFCFF; transition:border-color .15s; }
+.pill-container:hover { border-color:var(--blue); }
+.pill-placeholder { color:var(--t3); font-size:13px; }
+.pill-item { display:inline-flex; align-items:center; gap:4px; background:var(--blue-light); border:1px solid rgba(24,119,197,.25); color:var(--blue); border-radius:20px; padding:2px 8px; font-size:11px; font-weight:600; }
+.pill-item button { background:none; border:none; color:inherit; cursor:pointer; opacity:.6; font-size:14px; }
+.dropdown-list { position:absolute; top:100%; left:0; right:0; z-index:50; background:var(--card); border:1px solid var(--border); border-radius:var(--r-md); box-shadow:var(--sh-lg); max-height:240px; overflow-y:auto; margin-top:3px; }
+.dropdown-search { padding:8px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; background:var(--bg); }
+.dropdown-search input { border:none; background:transparent; font-size:13px; outline:none; flex:1; font-family:var(--font); }
+.dropdown-group-label { padding:8px 12px 4px; font-size:9px; font-weight:700; color:var(--t3); text-transform:uppercase; letter-spacing:1px; background:var(--bg); }
+.dropdown-option { display:flex; align-items:center; gap:10px; padding:9px 12px; cursor:pointer; font-size:13px; color:var(--t1); transition:background .12s; }
+.dropdown-option:hover { background:var(--card-hover); }
+.dropdown-option.selected { background:var(--blue-light); color:var(--blue); }
+.chk { width:16px; height:16px; border-radius:4px; border:1.5px solid var(--border-2); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .15s; }
+.dropdown-option.selected .chk { background:var(--blue); border-color:var(--blue); }
+.chk-mark { display:none; color:#fff; font-size:10px; font-weight:700; }
+.dropdown-option.selected .chk-mark { display:block; }
+
 </style>
 </head>
 <body class="app-layout">

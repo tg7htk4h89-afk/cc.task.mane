@@ -1680,8 +1680,9 @@ function renderTaskModal(d) {
   populateDelegateSelect();
   var sheet = document.getElementById('taskModalSheet');
   if (sheet) {
-    sheet.style.transform = 'scale(.96) translateY(12px)';
-    sheet.style.opacity = '0';
+    var _isMob = window.innerWidth <= 768;
+    sheet.style.transform = _isMob ? 'translateY(100%)' : 'scale(.96) translateY(10px)';
+    sheet.style.opacity = _isMob ? '1' : '0';
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
         var isMob = window.innerWidth <= 768;
