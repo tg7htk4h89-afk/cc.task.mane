@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
 <title>New Training Plan — ADC Task Manager</title><!-- FIX-v5 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1417,6 +1420,505 @@ body { min-height: 100%; }
   .layout-main, .main-content { margin-left: 220px !important; }
   #archCards { display: none !important; }
   .arch-table-wrap { display: block !important; }
+}
+
+
+/* ══ APP MODE MASTER ══ */
+
+/* ══════════════════════════════════════════════════════════
+   APP MODE — iPhone native app feel
+   Fixed viewport, no zoom, no horizontal scroll
+   Only vertical scroll inside the content area
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* 1. LOCK VIEWPORT — no zoom, no horizontal shift */
+  html, body {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    position: relative !important;
+    -webkit-text-size-adjust: 100% !important;
+    touch-action: pan-y !important; /* only vertical touch */
+  }
+
+  /* 2. APP SHELL — fills screen like native app */
+  .app-layout, .layout-wrap, body > div:first-child {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+  }
+  .layout-main, .main-content {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    margin-left: 0 !important;
+    float: none !important;
+  }
+  .page-content {
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    padding: 14px 14px calc(76px + env(safe-area-inset-bottom, 10px)) 14px !important;
+  }
+
+  /* 3. KILL ALL MIN-WIDTH — biggest cause of horizontal overflow */
+  * {
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  /* But restore useful ones */
+  .k-col { min-width: 84vw !important; max-width: 84vw !important; }
+  button, .btn, .f-pill, .filter-btn { min-width: auto !important; white-space: nowrap !important; }
+  input, select, textarea { min-width: 0 !important; width: 100% !important; max-width: 100% !important; }
+
+  /* 4. KANBAN — swipe only, never pushes right */
+  .kanban-board, .kanban-wrap, #kanbanBoard {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    scrollbar-width: none !important;
+    touch-action: pan-x !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 0 0 16px 0 !important;
+    margin: 0 !important;
+    gap: 10px !important;
+  }
+  .kanban-board::-webkit-scrollbar,
+  .kanban-wrap::-webkit-scrollbar,
+  #kanbanBoard::-webkit-scrollbar { display: none !important; }
+
+  /* 5. EVERY CARD, GRID, TABLE — no overflow */
+  .card, .form-card, .plan-card, .arch-card,
+  .k-card, .todo-item, .td-item, .settings-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+  table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    overflow: hidden !important;
+  }
+  td, th {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 0 !important; /* forces table-layout:fixed to work */
+  }
+
+  /* 6. MODALS — full width bottom sheet on mobile */
+  #taskModal {
+    padding: 0 !important;
+    align-items: flex-end !important;
+    width: 100vw !important;
+  }
+  #taskModalSheet {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    left: 0 !important;
+    border-radius: 20px 20px 0 0 !important;
+    transform: translateY(100%) !important;
+    opacity: 1 !important;
+  }
+  #newTaskModal {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  /* 7. HERO CARDS — fit screen width */
+  .td-hero, .task-hero, .page-hero {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 18px !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+  }
+
+  /* 8. SIDEBAR — offscreen, slides in */
+  .sidebar {
+    position: fixed !important;
+    left: 0 !important; top: 0 !important; bottom: 0 !important;
+    width: min(80vw, 280px) !important;
+    max-width: 80vw !important;
+    z-index: 500 !important;
+    transform: translateX(-100%) !important;
+    transition: transform .28s cubic-bezier(.32,0,.15,1) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+  .sidebar.open {
+    transform: translateX(0) !important;
+    box-shadow: 12px 0 40px rgba(0,0,0,.5) !important;
+  }
+
+  /* 9. TOP BAR — sticky, full width */
+  .top-bar {
+    position: sticky !important; top: 0 !important;
+    width: 100vw !important; max-width: 100vw !important;
+    z-index: 100 !important; box-sizing: border-box !important;
+  }
+
+  /* 10. BOTTOM NAV — fixed at bottom like native app */
+  .mobile-bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important; left: 0 !important; right: 0 !important;
+    width: 100vw !important; z-index: 300 !important;
+    padding-bottom: env(safe-area-inset-bottom, 8px) !important;
+    display: flex !important;
+  }
+
+  /* 11. FILTER BARS — horizontal scroll, never wrap */
+  .board-filters, .filter-bar, .filter-row,
+  .td-filters, .f-row {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    flex-wrap: nowrap !important;
+    max-width: 100% !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .board-filters::-webkit-scrollbar,
+  .filter-bar::-webkit-scrollbar,
+  .td-filters::-webkit-scrollbar { display: none !important; }
+
+  /* 12. TEXT — never overflow */
+  h1, h2, h3, h4, h5, p, span, div, a {
+    max-width: 100% !important;
+    word-break: break-word !important;
+  }
+
+  /* 13. IMAGES & MEDIA */
+  img, svg, video, iframe { max-width: 100% !important; height: auto !important; }
+
+  /* 14. ARCHIVE TABLE → CARDS on mobile */
+  .arch-table-wrap, table { display: none !important; }
+  #archCards { display: flex !important; flex-direction: column !important; }
+  /* Exception: show tables that are inside cards only */
+  .card table, .panel table { display: table !important; width: 100% !important; }
+}
+
+/* Desktop: restore everything */
+@media (min-width: 769px) {
+  * { min-width: revert; }
+  .mobile-bottom-nav { display: none !important; }
+  .sidebar {
+    transform: none !important;
+    position: sticky !important;
+    top: 0 !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+  }
+  .sidebar-toggle, .sb-toggle { display: none !important; }
+  .layout-main, .main-content { margin-left: 220px !important; }
+  #archCards { display: none !important; }
+  .arch-table-wrap, table { display: revert !important; }
+  #taskModalSheet {
+    width: 100% !important;
+    max-width: 860px !important;
+    border-radius: 20px !important;
+    transform: scale(.96) translateY(12px) !important;
+  }
+  #taskModal { align-items: center !important; padding: 20px !important; }
+}
+
+
+/* ══ SPACING & TYPE SYSTEM v2 ══ */
+/* ══════════════════════════════════════════════════════════════
+   SPACING & TYPOGRAPHY SYSTEM v2
+   Clean, consistent, iPhone-app-grade sizing
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── GLOBAL TYPE SCALE ─────────────────────────────────────── */
+:root {
+  --fs-xs:   10px;   /* labels, timestamps, IDs */
+  --fs-sm:   11px;   /* secondary text, badges */
+  --fs-base: 13px;   /* body text, form labels */
+  --fs-md:   14px;   /* card titles, list items */
+  --fs-lg:   16px;   /* section headers */
+  --fs-xl:   20px;   /* page titles, hero title */
+  --fs-2xl:  24px;   /* hero stats */
+
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semi:   600;
+  --fw-bold:   700;
+  --fw-black:  800;
+
+  /* Spacing scale */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+
+  /* Topbar */
+  --topbar-h: 52px;
+}
+
+html { font-size: 14px !important; }
+
+/* ── GLOBAL BASE ────────────────────────────────────────────── */
+body {
+  font-size: var(--fs-base) !important;
+  font-family: var(--font, 'IBM Plex Sans', sans-serif) !important;
+  line-height: 1.5 !important;
+}
+
+/* ── TOP BAR ─────────────────────────────────────────────────── */
+.top-bar {
+  height: var(--topbar-h) !important;
+  padding: 0 20px !important;
+}
+.breadcrumb {
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  letter-spacing: -.3px !important;
+}
+.top-bar span[style*="font-size:10px"],
+.top-bar div[style*="font-size:10px"] {
+  font-size: 11px !important;
+  opacity: .6 !important;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────────────── */
+.sidebar-title, .logo-name { font-size: 13px !important; font-weight: 700 !important; }
+.sidebar-sub, .logo-sub    { font-size: 10px !important; letter-spacing: .6px !important; }
+.nav-section { font-size: 9px !important; letter-spacing: 1.2px !important; padding: 14px 14px 4px !important; }
+.nav-item {
+  font-size: 12.5px !important;
+  padding: 9px 12px !important;
+  margin: 1px 6px !important;
+  gap: 10px !important;
+}
+
+/* ── CARDS ───────────────────────────────────────────────────── */
+.card, .form-card {
+  padding: var(--sp-5) !important;     /* 20px */
+  border-radius: 16px !important;
+  margin-bottom: 14px !important;
+}
+.card-title, .form-section-title {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: .8px !important;
+  text-transform: uppercase !important;
+  margin-bottom: 16px !important;
+  padding-bottom: 12px !important;
+}
+.settings-section {
+  padding: 20px !important;
+  border-radius: 16px !important;
+  margin-bottom: 14px !important;
+}
+
+/* ── KANBAN COLUMNS ──────────────────────────────────────────── */
+.k-header, .kanban-col-header {
+  padding: 10px 14px !important;
+  margin-bottom: 10px !important;
+  border-radius: 12px !important;
+}
+.k-label, .kcol-title { font-size: 12px !important; font-weight: 700 !important; }
+.k-count, .kcol-count { font-size: 11px !important; padding: 2px 8px !important; }
+
+/* ── KANBAN CARDS ────────────────────────────────────────────── */
+.k-card {
+  padding: 12px 14px !important;
+  border-radius: 12px !important;
+  margin-bottom: 8px !important;
+}
+.k-card-title { font-size: 12.5px !important; font-weight: 700 !important; line-height: 1.4 !important; }
+.k-card-id    { font-size: 9px !important; margin-bottom: 5px !important; }
+.k-card-cat   { font-size: 10px !important; padding: 2px 7px !important; }
+.k-pri        { font-size: 10px !important; padding: 2px 8px !important; border-radius: 6px !important; font-weight: 700 !important; }
+.k-card-bottom { margin-top: 8px !important; gap: 6px !important; }
+.k-prog { height: 4px !important; border-radius: 4px !important; }
+.k-add  { margin-top: 6px !important; height: 36px !important; border-radius: 10px !important; font-size: 12px !important; }
+
+/* ── HERO CARDS ──────────────────────────────────────────────── */
+.task-hero, .td-hero, .page-hero {
+  padding: 22px 24px !important;
+  border-radius: 20px !important;
+  margin-bottom: 18px !important;
+}
+.task-hero-tag, .td-hero-tag, .ph-tag {
+  font-size: 9px !important;
+  letter-spacing: 1.4px !important;
+  margin-bottom: 5px !important;
+}
+.task-hero-title, .td-hero-title, .ph-title {
+  font-size: 21px !important;
+  font-weight: 900 !important;
+  letter-spacing: -.4px !important;
+  margin-bottom: 16px !important;
+}
+.task-hero-val, .td-stat-val, .ph-stat-val {
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+.task-hero-lbl, .td-stat-lbl, .ph-stat-lbl {
+  font-size: 9px !important;
+  font-weight: 600 !important;
+  letter-spacing: .7px !important;
+  margin-top: 3px !important;
+}
+.task-hero-stats, .td-hero-stats, .ph-stats { gap: 20px !important; }
+
+/* ── BUTTONS ─────────────────────────────────────────────────── */
+.btn {
+  padding: 9px 18px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  gap: 7px !important;
+}
+.btn-new, .btn-primary {
+  padding: 10px 20px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border-radius: 11px !important;
+}
+
+/* ── FILTER / TAB PILLS ─────────────────────────────────────── */
+.f-pill, .filter-btn, .tab-btn {
+  padding: 7px 15px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+.board-filters { gap: 6px !important; margin-bottom: 16px !important; }
+
+/* ── INPUTS / FORMS ──────────────────────────────────────────── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select, textarea {
+  padding: 10px 13px !important;
+  font-size: 13px !important;
+  border-radius: 10px !important;
+  line-height: 1.4 !important;
+}
+.form-group { margin-bottom: 14px !important; }
+.form-group label, .field label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: .5px !important;
+  margin-bottom: 6px !important;
+}
+
+/* ── BADGES / STATUS ─────────────────────────────────────────── */
+.badge, .status-badge {
+  padding: 3px 10px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  border-radius: 20px !important;
+}
+
+/* ── TODO ITEMS ──────────────────────────────────────────────── */
+.todo-item, .td-item {
+  padding: 13px 14px !important;
+  border-radius: 14px !important;
+  margin-bottom: 8px !important;
+  gap: 12px !important;
+}
+.td-title  { font-size: 13px !important; font-weight: 600 !important; }
+.td-sub    { font-size: 11px !important; }
+
+/* ── PLAN / TRAINING CARDS ───────────────────────────────────── */
+.plan-card { padding: 18px !important; border-radius: 14px !important; margin-bottom: 12px !important; }
+.plan-title { font-size: 14px !important; font-weight: 700 !important; }
+.plan-sub   { font-size: 11px !important; margin-top: 3px !important; }
+
+/* ── PAGINATION ──────────────────────────────────────────────── */
+.pag-info { font-size: 11px !important; color: var(--t3) !important; }
+.page-btn { width: 32px !important; height: 32px !important; font-size: 12px !important; border-radius: 8px !important; }
+
+/* ── MOBILE BOTTOM NAV ───────────────────────────────────────── */
+.mbn-item { font-size: 10px !important; gap: 3px !important; padding: 5px 4px !important; }
+.mbn-item svg { width: 22px !important; height: 22px !important; }
+
+/* ── SECTION HEADERS IN PAGE ─────────────────────────────────── */
+.page-header { margin-bottom: 18px !important; }
+.board-title, .page-title { font-size: 20px !important; font-weight: 800 !important; }
+.board-sub, .page-sub { font-size: 12px !important; }
+
+/* ── MODAL TABS ──────────────────────────────────────────────── */
+.tmtab { padding: 10px 4px !important; font-size: 11px !important; font-weight: 600 !important; }
+#taskModalHeader .ph-title { font-size: 17px !important; }
+#taskModalHeader .ph-tag   { font-size: 9px !important; }
+
+/* ── MOBILE OVERRIDES ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Base size bump for readability */
+  html { font-size: 15px !important; }
+  body { font-size: 14px !important; }
+
+  /* Top bar */
+  .breadcrumb { font-size: 17px !important; }
+  .top-bar { padding: 0 14px !important; height: 52px !important; }
+
+  /* Hero — compact but readable */
+  .task-hero, .td-hero, .page-hero {
+    padding: 16px 18px !important;
+    margin-bottom: 14px !important;
+    border-radius: 16px !important;
+  }
+  .task-hero-title, .td-hero-title, .ph-title { font-size: 18px !important; }
+  .task-hero-val, .td-stat-val, .ph-stat-val  { font-size: 22px !important; }
+  .task-hero-stats, .td-hero-stats, .ph-stats  { gap: 14px !important; }
+  .task-hero-ring, .td-ring-wrap, .ph-ring    { width: 64px !important; height: 64px !important; }
+
+  /* Kanban card */
+  .k-card { padding: 11px 12px !important; }
+  .k-card-title { font-size: 13px !important; }
+  .k-card-id    { font-size: 9px !important; }
+
+  /* Filters */
+  .f-pill, .filter-btn { padding: 7px 14px !important; font-size: 12px !important; height: 34px !important; }
+  .board-filters { margin-bottom: 12px !important; }
+
+  /* Cards */
+  .card, .form-card { padding: 16px !important; border-radius: 14px !important; }
+
+  /* Buttons */
+  .btn { padding: 9px 16px !important; font-size: 13px !important; }
+  .btn-new, .btn-primary { padding: 10px 18px !important; }
+
+  /* Page content */
+  .page-content {
+    padding: 14px 14px calc(76px + env(safe-area-inset-bottom, 10px)) !important;
+  }
+
+  /* Todo items */
+  .todo-item, .td-item { padding: 12px 13px !important; }
+
+  /* Plan cards */
+  .plan-card { padding: 14px !important; }
+  .plan-title { font-size: 13px !important; }
+
+  /* Settings */
+  .settings-section { padding: 16px !important; }
+  .settings-title   { font-size: 14px !important; }
+  .settings-row     { padding: 12px 0 !important; }
+
+  /* Forms */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select, textarea { padding: 10px 12px !important; font-size: 14px !important; }
+  .form-group label, .field label { font-size: 11px !important; }
 }
 
 </style>
