@@ -920,14 +920,17 @@ td.muted { color: var(--t3); font-size: 12px; }
           <div class="candidate" data-rim="${c.rim}" onclick="selectCandidate('${c.rim}', this)">
             <div class="cand-rank ${i === 0 ? 'r1' : ''}">${i + 1}</div>
             <div>
-              <div class="cand-name">${c.name}</div>
-              <div class="cand-meta">${c.homeBranchName} · covered ${c.timesCovered}× · absent ${c.timesAbsent}× ${c.lastCoverDate ? '· last cover ' + formatDate(c.lastCoverDate) : '· never covered'}${c.sameArea ? ' · same area' : ''}</div>
+              <div class="cand-name">${c.name} <span style="font-size:10px; color:var(--t3); font-weight:500;">· ${c.role}</span></div>
+              <div class="cand-meta">${c.homeBranchName} · covered ${c.timesCovered}× · absent ${c.timesAbsent}× ${c.lastCoverDate ? '· last cover ' + formatDate(c.lastCoverDate) : '· never covered'}</div>
             </div>
             <div>
               <div class="cand-score">${c.fairnessScore}</div>
               <div class="cand-score-label">Score</div>
             </div>
-            ${c.sameArea ? '<span class="badge b-blue">Same area</span>' : '<span class="badge b-muted">Cross area</span>'}
+            <div style="display:flex; flex-direction:column; gap:3px; align-items:flex-end;">
+              ${c.sameRole ? '<span class="badge b-covered">Same role</span>' : '<span class="badge b-warn">Cross role</span>'}
+              ${c.sameArea ? '<span class="badge b-blue">Same area</span>' : '<span class="badge b-muted">Cross area</span>'}
+            </div>
           </div>
         `).join('')
       }
