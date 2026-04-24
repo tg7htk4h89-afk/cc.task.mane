@@ -552,6 +552,62 @@ tbody td { padding: 11px 14px; font-size: 12.5px; color: var(--t2); vertical-ali
   .td-ring-wrap { width:64px; height:64px; }
 }
 
+
+
+/* ══ DESKTOP LAYOUT FIX ══════════════════════════════════════
+   Fix class name mismatches and double margin-left
+   ══════════════════════════════════════════════════════════ */
+
+/* Only outer wrapper gets the sidebar margin */
+.layout-main {
+  margin-left: var(--sb-width) !important;
+  display: flex; flex-direction: column; min-height: 100vh;
+}
+/* Inner main/main-content has no extra margin */
+main, .main-content {
+  flex: 1; display: flex; flex-direction: column;
+  margin-left: 0 !important;
+}
+
+/* Kanban — the actual element uses class kanban-scroll */
+.kanban-scroll, #kanbanBoard {
+  display: flex !important;
+  gap: 12px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 20px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.kanban-board { overflow: hidden; }
+
+/* Desktop k-col fixed width */
+@media (min-width: 769px) {
+  .kanban-scroll .k-col, #kanbanBoard .k-col {
+    min-width: 260px !important;
+    max-width: 260px !important;
+    width: 260px !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+/* Mobile kanban scroll */
+@media (max-width: 768px) {
+  .kanban-board {
+    overflow-x: hidden;
+    margin: 0 -12px;
+  }
+  .kanban-scroll, #kanbanBoard {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    scroll-snap-type: x mandatory !important;
+    scrollbar-width: none !important;
+    padding: 0 12px 16px !important;
+  }
+  .kanban-scroll::-webkit-scrollbar,
+  #kanbanBoard::-webkit-scrollbar { display: none !important; }
+}
+
 </style>
 </head>
 <body>
