@@ -3,45 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KIB Branches — Transfer System</title>
+<title>KIB Branches — Coverage System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --navy: #060F24;
-  --navy-2: #0D1B3E;
-  --navy-3: #142556;
-  --blue: #1877C5;
-  --blue-dim: rgba(24,119,197,0.12);
-  --blue-light: #E8F1FB;
-  --green: #0EA472;
-  --green-dim: #E6F7F2;
-  --red: #E5383B;
-  --red-dim: #FEE8E8;
-  --amber: #F4A523;
-  --amber-dim: #FEF5E7;
-  --purple: #7B61FF;
-  --purple-dim: #F0EEFF;
-  --bg: #F0F4F9;
-  --card: #FFFFFF;
-  --card-hover: #FAFCFF;
-  --border: #E4EAF3;
-  --border-2: #D0D9E8;
-  --t1: #0A1628;
-  --t2: #4A5568;
-  --t3: #8A9BB0;
-  --t4: #B8C5D4;
-  --sb: var(--navy);
-  --sb-text: rgba(255,255,255,0.5);
-  --sb-active-bg: rgba(24,119,197,0.18);
-  --sb-active: #5BA8E8;
-  --sb-width: 224px;
-  --topbar-h: 52px;
+  --navy: #060F24; --navy-2: #0D1B3E;
+  --blue: #1877C5; --blue-dim: rgba(24,119,197,0.12); --blue-light: #E8F1FB;
+  --green: #0EA472; --green-dim: #E6F7F2;
+  --red: #E5383B; --red-dim: #FEE8E8;
+  --amber: #F4A523; --amber-dim: #FEF5E7;
+  --purple: #7B61FF; --purple-dim: #F0EEFF;
+  --bg: #F0F4F9; --card: #FFFFFF; --card-hover: #FAFCFF;
+  --border: #E4EAF3; --border-2: #D0D9E8;
+  --t1: #0A1628; --t2: #4A5568; --t3: #8A9BB0; --t4: #B8C5D4;
+  --sb: var(--navy); --sb-text: rgba(255,255,255,0.5);
+  --sb-active-bg: rgba(24,119,197,0.18); --sb-active: #5BA8E8;
+  --sb-width: 224px; --topbar-h: 52px;
   --font: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
-  --r-sm: 6px;
-  --r-md: 10px;
-  --r-lg: 14px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px;
   --sh-sm: 0 1px 3px rgba(10,22,40,0.06), 0 1px 2px rgba(10,22,40,0.04);
   --sh-md: 0 4px 12px rgba(10,22,40,0.08), 0 1px 3px rgba(10,22,40,0.05);
   --sh-lg: 0 12px 32px rgba(10,22,40,0.12), 0 4px 8px rgba(10,22,40,0.06);
@@ -52,17 +33,13 @@ body { font-family: var(--font); background: var(--bg); color: var(--t1); line-h
 button { font-family: var(--font); cursor: pointer; }
 input, select, textarea { font-family: var(--font); }
 
-/* Layout */
 .app-layout { display: flex; min-height: 100vh; }
 
-/* Sidebar */
 .sidebar {
-  width: var(--sb-width);
-  background: var(--sb);
+  width: var(--sb-width); background: var(--sb);
   display: flex; flex-direction: column;
   position: fixed; left: 0; top: 0; bottom: 0;
-  z-index: 200;
-  overflow-y: auto;
+  z-index: 200; overflow-y: auto;
   transition: transform 0.25s ease;
 }
 .sb-brand {
@@ -71,361 +48,132 @@ input, select, textarea { font-family: var(--font); }
   display: flex; align-items: center; gap: 12px;
 }
 .sb-logo {
-  width: 36px; height: 36px;
-  background: var(--blue);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 16px; font-weight: 700;
-  letter-spacing: -0.5px;
+  width: 36px; height: 36px; background: var(--blue);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 16px; font-weight: 700; letter-spacing: -0.5px;
 }
 .sb-brand-text { flex: 1; min-width: 0; }
-.sb-brand-title {
-  color: #fff; font-size: 13px; font-weight: 700;
-  letter-spacing: -0.2px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.sb-brand-sub {
-  color: rgba(255,255,255,0.4);
-  font-size: 10px; font-weight: 500;
-  text-transform: uppercase; letter-spacing: 0.6px;
-  margin-top: 2px;
-}
+.sb-brand-title { color: #fff; font-size: 13px; font-weight: 700; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-brand-sub { color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 2px; }
 
 .sb-nav { padding: 12px 8px; flex: 1; }
-.sb-section-label {
-  padding: 8px 12px 6px;
-  font-size: 9px; font-weight: 700;
-  color: rgba(255,255,255,0.3);
-  text-transform: uppercase; letter-spacing: 1px;
-}
+.sb-section-label { padding: 8px 12px 6px; font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; }
 .nav-item {
-  width: 100%;
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 12px;
-  border: none; background: transparent;
-  color: var(--sb-text);
-  font-size: 12.5px; font-weight: 500;
-  border-radius: var(--r-sm);
-  text-align: left;
-  margin-bottom: 2px;
-  transition: background 0.15s, color 0.15s;
-  position: relative;
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border: none; background: transparent;
+  color: var(--sb-text); font-size: 12.5px; font-weight: 500;
+  border-radius: var(--r-sm); text-align: left; margin-bottom: 2px;
+  transition: background 0.15s, color 0.15s; position: relative;
+  text-decoration: none;
 }
 .nav-item:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.8); }
-.nav-item.active {
-  background: var(--sb-active-bg);
-  color: var(--sb-active);
-}
-.nav-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 8px; bottom: 8px;
-  width: 2.5px;
-  background: var(--sb-active);
-  border-radius: 0 2px 2px 0;
-}
-.nav-icon {
-  width: 16px; height: 16px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.nav-badge {
-  background: var(--red);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 10px;
-  margin-left: auto;
-  min-width: 18px;
-  text-align: center;
-}
+.nav-item.active { background: var(--sb-active-bg); color: var(--sb-active); }
+.nav-item.active::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2.5px; background: var(--sb-active); border-radius: 0 2px 2px 0; }
+.nav-icon { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.nav-badge { background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: auto; min-width: 18px; text-align: center; }
 
-.sb-footer {
-  padding: 12px 16px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-}
-.sb-user {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px;
-  border-radius: var(--r-sm);
-}
-.sb-avatar {
-  width: 30px; height: 30px;
-  background: var(--blue);
-  color: #fff;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 11px;
-  flex-shrink: 0;
-}
+.sb-footer { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.08); }
+.sb-user { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--r-sm); }
+.sb-avatar { width: 30px; height: 30px; background: var(--blue); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; flex-shrink: 0; }
 .sb-user-info { flex: 1; min-width: 0; }
-.sb-user-name {
-  color: #fff;
-  font-size: 12px; font-weight: 600;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.sb-user-role {
-  color: rgba(255,255,255,0.4);
-  font-size: 10px; font-weight: 500;
-  text-transform: uppercase; letter-spacing: 0.4px;
-}
-.sb-logout {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.5);
-  padding: 5px;
-  border-radius: var(--r-sm);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s;
-}
+.sb-user-name { color: #fff; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-user-role { color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+.sb-logout { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); padding: 5px; border-radius: var(--r-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
 .sb-logout:hover { background: rgba(229,56,59,0.15); border-color: var(--red); color: var(--red); }
 
-/* Main content */
-.main {
-  flex: 1;
-  margin-left: var(--sb-width);
-  display: flex; flex-direction: column;
-  min-height: 100vh;
-}
+.main { flex: 1; margin-left: var(--sb-width); display: flex; flex-direction: column; min-height: 100vh; }
 
-/* Top bar */
 .top-bar {
-  height: var(--topbar-h);
-  background: var(--card);
+  height: var(--topbar-h); background: var(--card);
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 16px;
-  padding: 0 24px;
-  position: sticky; top: 0; z-index: 50;
+  padding: 0 24px; position: sticky; top: 0; z-index: 50;
 }
-.sb-toggle {
-  display: none;
-  background: transparent; border: none;
-  color: var(--t2);
-  padding: 6px; border-radius: var(--r-sm);
-  cursor: pointer;
-}
-.sb-toggle:hover { background: var(--bg); }
-.page-breadcrumb {
-  font-size: 11px; color: var(--t3); font-weight: 500;
-  text-transform: uppercase; letter-spacing: 0.6px;
-}
+.sb-toggle { display: none; background: transparent; border: none; color: var(--t2); padding: 6px; border-radius: var(--r-sm); cursor: pointer; }
+.page-breadcrumb { font-size: 11px; color: var(--t3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.6px; }
 .page-breadcrumb strong { color: var(--t1); font-weight: 600; }
 .top-spacer { flex: 1; }
 .top-action {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--t2);
-  padding: 6px 12px;
-  border-radius: var(--r-md);
+  background: transparent; border: 1px solid var(--border); color: var(--t2);
+  padding: 6px 12px; border-radius: var(--r-md);
   font-size: 12px; font-weight: 500;
   display: flex; align-items: center; gap: 6px;
-  transition: all 0.15s;
+  transition: all 0.15s; text-decoration: none; font-family: var(--font);
 }
 .top-action:hover { background: var(--bg); color: var(--t1); border-color: var(--border-2); }
 
-/* Page content */
 .page-content { padding: 24px; flex: 1; max-width: 1600px; }
-.page-header {
-  display: flex; justify-content: space-between; align-items: end;
-  flex-wrap: wrap; gap: 16px;
-  margin-bottom: 20px;
-}
-.page-title {
-  font-size: 22px; font-weight: 700;
-  color: var(--t1); letter-spacing: -0.5px;
-}
-.page-sub {
-  font-size: 12.5px; color: var(--t3);
-  margin-top: 2px;
-}
+.page-header { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+.page-title { font-size: 22px; font-weight: 700; color: var(--t1); letter-spacing: -0.5px; }
+.page-sub { font-size: 12.5px; color: var(--t3); margin-top: 2px; }
 
-/* KPI cards */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-  margin-bottom: 20px;
-}
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
 .kpi-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 16px 18px;
-  box-shadow: var(--sh-sm);
-  position: relative;
-  overflow: hidden;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 16px 18px;
+  box-shadow: var(--sh-sm); position: relative; overflow: hidden;
 }
-.kpi-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--blue);
-}
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--blue); }
 .kpi-card.red::before { background: var(--red); }
 .kpi-card.green::before { background: var(--green); }
 .kpi-card.amber::before { background: var(--amber); }
 .kpi-card.purple::before { background: var(--purple); }
+.kpi-label { font-size: 10px; font-weight: 700; color: var(--t3); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 8px; }
+.kpi-value { font-size: 28px; font-weight: 700; color: var(--t1); letter-spacing: -0.8px; line-height: 1.1; }
+.kpi-sub { font-size: 11px; color: var(--t3); margin-top: 6px; font-weight: 500; }
 
-.kpi-label {
-  font-size: 10px; font-weight: 700;
-  color: var(--t3);
-  text-transform: uppercase; letter-spacing: 0.7px;
-  margin-bottom: 8px;
-}
-.kpi-value {
-  font-size: 28px; font-weight: 700;
-  color: var(--t1); letter-spacing: -0.8px;
-  line-height: 1.1;
-}
-.kpi-sub {
-  font-size: 11px; color: var(--t3);
-  margin-top: 6px;
-  font-weight: 500;
-}
-
-/* Generic card */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  box-shadow: var(--sh-sm);
-  margin-bottom: 16px;
-  overflow: hidden;
-}
-.card-head {
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center;
-  gap: 12px; flex-wrap: wrap;
-}
-.card-title {
-  font-size: 14px; font-weight: 700;
-  color: var(--t1);
-}
-.card-sub {
-  font-size: 11px; color: var(--t3); font-weight: 500;
-  margin-top: 2px;
-}
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--sh-sm); margin-bottom: 16px; overflow: hidden; }
+.card-head { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.card-title { font-size: 14px; font-weight: 700; color: var(--t1); }
+.card-sub { font-size: 11px; color: var(--t3); font-weight: 500; margin-top: 2px; }
 .card-body { padding: 18px 20px; }
 
-/* Form */
-.form-row {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 12px; margin-bottom: 12px;
-}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
 .form-row-1 { margin-bottom: 12px; }
 .form-group { display: flex; flex-direction: column; }
-.form-label {
-  font-size: 11px; font-weight: 600;
-  color: var(--t2);
-  text-transform: uppercase; letter-spacing: 0.6px;
-  margin-bottom: 6px;
-}
+.form-label { font-size: 11px; font-weight: 600; color: var(--t2); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
 .form-input, .form-select, .form-textarea {
-  padding: 9px 12px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-md);
-  font-size: 13px; font-family: var(--font);
-  background: #FAFCFF; color: var(--t1);
-  outline: none;
+  padding: 9px 12px; border: 1.5px solid var(--border);
+  border-radius: var(--r-md); font-size: 13px; font-family: var(--font);
+  background: #FAFCFF; color: var(--t1); outline: none;
   transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
-.form-input:focus, .form-select:focus, .form-textarea:focus {
-  border-color: var(--blue);
-  background: #fff;
-  box-shadow: 0 0 0 3px var(--blue-dim);
-}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--blue); background: #fff; box-shadow: 0 0 0 3px var(--blue-dim); }
 .form-textarea { min-height: 70px; resize: vertical; }
 
-/* Buttons */
 .btn {
-  background: var(--blue);
-  color: #fff;
-  border: none;
-  border-radius: var(--r-md);
-  padding: 8px 16px;
-  font-size: 12px; font-weight: 600;
-  letter-spacing: 0.2px;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
+  background: var(--blue); color: #fff; border: none;
+  border-radius: var(--r-md); padding: 8px 16px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.2px;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
   display: inline-flex; align-items: center; gap: 6px;
 }
 .btn:hover:not(:disabled) { background: #1468B3; }
 .btn:active:not(:disabled) { transform: translateY(1px); }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
-.btn-ghost {
-  background: transparent;
-  border: 1px solid var(--border-2);
-  color: var(--t2);
-}
-.btn-ghost:hover:not(:disabled) {
-  background: var(--bg);
-  color: var(--t1);
-  border-color: var(--border-2);
-}
-.btn-danger {
-  background: transparent;
-  border: 1px solid rgba(229,56,59,0.3);
-  color: var(--red);
-}
-.btn-danger:hover:not(:disabled) {
-  background: var(--red-dim);
-  border-color: var(--red);
-}
+.btn-ghost { background: transparent; border: 1px solid var(--border-2); color: var(--t2); }
+.btn-ghost:hover:not(:disabled) { background: var(--bg); color: var(--t1); }
+.btn-danger { background: transparent; border: 1px solid rgba(229,56,59,0.3); color: var(--red); }
+.btn-danger:hover:not(:disabled) { background: var(--red-dim); }
 .btn-sm { padding: 6px 12px; font-size: 11px; }
-
 .btn-row { display: flex; gap: 8px; justify-content: flex-end; }
 
-/* Table */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
-thead th {
-  padding: 11px 16px; text-align: left;
-  font-size: 10px; font-weight: 700;
-  color: var(--t3);
-  text-transform: uppercase; letter-spacing: 0.6px;
-  background: #F8FAFC;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background 0.15s;
-}
+thead th { padding: 11px 16px; text-align: left; font-size: 10px; font-weight: 700; color: var(--t3); text-transform: uppercase; letter-spacing: 0.6px; background: #F8FAFC; border-bottom: 1px solid var(--border); white-space: nowrap; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: #F8FAFC; }
-tbody td {
-  padding: 12px 16px;
-  font-size: 13px; color: var(--t2);
-  vertical-align: middle;
-}
+tbody td { padding: 12px 16px; font-size: 13px; color: var(--t2); vertical-align: middle; }
 td.bold { font-weight: 600; color: var(--t1); }
 td.muted { color: var(--t3); font-size: 12px; }
 
-.rank-cell {
-  font-size: 16px; font-weight: 700;
-  color: var(--blue);
-  text-align: center;
-  width: 40px;
-}
+.rank-cell { font-size: 16px; font-weight: 700; color: var(--blue); text-align: center; width: 40px; }
 .rank-cell.r1 { color: var(--amber); }
 .rank-cell.r2 { color: #78828F; }
 .rank-cell.r3 { color: #B8763A; }
 
-/* Badges */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 10px; font-weight: 700;
-  white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
+.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.3px; }
 .b-ok { background: var(--green-dim); color: #065F46; }
 .b-under { background: var(--red-dim); color: #991B1B; }
 .b-over { background: var(--amber-dim); color: #92400E; }
@@ -434,223 +182,117 @@ td.muted { color: var(--t3); font-size: 12px; }
 .b-blue { background: var(--blue-light); color: #1E40AF; }
 .b-muted { background: #F1F5F9; color: #64748B; }
 .b-pending { background: var(--amber-dim); color: #92400E; }
-.b-rejected { background: var(--red-dim); color: #991B1B; }
-.b-completed { background: var(--green-dim); color: #065F46; }
+.b-covered { background: var(--green-dim); color: #065F46; }
+.b-cancelled { background: #F1F5F9; color: #64748B; }
+.b-purple { background: var(--purple-dim); color: #5B21B6; }
 
-/* Views */
 .view { display: none; }
 .view.active { display: block; animation: fadeIn 0.2s; }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Branch tile grid */
-.branch-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 12px;
-}
+.branch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
 .branch-tile {
-  background: #FAFCFF;
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--blue);
-  border-radius: var(--r-md);
+  background: #FAFCFF; border: 1px solid var(--border);
+  border-left: 3px solid var(--blue); border-radius: var(--r-md);
   padding: 12px 14px;
 }
 .branch-tile.under { border-left-color: var(--red); background: #FFF8F8; }
 .branch-tile.over { border-left-color: var(--amber); background: #FFFDF6; }
 .branch-tile.ok { border-left-color: var(--green); background: #F6FDFB; }
-
 .branch-name { font-size: 13px; font-weight: 700; color: var(--t1); margin-bottom: 3px; }
 .branch-meta { font-size: 10px; color: var(--t3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; font-weight: 600; }
-.branch-stats { display: flex; gap: 12px; font-size: 12px; }
+.branch-stats { display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+.branch-stats-row { display: flex; justify-content: space-between; align-items: center; }
 .branch-stats span { color: var(--t3); font-weight: 500; }
 .branch-stats strong { color: var(--t1); font-weight: 700; }
+.impact { font-size: 10px; color: var(--t3); font-weight: 600; }
+.impact.negative { color: var(--red); }
+.impact.positive { color: var(--green); }
 
-/* Pending request list */
-.req-item {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 16px 20px;
-  margin-bottom: 12px;
-  display: flex; justify-content: space-between; align-items: start;
-  gap: 16px; flex-wrap: wrap;
-  box-shadow: var(--sh-sm);
-  transition: box-shadow 0.15s;
+/* Absence item card */
+.abs-item {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 16px 20px;
+  margin-bottom: 12px; display: flex; justify-content: space-between;
+  align-items: start; gap: 16px; flex-wrap: wrap;
+  box-shadow: var(--sh-sm); transition: box-shadow 0.15s;
 }
-.req-item:hover { box-shadow: var(--sh-md); }
-.req-item-head {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
-  flex-wrap: wrap;
-}
-.req-id { font-size: 11px; color: var(--t3); font-weight: 600; }
-.req-date { font-size: 11px; color: var(--t3); }
-.req-flow {
-  font-size: 15px; font-weight: 700;
-  color: var(--t1);
-  margin-bottom: 4px;
-  letter-spacing: -0.2px;
-}
-.req-flow .arr { color: var(--blue); margin: 0 4px; }
-.req-requester { font-size: 12px; color: var(--t2); margin-bottom: 8px; }
-.req-reason { font-size: 12.5px; color: var(--t2); max-width: 600px; line-height: 1.5; }
-.req-reason strong { color: var(--t1); font-weight: 600; }
+.abs-item:hover { box-shadow: var(--sh-md); }
+.abs-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.abs-id { font-size: 11px; color: var(--t3); font-weight: 600; font-family: 'IBM Plex Mono', monospace; }
+.abs-date { font-size: 11px; color: var(--t3); }
+.abs-title { font-size: 15px; font-weight: 700; color: var(--t1); margin-bottom: 4px; letter-spacing: -0.2px; }
+.abs-title .divider { color: var(--t3); margin: 0 8px; font-weight: 400; }
+.abs-title .branch { color: var(--blue); }
+.abs-meta-row { font-size: 12px; color: var(--t2); margin-bottom: 6px; }
+.abs-meta-row strong { color: var(--t1); font-weight: 600; }
+.abs-reason { font-size: 12.5px; color: var(--t2); max-width: 600px; line-height: 1.5; }
+.abs-reason strong { color: var(--t1); font-weight: 600; }
+.abs-dates { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); padding: 3px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; color: var(--t1); }
 
-/* Candidate row in modal */
+/* Candidate rows */
 .candidate {
-  padding: 12px 14px;
-  background: #FAFCFF;
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-md);
-  display: grid;
-  grid-template-columns: 32px 1fr auto auto;
-  gap: 12px; align-items: center;
-  margin-bottom: 8px;
-  transition: all 0.15s;
-  cursor: pointer;
+  padding: 12px 14px; background: #FAFCFF;
+  border: 1.5px solid var(--border); border-radius: var(--r-md);
+  display: grid; grid-template-columns: 32px 1fr auto auto;
+  gap: 12px; align-items: center; margin-bottom: 8px;
+  transition: all 0.15s; cursor: pointer;
 }
 .candidate:hover { background: #fff; border-color: var(--border-2); }
-.candidate.selected {
-  background: var(--blue-light);
-  border-color: var(--blue);
-  box-shadow: 0 0 0 2px var(--blue-dim);
-}
-.cand-rank {
-  font-size: 18px; font-weight: 700;
-  color: var(--blue);
-  text-align: center;
-}
+.candidate.selected { background: var(--blue-light); border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-dim); }
+.cand-rank { font-size: 18px; font-weight: 700; color: var(--blue); text-align: center; }
 .cand-rank.r1 { color: var(--amber); }
 .cand-name { font-size: 13px; font-weight: 600; color: var(--t1); margin-bottom: 2px; }
 .cand-meta { font-size: 11px; color: var(--t3); line-height: 1.4; }
-.cand-score {
-  font-size: 18px; font-weight: 700;
-  color: var(--blue);
-  text-align: right;
-}
-.cand-score-label {
-  font-size: 9px; color: var(--t3);
-  text-transform: uppercase; letter-spacing: 0.6px;
-  text-align: right;
-  font-weight: 600;
-}
+.cand-score { font-size: 18px; font-weight: 700; color: var(--blue); text-align: right; }
+.cand-score-label { font-size: 9px; color: var(--t3); text-transform: uppercase; letter-spacing: 0.6px; text-align: right; font-weight: 600; }
 
 /* Modal */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(10,22,40,0.5);
-  backdrop-filter: blur(3px);
-  display: none;
-  align-items: center; justify-content: center;
-  z-index: 300;
-  padding: 20px;
-}
+.modal-overlay { position: fixed; inset: 0; background: rgba(10,22,40,0.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 300; padding: 20px; }
 .modal-overlay.show { display: flex; }
-.modal {
-  background: var(--card);
-  border-radius: var(--r-lg);
-  width: 100%; max-width: 620px; max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: var(--sh-lg);
-  animation: modalIn 0.2s ease;
-}
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
-}
-.modal-head {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center;
-}
+.modal { background: var(--card); border-radius: var(--r-lg); width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; box-shadow: var(--sh-lg); animation: modalIn 0.2s ease; }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+.modal-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 .modal-title { font-size: 15px; font-weight: 700; color: var(--t1); }
-.modal-close {
-  background: none; border: none;
-  color: var(--t3);
-  font-size: 22px; line-height: 1;
-  cursor: pointer;
-  width: 28px; height: 28px;
-  border-radius: var(--r-sm);
-  display: flex; align-items: center; justify-content: center;
-}
+.modal-close { background: none; border: none; color: var(--t3); font-size: 22px; line-height: 1; cursor: pointer; width: 28px; height: 28px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; }
 .modal-close:hover { background: var(--bg); color: var(--t1); }
 .modal-body { padding: 18px 20px; }
-.modal-footer {
-  padding: 14px 20px;
-  border-top: 1px solid var(--border);
-  display: flex; justify-content: flex-end; gap: 8px;
-}
+.modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
 
-.req-summary {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 12px 14px;
-  margin-bottom: 18px;
-}
-.req-summary-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.req-summary-flow { font-size: 14px; font-weight: 700; color: var(--t1); margin-bottom: 4px; }
-.req-summary-meta { font-size: 11px; color: var(--t3); margin-bottom: 8px; }
-.req-summary-reason { font-size: 12px; color: var(--t2); line-height: 1.5; }
+.abs-summary { background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 16px; margin-bottom: 18px; }
+.abs-summary-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.abs-summary-title { font-size: 14px; font-weight: 700; color: var(--t1); margin-bottom: 6px; }
+.abs-summary-title .arr { color: var(--blue); margin: 0 6px; }
+.abs-summary-meta { font-size: 11.5px; color: var(--t3); margin-bottom: 8px; }
+.abs-summary-meta strong { color: var(--t2); font-weight: 600; }
+.abs-summary-reason { font-size: 12px; color: var(--t2); line-height: 1.5; }
 
-/* Loading */
-.loading-wrap {
-  padding: 40px; text-align: center;
-  color: var(--t3); font-size: 13px;
-}
-.spinner-sm {
-  display: inline-block;
-  width: 18px; height: 18px;
-  border: 2px solid var(--border);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-  vertical-align: middle;
-  margin-right: 8px;
-}
+/* Loading / Empty */
+.loading-wrap { padding: 40px; text-align: center; color: var(--t3); font-size: 13px; }
+.spinner-sm { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 8px; }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* Empty state */
-.empty {
-  text-align: center;
-  padding: 48px 20px;
-}
+.empty { text-align: center; padding: 48px 20px; }
 .empty-icon { font-size: 40px; margin-bottom: 10px; opacity: 0.5; }
 .empty-title { font-size: 15px; font-weight: 700; color: var(--t2); margin-bottom: 4px; }
 .empty-sub { font-size: 12px; color: var(--t3); }
 
 /* Toast */
-.toast {
-  position: fixed;
-  bottom: 24px; right: 24px;
-  background: var(--navy-2);
-  color: #fff;
-  padding: 12px 16px;
-  border-radius: var(--r-md);
-  font-size: 12px; font-weight: 500;
-  z-index: 400;
-  box-shadow: var(--sh-lg);
-  min-width: 260px; max-width: 360px;
-  transform: translateX(120%);
-  transition: transform 0.25s ease;
-  border-left: 3px solid var(--blue);
-}
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy-2); color: #fff; padding: 12px 16px; border-radius: var(--r-md); font-size: 12px; font-weight: 500; z-index: 400; box-shadow: var(--sh-lg); min-width: 260px; max-width: 360px; transform: translateX(120%); transition: transform 0.25s ease; border-left: 3px solid var(--blue); }
 .toast.show { transform: translateX(0); }
 .toast.success { border-left-color: var(--green); }
 .toast.error { border-left-color: var(--red); }
 
-/* Filter controls */
-.filter-row {
-  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
-  margin-bottom: 12px;
-}
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
 
-/* Overlay for mobile sidebar */
+/* Fairness bar */
+.fair-bar-wrap { display: flex; align-items: center; gap: 10px; }
+.fair-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; min-width: 80px; max-width: 160px; }
+.fair-bar-fill { height: 100%; background: var(--blue); border-radius: 3px; transition: width 0.4s; }
+.fair-bar-fill.high { background: var(--amber); }
+.fair-bar-fill.critical { background: var(--red); }
+
 #sbOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 150; }
 
-/* Mobile */
 @media (max-width: 900px) {
   .sidebar { transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.35); }
@@ -666,13 +308,12 @@ td.muted { color: var(--t3); font-size: 12px; }
 
 <div class="app-layout">
 
-  <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sb-brand">
       <div class="sb-logo">K</div>
       <div class="sb-brand-text">
         <div class="sb-brand-title">Branches</div>
-        <div class="sb-brand-sub">Transfer System</div>
+        <div class="sb-brand-sub">Coverage System</div>
       </div>
     </div>
 
@@ -694,13 +335,12 @@ td.muted { color: var(--t3); font-size: 12px; }
 
   <div id="sbOverlay" onclick="toggleSidebar()"></div>
 
-  <!-- Main -->
   <main class="main">
     <div class="top-bar">
       <button class="sb-toggle" onclick="toggleSidebar()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
-      <div class="page-breadcrumb">KIB Retail Banking <strong id="crumbPage">Dashboard</strong></div>
+      <div class="page-breadcrumb">KIB Retail Banking · <strong id="crumbPage">Dashboard</strong></div>
       <div class="top-spacer"></div>
       <button class="top-action" onclick="refreshCurrent()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
@@ -715,7 +355,7 @@ td.muted { color: var(--t3); font-size: 12px; }
         <div class="page-header">
           <div>
             <div class="page-title">Coverage Dashboard</div>
-            <div class="page-sub">Live headcount across all retail branches</div>
+            <div class="page-sub">Live headcount including absences & active covers</div>
           </div>
         </div>
 
@@ -724,8 +364,8 @@ td.muted { color: var(--t3); font-size: 12px; }
         <div class="card">
           <div class="card-head">
             <div>
-              <div class="card-title">Branch Coverage</div>
-              <div class="card-sub">Teller + Head Teller headcount vs. target</div>
+              <div class="card-title">Branch Coverage Today</div>
+              <div class="card-sub">Home staff − Absent + Covering = Effective headcount</div>
             </div>
           </div>
           <div class="card-body">
@@ -734,45 +374,56 @@ td.muted { color: var(--t3); font-size: 12px; }
         </div>
       </section>
 
-      <!-- New Request -->
-      <section class="view" id="view-request">
+      <!-- Report Absence (Area Manager) -->
+      <section class="view" id="view-report">
         <div class="page-header">
           <div>
-            <div class="page-title">New Transfer Request</div>
-            <div class="page-sub">Request a Teller or Head Teller transfer between branches</div>
+            <div class="page-title">Report Staff Absence</div>
+            <div class="page-sub">Report an absent Teller or Head Teller to request coverage</div>
           </div>
         </div>
 
         <div class="card">
           <div class="card-body">
-            <form id="requestForm" onsubmit="return submitRequest(event)">
-              <div class="form-row">
+            <form id="reportForm" onsubmit="return submitAbsence(event)">
+              <div class="form-row-1">
                 <div class="form-group">
-                  <label class="form-label" for="req-role">Role Needed</label>
-                  <select class="form-select" id="req-role" required>
-                    <option value="">Select role…</option>
-                    <option value="Teller">Teller</option>
-                    <option value="Head Teller">Head Teller</option>
+                  <label class="form-label" for="abs-staff">Absent Staff Member</label>
+                  <select class="form-select" id="abs-staff" required onchange="showStaffInfo()">
+                    <option value="">Loading staff list…</option>
                   </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="req-to-branch">Destination Branch</label>
-                  <select class="form-select" id="req-to-branch" required>
-                    <option value="">Select branch…</option>
-                  </select>
+                  <div id="staffInfo" style="font-size:11px; color:var(--t3); margin-top:6px; display:none;"></div>
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
-                  <label class="form-label" for="req-from-branch">From Branch (optional)</label>
-                  <select class="form-select" id="req-from-branch">
-                    <option value="">Any branch (system suggests)</option>
+                  <label class="form-label" for="abs-from">Absence From</label>
+                  <input type="date" class="form-input" id="abs-from" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="abs-to">Absence To</label>
+                  <input type="date" class="form-input" id="abs-to" required>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="abs-reason">Reason</label>
+                  <select class="form-select" id="abs-reason" required>
+                    <option value="">Select reason…</option>
+                    <option>Sick Leave</option>
+                    <option>Annual Leave</option>
+                    <option>Emergency Leave</option>
+                    <option>Training</option>
+                    <option>Maternity Leave</option>
+                    <option>Hajj Leave</option>
+                    <option>Other</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label class="form-label" for="req-priority">Priority</label>
-                  <select class="form-select" id="req-priority">
+                  <label class="form-label" for="abs-priority">Priority</label>
+                  <select class="form-select" id="abs-priority">
                     <option value="Normal">Normal</option>
                     <option value="Urgent">Urgent</option>
                   </select>
@@ -781,37 +432,37 @@ td.muted { color: var(--t3); font-size: 12px; }
 
               <div class="form-row-1">
                 <div class="form-group">
-                  <label class="form-label" for="req-reason">Reason / Justification</label>
-                  <textarea class="form-textarea" id="req-reason" placeholder="e.g. Teller on extended leave, shortage due to training…" required></textarea>
+                  <label class="form-label" for="abs-notes">Additional Notes (optional)</label>
+                  <textarea class="form-textarea" id="abs-notes" placeholder="Any relevant details…"></textarea>
                 </div>
               </div>
 
               <div class="btn-row">
                 <button type="reset" class="btn btn-ghost">Clear</button>
-                <button type="submit" class="btn" id="submitReqBtn">Submit Request</button>
+                <button type="submit" class="btn" id="submitBtn">Report Absence</button>
               </div>
             </form>
           </div>
         </div>
       </section>
 
-      <!-- Pending -->
+      <!-- Pending (Area Ops) -->
       <section class="view" id="view-pending">
         <div class="page-header">
           <div>
-            <div class="page-title">Pending Approvals</div>
-            <div class="page-sub">Review requests and select candidates from the queue</div>
+            <div class="page-title">Pending Coverage</div>
+            <div class="page-sub">Absences awaiting cover assignment</div>
           </div>
         </div>
         <div id="pendingList"></div>
       </section>
 
-      <!-- My Requests -->
-      <section class="view" id="view-my-requests">
+      <!-- My Reports -->
+      <section class="view" id="view-my-reports">
         <div class="page-header">
           <div>
-            <div class="page-title">My Requests</div>
-            <div class="page-sub">Track your submitted transfer requests</div>
+            <div class="page-title">My Absence Reports</div>
+            <div class="page-sub">Track absences you've reported</div>
           </div>
         </div>
         <div class="card">
@@ -819,32 +470,34 @@ td.muted { color: var(--t3); font-size: 12px; }
             <table>
               <thead>
                 <tr>
-                  <th>Request ID</th>
-                  <th>Date</th>
-                  <th>Role</th>
-                  <th>From → To</th>
-                  <th>Status</th>
-                  <th>Selected Staff</th>
+                  <th>ID</th>
+                  <th>Reported</th>
+                  <th>Absent Staff</th>
+                  <th>Branch</th>
+                  <th>Dates</th>
                   <th>Reason</th>
+                  <th>Status</th>
+                  <th>Covered By</th>
                 </tr>
               </thead>
-              <tbody id="myRequestsBody">
-                <tr><td colspan="7" class="loading-wrap"><span class="spinner-sm"></span>Loading…</td></tr>
+              <tbody id="myReportsBody">
+                <tr><td colspan="8" class="loading-wrap"><span class="spinner-sm"></span>Loading…</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </section>
 
-      <!-- Queue -->
-      <section class="view" id="view-queue">
+      <!-- Fairness Report -->
+      <section class="view" id="view-fairness">
         <div class="page-header">
           <div>
-            <div class="page-title">Transfer Queue</div>
-            <div class="page-sub">Ranked candidates by fairness score</div>
+            <div class="page-title">Fairness Distribution</div>
+            <div class="page-sub">How evenly coverage is spread across staff</div>
           </div>
           <div class="filter-row">
-            <select class="form-select" id="queueRoleFilter" onchange="loadQueue()" style="min-width:150px;">
+            <select class="form-select" id="fairRoleFilter" onchange="loadFairness()" style="min-width:150px;">
+              <option value="all">All Roles</option>
               <option value="Teller">Teller</option>
               <option value="Head Teller">Head Teller</option>
             </select>
@@ -855,18 +508,18 @@ td.muted { color: var(--t3); font-size: 12px; }
             <table>
               <thead>
                 <tr>
-                  <th>Rank</th>
                   <th>RIM</th>
                   <th>Name</th>
-                  <th>Current Branch</th>
-                  <th>Tenure</th>
-                  <th>Transfers</th>
-                  <th>On Leave</th>
-                  <th>Fairness</th>
+                  <th>Role</th>
+                  <th>Home Branch</th>
+                  <th>Times Absent</th>
+                  <th>Times Covered</th>
+                  <th>Coverage Load</th>
+                  <th>Last Cover</th>
                 </tr>
               </thead>
-              <tbody id="queueBody">
-                <tr><td colspan="8" class="loading-wrap"><span class="spinner-sm"></span>Loading queue…</td></tr>
+              <tbody id="fairnessBody">
+                <tr><td colspan="8" class="loading-wrap"><span class="spinner-sm"></span>Loading…</td></tr>
               </tbody>
             </table>
           </div>
@@ -877,8 +530,8 @@ td.muted { color: var(--t3); font-size: 12px; }
       <section class="view" id="view-history">
         <div class="page-header">
           <div>
-            <div class="page-title">Transfer History</div>
-            <div class="page-sub">Completed transfers — audit trail</div>
+            <div class="page-title">Coverage History</div>
+            <div class="page-sub">All completed coverage assignments</div>
           </div>
         </div>
         <div class="card">
@@ -886,13 +539,13 @@ td.muted { color: var(--t3); font-size: 12px; }
             <table>
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>RIM</th>
-                  <th>Staff Name</th>
-                  <th>From</th>
-                  <th>To</th>
+                  <th>Dates</th>
+                  <th>Days</th>
+                  <th>Absent Staff</th>
+                  <th>Covered By</th>
+                  <th>Home → At Branch</th>
                   <th>Role</th>
-                  <th>Approved By</th>
+                  <th>Selected By</th>
                 </tr>
               </thead>
               <tbody id="historyBody">
@@ -911,14 +564,14 @@ td.muted { color: var(--t3); font-size: 12px; }
 <div class="modal-overlay" id="reviewModal">
   <div class="modal">
     <div class="modal-head">
-      <div class="modal-title">Review Transfer Request</div>
+      <div class="modal-title">Assign Coverage</div>
       <button class="modal-close" onclick="closeModal()">&times;</button>
     </div>
     <div class="modal-body" id="reviewBody"></div>
     <div class="modal-footer">
-      <button class="btn btn-danger btn-sm" onclick="rejectRequest()">Reject</button>
-      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-sm" id="approveBtn" onclick="approveRequest()" disabled>Approve Selection</button>
+      <button class="btn btn-danger btn-sm" onclick="cancelAbs()">Cancel Absence</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
+      <button class="btn btn-sm" id="approveBtn" onclick="approveCoverage()" disabled>Assign Coverage</button>
     </div>
   </div>
 </div>
@@ -933,25 +586,25 @@ td.muted { color: var(--t3); font-size: 12px; }
   if (!session) { window.location.href = 'branches.html'; }
   const user = JSON.parse(session);
 
-  let currentBranches = [];
-  let activeRequest = null;
+  let staffList = [];
+  let activeAbsence = null;
   let selectedCandidate = null;
   let currentTab = 'dashboard';
 
   const TABS_BY_ROLE = {
-    'Admin': ['dashboard', 'pending', 'queue', 'history'],
-    'Head of Branches': ['dashboard', 'pending', 'queue', 'history'],
-    'Area Manager': ['dashboard', 'request', 'my-requests', 'queue'],
-    'Area Ops Manager': ['dashboard', 'pending', 'queue', 'history']
+    'Admin':             ['dashboard', 'pending', 'fairness', 'history'],
+    'Head of Branches':  ['dashboard', 'pending', 'fairness', 'history'],
+    'Area Manager':      ['dashboard', 'report', 'my-reports', 'fairness'],
+    'Area Ops Manager':  ['dashboard', 'pending', 'fairness', 'history']
   };
 
   const TAB_META = {
-    'dashboard': { label: 'Dashboard', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' },
-    'request':   { label: 'New Request', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' },
-    'my-requests': { label: 'My Requests', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' },
-    'pending':   { label: 'Pending Approvals', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
-    'queue':     { label: 'Queue', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>' },
-    'history':   { label: 'History', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/><polyline points="12 7 12 12 15 14"/></svg>' }
+    'dashboard':   { label: 'Dashboard', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' },
+    'report':      { label: 'Report Absence', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>' },
+    'my-reports':  { label: 'My Reports', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' },
+    'pending':     { label: 'Pending Coverage', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
+    'fairness':    { label: 'Fairness Report', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>' },
+    'history':     { label: 'Coverage History', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/><polyline points="12 7 12 12 15 14"/></svg>' }
   };
 
   function init() {
@@ -967,15 +620,14 @@ td.muted { color: var(--t3); font-size: 12px; }
       const badge = tab === 'pending' ? '<span class="nav-badge" id="pendingBadge" style="display:none">0</span>' : '';
       html += `<button class="nav-item" data-tab="${tab}" onclick="switchTab('${tab}')"><span class="nav-icon">${meta.icon}</span>${meta.label}${badge}</button>`;
     });
-    // Admin link
     if (user.role === 'Admin') {
       html += '<div class="sb-section-label" style="margin-top:12px;">System</div>';
-      html += '<a class="nav-item" href="branches-admin.html" style="text-decoration:none;"><span class="nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>Admin Console</a>';
+      html += '<a class="nav-item" href="branches-admin.html"><span class="nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>Admin Console</a>';
     }
     nav.innerHTML = html;
 
     switchTab(tabs[0]);
-    loadBranchesList();
+    loadStaffList();
 
     if (user.role === 'Area Ops Manager' || user.role === 'Admin' || user.role === 'Head of Branches') {
       checkPendingCount();
@@ -990,14 +642,13 @@ td.muted { color: var(--t3); font-size: 12px; }
     const view = document.getElementById('view-' + tab);
     if (view) view.classList.add('active');
     document.getElementById('crumbPage').textContent = TAB_META[tab]?.label || 'Dashboard';
-
     if (window.innerWidth <= 900) toggleSidebar(false);
 
     if (tab === 'dashboard') loadDashboard();
-    else if (tab === 'request') prepareRequestForm();
-    else if (tab === 'my-requests') loadMyRequests();
+    else if (tab === 'report') prepareReportForm();
+    else if (tab === 'my-reports') loadMyReports();
     else if (tab === 'pending') loadPending();
-    else if (tab === 'queue') loadQueue();
+    else if (tab === 'fairness') loadFairness();
     else if (tab === 'history') loadHistory();
   }
 
@@ -1023,6 +674,7 @@ td.muted { color: var(--t3); font-size: 12px; }
     }
   }
 
+  // ==================== Dashboard ====================
   async function loadDashboard() {
     const kpi = document.getElementById('kpiGrid');
     const grid = document.getElementById('branchGrid');
@@ -1042,106 +694,158 @@ td.muted { color: var(--t3); font-size: 12px; }
         <div class="kpi-value">${d.totalStaff}</div>
         <div class="kpi-sub">Tellers + Head Tellers</div>
       </div>
+      <div class="kpi-card red">
+        <div class="kpi-label">Absent Today</div>
+        <div class="kpi-value">${d.absentToday}</div>
+        <div class="kpi-sub">currently off</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Pending Coverage</div>
+        <div class="kpi-value">${d.pendingAbsences}</div>
+        <div class="kpi-sub">awaiting assignment</div>
+      </div>
       <div class="kpi-card ${underCount > 0 ? 'red' : 'green'}">
-        <div class="kpi-label">Under-staffed</div>
+        <div class="kpi-label">Branches Under</div>
         <div class="kpi-value">${underCount}</div>
-        <div class="kpi-sub">${underCount === 0 ? 'All branches covered' : 'branches need staff'}</div>
+        <div class="kpi-sub">${underCount === 0 ? 'all covered' : 'below target today'}</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-label">Covers (30 days)</div>
+        <div class="kpi-value">${d.recentCovers}</div>
+        <div class="kpi-sub">completed coverages</div>
       </div>
       <div class="kpi-card ${overCount > 0 ? 'amber' : ''}">
-        <div class="kpi-label">Over-staffed</div>
+        <div class="kpi-label">Branches Over</div>
         <div class="kpi-value">${overCount}</div>
         <div class="kpi-sub">surplus available</div>
       </div>
-      <div class="kpi-card purple">
-        <div class="kpi-label">Pending Requests</div>
-        <div class="kpi-value">${d.pendingRequests}</div>
-        <div class="kpi-sub">awaiting review</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Transfers (30d)</div>
-        <div class="kpi-value">${d.recentTransfers}</div>
-        <div class="kpi-sub">completed this month</div>
-      </div>
-      <div class="kpi-card amber">
-        <div class="kpi-label">On Leave</div>
-        <div class="kpi-value">${d.onLeaveCount}</div>
-        <div class="kpi-sub">active staff</div>
-      </div>
     `;
 
-    grid.innerHTML = d.branches.map(b => `
-      <div class="branch-tile ${b.status.toLowerCase()}">
-        <div class="branch-name">${b.name}</div>
-        <div class="branch-meta">${b.area} · ${b.status}</div>
-        <div class="branch-stats">
-          <span>Tellers <strong>${b.tellerActual}/${b.tellerTarget}</strong></span>
-          <span>HT <strong>${b.htActual}/${b.htTarget}</strong></span>
+    grid.innerHTML = d.branches.map(b => {
+      const tellerEff = b.tellerActual, htEff = b.htActual;
+      const absenceImpact = (b.tellerAbsent + b.htAbsent) > 0 ? `<div class="impact negative">−${b.tellerAbsent + b.htAbsent} absent</div>` : '';
+      const coverImpact = (b.tellerCovering + b.htCovering) > 0 ? `<div class="impact positive">+${b.tellerCovering + b.htCovering} covering</div>` : '';
+      return `
+        <div class="branch-tile ${b.status.toLowerCase()}">
+          <div class="branch-name">${b.name}</div>
+          <div class="branch-meta">${b.area} · ${b.status}</div>
+          <div class="branch-stats">
+            <div class="branch-stats-row">
+              <span>Tellers</span>
+              <span><strong>${tellerEff}/${b.tellerTarget}</strong></span>
+            </div>
+            <div class="branch-stats-row">
+              <span>Head Tellers</span>
+              <span><strong>${htEff}/${b.htTarget}</strong></span>
+            </div>
+            ${absenceImpact || coverImpact ? '<div class="branch-stats-row">' + absenceImpact + coverImpact + '</div>' : ''}
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
-  async function loadBranchesList() {
-    const res = await callAPI('getBranches');
+  // ==================== Report Absence ====================
+  async function loadStaffList() {
+    const res = await callAPI('getStaffList');
     if (res.ok) {
-      currentBranches = res.data;
-      const to = document.getElementById('req-to-branch');
-      const from = document.getElementById('req-from-branch');
-      if (to) to.innerHTML = '<option value="">Select branch…</option>' + currentBranches.map(b => `<option value="${b.id}">${b.name} (${b.area})</option>`).join('');
-      if (from) from.innerHTML = '<option value="">Any branch (system suggests)</option>' + currentBranches.map(b => `<option value="${b.id}">${b.name} (${b.area})</option>`).join('');
+      staffList = res.data;
+      const sel = document.getElementById('abs-staff');
+      if (sel) {
+        // Group by branch
+        const byBranch = {};
+        staffList.forEach(s => {
+          if (!byBranch[s.branchName]) byBranch[s.branchName] = [];
+          byBranch[s.branchName].push(s);
+        });
+        let html = '<option value="">Select staff member…</option>';
+        Object.keys(byBranch).sort().forEach(branch => {
+          html += `<optgroup label="${branch}">`;
+          byBranch[branch].forEach(s => {
+            html += `<option value="${s.rim}" data-role="${s.role}" data-branch="${s.branchName}">${s.name} (${s.role})</option>`;
+          });
+          html += `</optgroup>`;
+        });
+        sel.innerHTML = html;
+      }
     }
   }
 
-  function prepareRequestForm() { if (currentBranches.length === 0) loadBranchesList(); }
+  function prepareReportForm() {
+    if (staffList.length === 0) loadStaffList();
+    // Default dates to today
+    const today = new Date().toISOString().split('T')[0];
+    const fromInput = document.getElementById('abs-from');
+    const toInput = document.getElementById('abs-to');
+    if (fromInput && !fromInput.value) fromInput.value = today;
+    if (toInput && !toInput.value) toInput.value = today;
+  }
 
-  async function submitRequest(e) {
+  function showStaffInfo() {
+    const sel = document.getElementById('abs-staff');
+    const opt = sel.options[sel.selectedIndex];
+    const info = document.getElementById('staffInfo');
+    if (opt && opt.value) {
+      info.innerHTML = `<strong style="color:var(--t2);">Role:</strong> ${opt.dataset.role} · <strong style="color:var(--t2);">Branch:</strong> ${opt.dataset.branch}`;
+      info.style.display = 'block';
+    } else {
+      info.style.display = 'none';
+    }
+  }
+
+  async function submitAbsence(e) {
     e.preventDefault();
-    const btn = document.getElementById('submitReqBtn');
+    const btn = document.getElementById('submitBtn');
     btn.disabled = true; btn.textContent = 'Submitting…';
 
     const payload = {
-      role: document.getElementById('req-role').value,
-      toBranchId: document.getElementById('req-to-branch').value,
-      fromBranchId: document.getElementById('req-from-branch').value,
-      priority: document.getElementById('req-priority').value,
-      reason: document.getElementById('req-reason').value.trim()
+      absentStaffRim: document.getElementById('abs-staff').value,
+      fromDate: document.getElementById('abs-from').value,
+      toDate: document.getElementById('abs-to').value,
+      reason: document.getElementById('abs-reason').value,
+      priority: document.getElementById('abs-priority').value,
+      notes: document.getElementById('abs-notes').value.trim()
     };
 
-    const res = await callAPI('submitRequest', payload);
-    btn.disabled = false; btn.textContent = 'Submit Request';
+    const res = await callAPI('reportAbsence', payload);
+    btn.disabled = false; btn.textContent = 'Report Absence';
 
     if (res.ok) {
-      toast('Request submitted · ' + res.requestId, 'success');
-      document.getElementById('requestForm').reset();
-      setTimeout(() => switchTab('my-requests'), 700);
+      toast('Absence reported · ' + res.absenceId, 'success');
+      document.getElementById('reportForm').reset();
+      document.getElementById('staffInfo').style.display = 'none';
+      setTimeout(() => switchTab('my-reports'), 700);
     } else {
       toast(res.error || 'Failed to submit', 'error');
     }
     return false;
   }
 
-  async function loadMyRequests() {
-    const body = document.getElementById('myRequestsBody');
-    body.innerHTML = '<tr><td colspan="7" class="loading-wrap"><span class="spinner-sm"></span>Loading…</td></tr>';
-    const res = await callAPI('getMyRequests');
-    if (!res.ok) { body.innerHTML = '<tr><td colspan="7" class="loading-wrap">Failed to load</td></tr>'; return; }
+  // ==================== My Reports ====================
+  async function loadMyReports() {
+    const body = document.getElementById('myReportsBody');
+    body.innerHTML = '<tr><td colspan="8" class="loading-wrap"><span class="spinner-sm"></span>Loading…</td></tr>';
+    const res = await callAPI('getMyAbsences');
+    if (!res.ok) { body.innerHTML = '<tr><td colspan="8" class="loading-wrap">Failed</td></tr>'; return; }
     if (res.data.length === 0) {
-      body.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><div class="empty-title">No requests yet</div><div class="empty-sub">Submit your first transfer request to get started.</div></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-icon">📋</div><div class="empty-title">No absences reported</div><div class="empty-sub">Your reported absences will appear here.</div></div></td></tr>';
       return;
     }
     body.innerHTML = res.data.map(r => `
       <tr>
-        <td class="bold">${r.id}</td>
-        <td class="muted">${formatDate(r.date)}</td>
-        <td><span class="badge b-blue">${r.role}</span></td>
-        <td>${r.fromBranchName || '—'} <span style="color:var(--blue)">→</span> <strong>${r.toBranchName}</strong></td>
+        <td class="muted" style="font-family:'IBM Plex Mono',monospace; font-size:11px;">${r.id}</td>
+        <td class="muted">${formatDate(r.reportDate)}</td>
+        <td class="bold">${r.absentName}</td>
+        <td>${r.branchName}</td>
+        <td class="muted" style="white-space:nowrap;">${formatDate(r.fromDate)} → ${formatDate(r.toDate)} <span style="color:var(--t3);">(${r.days}d)</span></td>
+        <td>${r.reason || '—'}</td>
         <td>${renderStatus(r.status)}</td>
-        <td>${r.selectedStaffName || '<span class="muted">—</span>'}</td>
-        <td class="muted" style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(r.reason)}">${escapeHtml(r.reason)}</td>
+        <td>${r.coverName || '<span class="muted">—</span>'}</td>
       </tr>
     `).join('');
   }
 
+  // ==================== Pending (Area Ops) ====================
   async function checkPendingCount() {
     const res = await callAPI('getPendingCount');
     const badge = document.getElementById('pendingBadge');
@@ -1156,67 +860,74 @@ td.muted { color: var(--t3); font-size: 12px; }
 
   async function loadPending() {
     const list = document.getElementById('pendingList');
-    list.innerHTML = '<div class="card"><div class="loading-wrap"><span class="spinner-sm"></span>Loading pending requests…</div></div>';
-    const res = await callAPI('getPendingRequests');
+    list.innerHTML = '<div class="card"><div class="loading-wrap"><span class="spinner-sm"></span>Loading pending absences…</div></div>';
+    const res = await callAPI('getPendingAbsences');
     if (!res.ok) { list.innerHTML = '<div class="card"><div class="empty"><div class="empty-title">Failed to load</div></div></div>'; return; }
     if (res.data.length === 0) {
-      list.innerHTML = '<div class="card"><div class="empty"><div class="empty-icon">✓</div><div class="empty-title">All caught up</div><div class="empty-sub">No pending requests at the moment.</div></div></div>';
+      list.innerHTML = '<div class="card"><div class="empty"><div class="empty-icon">✓</div><div class="empty-title">All caught up</div><div class="empty-sub">No absences awaiting coverage.</div></div></div>';
       return;
     }
-    list.innerHTML = res.data.map(r => `
-      <div class="req-item">
+    list.innerHTML = res.data.map(a => `
+      <div class="abs-item">
         <div style="flex:1; min-width:280px;">
-          <div class="req-item-head">
-            <span class="badge b-blue">${r.role}</span>
-            ${r.priority === 'Urgent' ? '<span class="badge b-under">Urgent</span>' : ''}
-            <span class="req-id">${r.id}</span>
-            <span class="req-date">· ${formatDate(r.date)}</span>
+          <div class="abs-head">
+            <span class="badge b-blue">${a.role}</span>
+            ${a.priority === 'Urgent' ? '<span class="badge b-under">Urgent</span>' : ''}
+            <span class="abs-id">${a.id}</span>
+            <span class="abs-date">· reported ${formatDate(a.reportDate)}</span>
           </div>
-          <div class="req-flow">${r.fromBranchName || 'Any branch'} <span class="arr">→</span> ${r.toBranchName}</div>
-          <div class="req-requester">Requested by <strong>${r.requesterName}</strong> · ${r.requesterArea}</div>
-          <div class="req-reason"><strong>Reason:</strong> ${escapeHtml(r.reason)}</div>
+          <div class="abs-title"><strong>${a.absentName}</strong><span class="divider">at</span><span class="branch">${a.branchName}</span></div>
+          <div class="abs-meta-row">
+            <span class="abs-dates">${formatDate(a.fromDate)} → ${formatDate(a.toDate)} · ${a.days} day${a.days > 1 ? 's' : ''}</span>
+          </div>
+          <div class="abs-reason"><strong>Reason:</strong> ${escapeHtml(a.reason)} · Reported by ${escapeHtml(a.reporterName)}</div>
         </div>
-        <button class="btn" onclick="openReview('${r.id}')">Review &amp; Select</button>
+        <button class="btn" onclick="openReview('${a.id}')">Select Cover</button>
       </div>
     `).join('');
   }
 
-  async function openReview(requestId) {
-    const res = await callAPI('getRequestWithQueue', { requestId });
+  async function openReview(absenceId) {
+    const res = await callAPI('getAbsenceWithQueue', { absenceId });
     if (!res.ok) { toast(res.error || 'Failed to load', 'error'); return; }
-    activeRequest = res.data;
+    activeAbsence = res.data;
     selectedCandidate = null;
 
-    const r = activeRequest.request;
-    const q = activeRequest.queue;
+    const a = activeAbsence.absence;
+    const q = activeAbsence.queue;
     const body = document.getElementById('reviewBody');
 
     body.innerHTML = `
-      <div class="req-summary">
-        <div class="req-summary-head">
-          <span class="badge b-blue">${r.role}</span>
-          <span class="req-id">${r.id}</span>
+      <div class="abs-summary">
+        <div class="abs-summary-head">
+          <span class="badge b-blue">${a.role}</span>
+          <span class="abs-id">${a.id}</span>
         </div>
-        <div class="req-summary-flow">${r.fromBranchName || 'Any branch'} <span style="color:var(--blue)">→</span> ${r.toBranchName}</div>
-        <div class="req-summary-meta">${r.requesterName} · ${formatDate(r.date)}</div>
-        <div class="req-summary-reason">${escapeHtml(r.reason)}</div>
+        <div class="abs-summary-title"><strong>${a.absentName}</strong><span class="arr">absent at</span>${a.branchName}</div>
+        <div class="abs-summary-meta">
+          <strong>Dates:</strong> ${formatDate(a.fromDate)} → ${formatDate(a.toDate)} (${a.days} day${a.days > 1 ? 's' : ''}) ·
+          <strong>Reason:</strong> ${escapeHtml(a.reason)}
+        </div>
+        <div class="abs-summary-meta">
+          <strong>Reported by:</strong> ${escapeHtml(a.reporterName)}
+        </div>
       </div>
 
-      <div class="form-label" style="margin-bottom:10px;">Top ${q.length} candidates — click to select</div>
+      <div class="form-label" style="margin-bottom:10px;">Top ${q.length} cover candidates — ranked by fairness (who has covered least)</div>
 
-      ${q.length === 0 ? '<div class="empty"><div class="empty-title">No eligible candidates</div></div>' :
+      ${q.length === 0 ? '<div class="empty"><div class="empty-title">No eligible covers</div><div class="empty-sub">No active ' + a.role + 's available.</div></div>' :
         q.map((c, i) => `
           <div class="candidate" data-rim="${c.rim}" onclick="selectCandidate('${c.rim}', this)">
             <div class="cand-rank ${i === 0 ? 'r1' : ''}">${i + 1}</div>
             <div>
               <div class="cand-name">${c.name}</div>
-              <div class="cand-meta">${c.currentBranch} · ${c.tenureMonths}mo · ${c.transfersReceived} prior transfers${c.onLeave === 'Yes' ? ' · ⚠ ON LEAVE' : ''}</div>
+              <div class="cand-meta">${c.homeBranchName} · covered ${c.timesCovered}× · absent ${c.timesAbsent}× ${c.lastCoverDate ? '· last cover ' + formatDate(c.lastCoverDate) : '· never covered'}${c.sameArea ? ' · same area' : ''}</div>
             </div>
             <div>
               <div class="cand-score">${c.fairnessScore}</div>
               <div class="cand-score-label">Score</div>
             </div>
-            ${c.onLeave === 'Yes' ? '<span class="badge b-warn">Leave</span>' : '<span class="badge b-ok">Available</span>'}
+            ${c.sameArea ? '<span class="badge b-blue">Same area</span>' : '<span class="badge b-muted">Cross area</span>'}
           </div>
         `).join('')
       }
@@ -1232,104 +943,117 @@ td.muted { color: var(--t3); font-size: 12px; }
     document.getElementById('approveBtn').disabled = false;
   }
 
-  async function approveRequest() {
+  async function approveCoverage() {
     if (!selectedCandidate) return;
-    const candidate = activeRequest.queue.find(c => c.rim === selectedCandidate);
-    if (candidate.onLeave === 'Yes' && !confirm('This staff member is on leave. Proceed anyway?')) return;
-
+    const candidate = activeAbsence.queue.find(c => c.rim === selectedCandidate);
     const btn = document.getElementById('approveBtn');
-    btn.disabled = true; btn.textContent = 'Processing…';
+    btn.disabled = true; btn.textContent = 'Assigning…';
 
-    const res = await callAPI('approveRequest', {
-      requestId: activeRequest.request.id,
-      staffRim: selectedCandidate
+    const res = await callAPI('approveCoverage', {
+      absenceId: activeAbsence.absence.id,
+      coverRim: selectedCandidate
     });
-    btn.disabled = false; btn.textContent = 'Approve Selection';
+    btn.disabled = false; btn.textContent = 'Assign Coverage';
 
     if (res.ok) {
-      toast('Transfer approved · ' + candidate.name + ' → ' + activeRequest.request.toBranchName, 'success');
+      toast(candidate.name + ' will cover ' + activeAbsence.absence.absentName + ' at ' + activeAbsence.absence.branchName, 'success');
       closeModal(); loadPending(); checkPendingCount();
     } else {
-      toast(res.error || 'Failed to approve', 'error');
+      toast(res.error || 'Failed to assign', 'error');
     }
   }
 
-  async function rejectRequest() {
-    if (!activeRequest) return;
-    const reason = prompt('Reason for rejection:');
+  async function cancelAbs() {
+    if (!activeAbsence) return;
+    const reason = prompt('Reason for cancelling the absence?');
     if (!reason) return;
-    const res = await callAPI('rejectRequest', { requestId: activeRequest.request.id, reason });
+    const res = await callAPI('cancelAbsence', { absenceId: activeAbsence.absence.id, reason });
     if (res.ok) {
-      toast('Request rejected', 'success');
+      toast('Absence cancelled', 'success');
       closeModal(); loadPending(); checkPendingCount();
     } else {
-      toast(res.error || 'Failed to reject', 'error');
+      toast(res.error || 'Failed to cancel', 'error');
     }
   }
 
   function closeModal() {
     document.getElementById('reviewModal').classList.remove('show');
-    activeRequest = null;
+    activeAbsence = null;
     selectedCandidate = null;
   }
 
-  async function loadQueue() {
-    const body = document.getElementById('queueBody');
-    const role = document.getElementById('queueRoleFilter').value;
-    body.innerHTML = '<tr><td colspan="8" class="loading-wrap"><span class="spinner-sm"></span>Loading queue…</td></tr>';
-    const res = await callAPI('getQueue', { role });
+  // ==================== Fairness ====================
+  async function loadFairness() {
+    const body = document.getElementById('fairnessBody');
+    const role = document.getElementById('fairRoleFilter').value;
+    body.innerHTML = '<tr><td colspan="8" class="loading-wrap"><span class="spinner-sm"></span>Loading…</td></tr>';
+    const res = await callAPI('getFairnessReport');
     if (!res.ok) { body.innerHTML = '<tr><td colspan="8" class="loading-wrap">Failed</td></tr>'; return; }
-    if (res.data.length === 0) {
-      body.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="empty-title">No eligible staff</div><div class="empty-sub">No active ${role}s in the queue.</div></div></td></tr>`;
+
+    let data = res.data;
+    if (role !== 'all') data = data.filter(d => d.role === role);
+
+    if (data.length === 0) {
+      body.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-title">No data</div></div></td></tr>';
       return;
     }
-    body.innerHTML = res.data.map((c, i) => {
-      const rc = i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
+
+    const maxCovers = Math.max(...data.map(d => d.timesCovered), 1);
+
+    body.innerHTML = data.map(r => {
+      const pct = Math.round((r.timesCovered / maxCovers) * 100);
+      const cls = pct > 70 ? 'critical' : pct > 40 ? 'high' : '';
       return `
         <tr>
-          <td class="rank-cell ${rc}">${i + 1}</td>
-          <td class="muted">${c.rim}</td>
-          <td class="bold">${c.name}</td>
-          <td>${c.currentBranch}</td>
-          <td>${c.tenureMonths} mo</td>
-          <td>${c.transfersReceived}</td>
-          <td>${c.onLeave === 'Yes' ? '<span class="badge b-warn">On Leave</span>' : '<span class="badge b-ok">Available</span>'}</td>
-          <td><strong style="color:var(--blue); font-size:14px;">${c.fairnessScore}</strong></td>
+          <td class="muted" style="font-family:'IBM Plex Mono',monospace; font-size:11px;">${r.rim}</td>
+          <td class="bold">${r.name}</td>
+          <td><span class="badge b-blue">${r.role}</span></td>
+          <td>${r.branch}</td>
+          <td style="text-align:center;"><strong>${r.timesAbsent}</strong></td>
+          <td style="text-align:center;"><strong style="color:var(--blue);">${r.timesCovered}</strong></td>
+          <td>
+            <div class="fair-bar-wrap">
+              <div class="fair-bar-track">
+                <div class="fair-bar-fill ${cls}" style="width:${pct}%"></div>
+              </div>
+              <span style="font-size:11px; color:var(--t3); min-width:28px;">${r.timesCovered}</span>
+            </div>
+          </td>
+          <td class="muted">${r.lastCoverDate ? formatDate(r.lastCoverDate) : '<span style="color:var(--t3);">Never</span>'}</td>
         </tr>
       `;
     }).join('');
   }
 
+  // ==================== History ====================
   async function loadHistory() {
     const body = document.getElementById('historyBody');
     body.innerHTML = '<tr><td colspan="7" class="loading-wrap"><span class="spinner-sm"></span>Loading…</td></tr>';
-    const res = await callAPI('getHistory');
+    const res = await callAPI('getCoverageHistory');
     if (!res.ok) { body.innerHTML = '<tr><td colspan="7" class="loading-wrap">Failed</td></tr>'; return; }
     if (res.data.length === 0) {
-      body.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📜</div><div class="empty-title">No transfers yet</div><div class="empty-sub">Completed transfers will appear here.</div></div></td></tr>';
+      body.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📜</div><div class="empty-title">No covers yet</div><div class="empty-sub">Completed covers will appear here.</div></div></td></tr>';
       return;
     }
     body.innerHTML = res.data.map(h => `
       <tr>
-        <td class="muted">${formatDate(h.date)}</td>
-        <td class="muted">${h.staffRim}</td>
-        <td class="bold">${h.staffName}</td>
-        <td>${h.fromBranchName}</td>
-        <td><strong style="color:var(--blue)">${h.toBranchName}</strong></td>
+        <td class="muted" style="white-space:nowrap;">${formatDate(h.fromDate)} → ${formatDate(h.toDate)}</td>
+        <td style="text-align:center;"><strong>${h.days}</strong></td>
+        <td class="bold">${h.absentName}</td>
+        <td><strong style="color:var(--blue);">${h.coverName}</strong></td>
+        <td>${h.coverHomeBranch} <span style="color:var(--t3); margin:0 4px;">→</span> ${h.coverAtBranch}</td>
         <td><span class="badge b-blue">${h.role}</span></td>
-        <td>${h.approvedBy}</td>
+        <td class="muted">${h.selectedBy}</td>
       </tr>
     `).join('');
   }
 
+  // ==================== Utils ====================
   function renderStatus(status) {
     const map = {
-      'Pending Area Ops Review': 'b-pending',
-      'Pending': 'b-pending',
-      'Approved': 'b-completed',
-      'Rejected': 'b-rejected',
-      'Completed': 'b-completed',
-      'Cancelled': 'b-muted'
+      'Pending Coverage': 'b-pending',
+      'Covered': 'b-covered',
+      'Cancelled': 'b-cancelled'
     };
     return `<span class="badge ${map[status] || 'b-info'}">${status}</span>`;
   }
